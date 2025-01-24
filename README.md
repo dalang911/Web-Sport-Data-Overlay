@@ -30,7 +30,7 @@ Copy the ./pages directory to your server directory and access index.html.
 The server requires HTTPS support.
 
 ## AI Support
-- [智普清言](https://github.com/THUDM)
+- [智谱清言](https://github.com/THUDM)
 
 ## Referenced Support Libraries
 
