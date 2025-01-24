@@ -9,8 +9,6 @@ Fully built with JavaScript.
 ## Runtime Environment Requirements
 Browsers that support the WebCodecs API; Chrome 94 and later versions support the WebCodecs API. Microsoft Edge and Google Chrome browsers are compatible. If not supported, please upgrade your browser engine.
 
-This translation maintains a professional tone and accurately conveys the requirements for the runtime environment, specifying the necessary browser support for the WebCodecs API and the action to take if the current browser does not meet the requirements.
-
 ## Web Demo Address
 https://overlay.data4u.vip/
 
