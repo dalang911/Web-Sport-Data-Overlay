@@ -14,6 +14,10 @@
     <script src="./js/bf-backfit.js"></script>
     <script src="./js/svg.js"></script>
     <script src="./js/i18n.js"></script>
+    <link rel="stylesheet" href="./css/maptalks.css">
+    <script src="./js/maptalks.min.js"></script>
+    <script src="./js/mp4-muxer.js"></script>
+
 
 
     <style>
@@ -327,21 +331,24 @@
             黑幕叠加视频
         </li>
 
-        <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;" i18n="ver">
-            1
+        <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
+            Beta 0.11
         </li>
-        <li class="layui-nav-item" i18n="readme">
-            现阶段支持特定格式的json和gpx文件。
-        </li>
+        <li class="layui-nav-item" i18n="readme"></li>
         <div class="ws-header-menu">
-            <li class="layui-nav-item" style="position: absolute;right: 220px;top: 0;">
+            <li class="layui-nav-item" style="position: absolute;right: 240px;top: 0;">
                 <button id="generate" class="layui-btn layui-btn-xs layui-btn-normal" lay-on="onmp4-page"
                     i18n="generate">生成MP4视频</button>
-            </li>
 
-            <li class="layui-nav-item" style="position: absolute;right: 16px;top: 0px;color: #000;width: 100px;">
-                <a href="javascript:;" style="color: #000000;"></a><i class="layui-icon layui-icon-website"
-                    style="font-size: 18px; color: #000000;"></i><span id="language">中文</span></a>
+            </li>
+            <li class="layui-nav-item"
+                style="position: absolute;right: 200px;top: 0px;color: #000;width: 30px;text-align: center;"
+                lay-on="setup">
+                <i class="layui-icon layui-icon-set-fill" style="font-size: 18px; color: #000000;"></i>
+            </li>
+            <li class="layui-nav-item" style="position: absolute;right: 80px;top: 0px;color: #000;width: 100px;">
+                <a href="javascript:;" style="color: #000000;"><i class="layui-icon layui-icon-website"
+                        style="font-size: 18px; color: #000000;"></i><span id="language">中文</span></a>
 
                 <dl class="layui-nav-child" style="top: 0px;">
                     <dd class="chinese">中文</dd>
@@ -349,6 +356,10 @@
                     <dd class="Japanese">日本语</dd>
                     <dd class="Korean">한국어</dd>
                 </dl>
+            </li>
+            <li class="layui-nav-item" style="position: absolute;right: 10px;top: 0px;color: #000;text-align: center;">
+                <a href="https://github.com/dalang911/Web-Sport-Data-Overlay" target="_blank"><i
+                        class="layui-icon layui-icon-github" style="font-size: 18px; color: #000000;"></i></a>
             </li>
         </div>
     </div>
@@ -443,6 +454,14 @@
                                 <div i18n="route">轨迹</div>
                             </div>
                             <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="web_map_pan"><img src="./images/w3.png"></div>
+                                <div i18n="webroute">轨迹</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="web_minimap_pan"><img src="./images/w4.png"></div>
+                                <div i18n="webroute">轨迹</div>
+                            </div>
+                            <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="TO_gps_pan"><img src="./images/w2.png"></div>
                                 <div i18n="location">位置</div>
                             </div>
@@ -532,11 +551,15 @@
                 </p>
             </div>
 
+
         </div>
     </div>
+    <div id="leafletmap" style="position: absolute;width: 300px;height: 300px;left: -2000px;bottom: 10px;"></div>
+    <div id="leafletmap_mini" style="position: absolute;width: 200px;height: 200px;left: -2000px;bottom: 410px;"></div>
 
-    <script src="./js/mp4-muxer.js"></script>
     <script>
+        //祯时间间隔，默认20ms，根据机器性能酌情增减，20-200。
+        var frame_delay = 20;
 
         //检测是否支持视频编码webcodecs
         if ('VideoEncoder' in window) {
@@ -1425,7 +1448,7 @@
                         fontSize: 28,
                         fontWeight: 'black',
                         text: '00:00:00',
-                        fill: '	#191970',
+                        fill: ' #191970',
                         textAlign: 'right',
                         verticalAlign: 'top',
                     }
@@ -1467,7 +1490,7 @@
                         points: map_points,  // [x,y, x,y ...]
                         cornerRadius: 4,
                         strokeWidth: 4,
-                        stroke: '#FFFF0088',
+                        stroke: '#FFFF00',
                         strokeCap: 'round'
                     },
                     {
@@ -1503,6 +1526,93 @@
                                     { "name": `${i18n.get('progress_route_color')}`, "url": "appv_map_pan.children[1].stroke", "value": appv_map_pan.children[1].stroke, "type": "color", "tools": true },
                                     { "name": `${i18n.get('Current_position_size')}`, "url": "appv_map_pan.children[2]", "value": appv_map_pan.children[2].width, "type": "Ellipse", "tools": true },
                                     { "name": `${i18n.get('Current_position_color')}`, "url": "appv_map_pan.children[2].fill", "value": appv_map_pan.children[2].fill, "type": "color", "tools": true },
+                                ]
+                            }
+                            tosettable(json);
+                        }
+                    ],
+                },
+            })
+
+
+            //web地图
+            web_map_pan = new Box({
+                id: 'web_map_pan',
+                x: appvWidth - 620,//左上角位置
+                y: 200,//左上角位置
+                width: 300,
+                height: 300,
+                lockRatio: true,
+                editable: true,
+                hitBox: true,
+                cornerRadius: 1000,//圆角
+                overflow: 'hide',
+                stroke: '#FFC800',
+                strokeWidth: 10,
+                resizeChildren: true,//子元素是否跟随 resize
+                children: [
+                    {
+                        tag: 'Image',
+                        url: map_images(),
+                        draggable: true
+                    },
+
+                ],
+                event: {
+                    [PointerEvent.DOWN]: [
+                        function () {
+                            var json =
+                            {
+                                "id": "web_map_pan",
+                                "set": [
+                                    { "name": `${i18n.get('webroute')}`, "url": web_map_pan.id, "value": "", "type": "title", "tools": false },
+                                    { "name": `${i18n.get('border-color')}`, "url": "web_map_pan.stroke", "value": web_map_pan.stroke, "type": "color", "tools": true },
+                                    { "name": `${i18n.get('Background_route_color')}`, "url": "polyline.updateSymbol({'lineColor': value})", "value": polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+                                    { "name": `${i18n.get('progress_route_color')}`, "url": "new_polyline.updateSymbol({'lineColor': value})", "value": new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+                                    { "name": `${i18n.get('Current_position_color')}`, "url": "marker.updateSymbol({'markerFill': value})", "value": marker._symbol.markerFill, "type": "funcolor", "tools": true },
+                                ]
+                            }
+                            tosettable(json);
+                        }
+                    ],
+                },
+            })
+
+            //miniweb地图
+            web_minimap_pan = new Box({
+                id: 'web_minimap_pan',
+                x: appvWidth - 620,//左上角位置
+                y: 200,//左上角位置
+                width: 200,
+                height: 200,
+                lockRatio: true,
+                editable: true,
+                hitBox: true,
+                cornerRadius: 1000,//圆角
+                overflow: 'hide',
+                stroke: '#FFC800',
+                strokeWidth: 10,
+                resizeChildren: true,//子元素是否跟随 resize
+                children: [
+                    {
+                        tag: 'Image',
+                        url: map_images(),
+                        draggable: true
+                    },
+
+                ],
+                event: {
+                    [PointerEvent.DOWN]: [
+                        function () {
+                            var json =
+                            {
+                                "id": "web_minimap_pan",
+                                "set": [
+                                    { "name": `${i18n.get('webroute')}`, "url": web_minimap_pan.id, "value": "", "type": "title", "tools": false },
+                                    { "name": `${i18n.get('border-color')}`, "url": "web_minimap_pan.stroke", "value": web_minimap_pan.stroke, "type": "color", "tools": true },
+                                    { "name": `${i18n.get('Background_route_color')}`, "url": "mini_polyline.updateSymbol({'lineColor': value})", "value": mini_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+                                    { "name": `${i18n.get('progress_route_color')}`, "url": "mini_new_polyline.updateSymbol({'lineColor': value})", "value": mini_new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+                                    { "name": `${i18n.get('Current_position_color')}`, "url": "mini_marker.updateSymbol({'markerFill': value})", "value": mini_marker._symbol.markerFill, "type": "funcolor", "tools": true },
                                 ]
                             }
                             tosettable(json);
@@ -2535,7 +2645,7 @@
                         strokeWidth: 3,
                         stroke: '#FFFFFF',
                         dashPattern: [3, 3]
-                    },                    
+                    },
                     {
                         tag: 'Line',
                         rotation: 30,
@@ -2545,7 +2655,7 @@
                         strokeWidth: 3,
                         stroke: '#FFFFFF',
                         dashPattern: [3, 3]
-                    },                   
+                    },
                     {
                         tag: 'Line',
                         rotation: -210,
@@ -2581,7 +2691,7 @@
                         fill: '#FFFFFF',
                         textAlign: 'center',
                         verticalAlign: 'top',
-                    },{
+                    }, {
                         tag: 'Text',
                         resizeFontSize: true,
                         width: 130,
@@ -2685,6 +2795,8 @@
             frame.add(text_str4_pan);
 
             frame.add(el_leida_pan);
+
+            frame.add(web_map_pan);
         }
 
         //生成视频
@@ -2735,7 +2847,14 @@
             var currentFrame = 0;//运动数据长度计数器
             //制作视频，插入帧
             function updateFrame() {
+                //判断是否有地图
+                if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
+                    var now_frame_delay = frame_delay*1 + 30;
+                } else {
+                    var now_frame_delay = frame_delay*1;
+                }
                 //if (currentFrame < 1000) {maxFrame
+                //
                 if (currentFrame < maxFrame) {
 
                     if (upFrame(currentFrame)) {
@@ -2755,7 +2874,7 @@
                         frame.close();
                         currentFrame++;
                         //循环
-                        timerId = setTimeout(updateFrame, 20);
+                        timerId = setTimeout(updateFrame, now_frame_delay);
                     }
 
                 } else {
@@ -2865,6 +2984,19 @@
                         inputDiv.appendChild(colorInput);
                         break;
 
+                    case 'funcolor':
+                        const funcolorInput = document.createElement('input');
+                        funcolorInput.type = 'color';
+                        funcolorInput.value = item.value;
+                        funcolorInput.className = 'layui-input';
+                        funcolorInput.onchange = function () {
+                            const updateSymbolFunction = new Function('value', item.url);
+                            // 调用创建的函数，并传递当前输入框的值
+                            updateSymbolFunction(this.value);
+                            setTimeout(getProgressBarValueAndUpdate, 20);
+                        };
+                        inputDiv.appendChild(funcolorInput);
+                        break;
                     case 'text':
                         const textInput = document.createElement('input'); // 创建文本输入框
                         textInput.type = 'text'; // 设置类型为文本
@@ -3007,6 +3139,20 @@
 
             }
             appv_map_pan.children[1].points = now_points;
+
+
+
+            //画web地图
+            if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
+                daohang(currentFrame);
+                if (frame.find('#web_map_pan').length > 0) {
+                    web_map_pan.children[0].url = map.toDataURL();
+                }
+                if (frame.find('#web_minimap_pan').length > 0) {
+                    web_minimap_pan.children[0].url = minimap.toDataURL();
+                }
+            }
+
             //画当前点
             appv_map_pan.children[2].x = map_points[currentFrame * 2] - 8;
             appv_map_pan.children[2].y = map_points[currentFrame * 2 + 1] - 8;
@@ -3064,7 +3210,7 @@
             //步频仪表盘
             el_cadence_pan.children[0].text = `${cadence}`;
 
-            
+
 
 
 
@@ -3181,7 +3327,7 @@
                         "training_at": "",//时间
                         "total_timer_time": 0,//总时长
                     },
-                    "motion": {	//运动
+                    "motion": { //运动
                         "distance": 0,//训练路程 米1
                         "total_ascent": 0,//总爬升
                         "total_descent": 0,//总下降
@@ -3316,6 +3462,7 @@
             // 注意：如果最后一个轨迹点的累计距离不是1000的整数倍，可能需要处理剩余的部分
             // 这里假设最后一个轨迹点已经处理过了，如果需要处理，可以添加相应的逻辑
             //console.log(rq);
+            set_leafletmap_latlngs(rq);
             return rq; // 返回解析后的gpx对象，假设它已经被转换为JSON兼容格式
         }
 
@@ -3330,7 +3477,7 @@
                         "training_at": "",//时间
                         "total_timer_time": 0,//总时长
                     },
-                    "motion": {	//运动
+                    "motion": { //运动
                         "distance": 0,//训练路程 米1
                         "total_ascent": 0,//总爬升
                         "total_descent": 0,//总下降
@@ -3465,9 +3612,9 @@
             // 注意：如果最后一个轨迹点的累计距离不是1000的整数倍，可能需要处理剩余的部分
             // 这里假设最后一个轨迹点已经处理过了，如果需要处理，可以添加相应的逻辑
             //console.log(rq);
+            set_leafletmap_latlngs(rq);
             return rq; // 返回解析后的gpx对象，假设它已经被转换为JSON兼容格式
         }
-
 
         // 解析fit
         function fitToJson(fitbyte) {
@@ -3480,7 +3627,7 @@
                         "training_at": "",//时间
                         "total_timer_time": 0,//总时长
                     },
-                    "motion": {	//运动
+                    "motion": { //运动
                         "distance": 0,//训练路程 米1
                         "total_ascent": 0,//总爬升
                         "total_descent": 0,//总下降
@@ -3628,54 +3775,74 @@
             // 注意：如果最后一个轨迹点的累计距离不是1000的整数倍，可能需要处理剩余的部分
             // 这里假设最后一个轨迹点已经处理过了，如果需要处理，可以添加相应的逻辑
             console.log(rq);
+            set_leafletmap_latlngs(rq);
             return rq; // 返回解析后的gpx对象，假设它已经被转换为JSON兼容格式
         }
-
 
         // 赋值进度条到指定进度
         function setProgressBarValue(value) {
             var progressBar = document.getElementById('progressBar');
             progressBar.value = value;
+            upFrame(value);
+            daohang(value);
         }
 
         // 监听进度条变化事件
         document.getElementById('progressBar').addEventListener('input', function () {
             var currentValue = this.value;
             upFrame(currentValue);
-            //console.log('当前进度条值：' + currentValue);
+            daohang(currentValue);
         });
+
+        //获取当前进度条的值，并调用 upFrame 和 daohang
+        function getProgressBarValueAndUpdate() {
+            var progressBar = document.getElementById('progressBar');
+            var currentValue = progressBar.value;
+            upFrame(currentValue);
+            daohang(currentValue);
+        }
+
+
 
         //雷达图
         function to_leida_xy(count, speed, cadence) {
-  // 定义雷达图的中心点
-  const centerX = el_leida_pan.children[3].x;
-  const centerY = el_leida_pan.children[3].y;
-  // 定义雷达图的半径
-  const radius = el_leida_pan.children[3].width;
-  // 定义每个指标对应的角度
-  const angles = [-210, -90, 30];
-  // 定义每个指标的最大值
-  const maxValues = [200, 22, 240];
-  // 存储每个指标在雷达图上的点位置的数组
-  let flatPoints = [];
+            // 定义雷达图的中心点
+            const centerX = el_leida_pan.children[3].x;
+            const centerY = el_leida_pan.children[3].y;
+            // 定义雷达图的半径
+            const radius = el_leida_pan.children[3].width;
+            // 定义每个指标对应的角度
+            const angles = [-210, -90, 30];
+            // 定义每个指标的最大值
+            const maxValues = [200, 22, 240];
+            // 存储每个指标在雷达图上的点位置的数组
+            let flatPoints = [];
 
-  // 将角度转换为弧度，并计算每个指标在雷达图上的点位置
-  angles.forEach((angle, index) => {
-    // 计算指标值与最大值的比例
-    const value = index === 0 ? count : (index === 1 ? speed : cadence);
-    const proportion = value / maxValues[index];
-    // 将角度转换为弧度
-    const radians = angle * Math.PI / 180;
-    // 计算雷达图上的点位置
-    const x = centerX + radius * proportion * Math.cos(radians);
-    const y = centerY + radius * proportion * Math.sin(radians);
-    // 将点位置添加到数组中
-    flatPoints.push(x, y);
-  });
+            // 将角度转换为弧度，并计算每个指标在雷达图上的点位置
+            angles.forEach((angle, index) => {
+                // 计算指标值与最大值的比例
+                const value = index === 0 ? count : (index === 1 ? speed : cadence);
+                const proportion = value / maxValues[index];
+                // 将角度转换为弧度
+                const radians = angle * Math.PI / 180;
+                // 计算雷达图上的点位置
+                const x = centerX + radius * proportion * Math.cos(radians);
+                const y = centerY + radius * proportion * Math.sin(radians);
+                // 将点位置添加到数组中
+                flatPoints.push(x, y);
+            });
 
-  // 返回扁平化的点位置数组
-  return flatPoints;
-}
+            // 返回扁平化的点位置数组
+            return flatPoints;
+        }
+
+        // 更新frame_delay变量的值
+        function updateFrameDelay(value) {
+            // 更新frame_delay变量的值
+            frame_delay = parseInt(value);
+            // 可以在这里添加其他需要执行的代码，例如更新页面显示或调用其他函数
+            console.log("frame_delay updated to: " + frame_delay);
+        }
     </script>
     <script>
         layui.use(function () {
@@ -3724,14 +3891,216 @@
                                 <video id="video" width="720px" height="720px" controls autoplay></video>
                                 <div class="download_button" style="width: 380px;">
                                     ${i18n.get('download_movie')}
-                                    <button type="button" class="layui-btn layui-bg-blue layui-btn-fluid"><a id="download" download="movie.mp4">download</a></button>
+                                    <a id="download" download="movie.mp4">
+                                    <button type="button" class="layui-btn layui-bg-blue layui-btn-fluid">download </button></a>
                                 </div>
                             </div>
                         `
                     });
                 },
+                'setup': function () {
+                    // 页面层
+                    layer.open({
+                        type: 1,
+                        area: ['420px', '240px'], // 宽高
+                        title: `${i18n.get('Setup')}`,
+                        content: `
+                            <div style="padding: 11px;">
+                                <!-- 数字选择器 -->
+                                ${i18n.get('Setup-ps')}<br>
+                                <label for="frameDelayInput">${i18n.get('Setup-label-ps')}</label>
+                                <input type="number" id="frameDelayInput" name="frameDelay"
+                                    min="15" max="200" step="5" value="20"
+                                    onchange="updateFrameDelay(this.value)">
+                            </div>
+                        `
+                    });
+                    frameDelayInput.value = frame_delay;
+                },
             })
         });
+    </script>
+    <script>
+        // maptalks地图
+        var map = new maptalks.Map('leafletmap', {
+            center: [118.9, 33.8], // 初始中心点
+            zoom: 15, // 初始缩放级别
+            baseLayer: new maptalks.TileLayer('base', {
+                urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c'],
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
+            })
+            // baseLayer: new maptalks.TileLayer('base', {
+            //     urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+            //     subdomains: ['a', 'b', 'c', 'd'],
+            //     attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
+            // })
+        });
+
+        var minimap = new maptalks.Map('leafletmap_mini', {
+            center: [118.9, 33.8], // 初始中心点
+            zoom: 17, // 初始缩放级别
+            baseLayer: new maptalks.TileLayer('base', {
+                urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c'],
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
+            })
+        });
+
+        var latlngs = [
+            [119.1, 33.1],
+            [119.2, 33.2],
+            [119.1, 33.5]
+        ];
+
+        // 创建折线实例
+        var polyline = new maptalks.LineString(latlngs, {
+            symbol: {
+                'lineColor': '#FFFF00',
+                'lineWidth': 5,
+                'lineOpacity': 0.9
+            }
+        });
+
+        // 创建折线实例
+        var mini_polyline = new maptalks.LineString(latlngs, {
+            symbol: {
+                'lineColor': '#FFFF00',
+                'lineWidth': 5,
+                'lineOpacity': 0.9
+            }
+        });
+
+        // 创建折线实例
+        var new_polyline = new maptalks.LineString([], {
+            symbol: {
+                'lineColor': '#FF8C00',
+                'lineWidth': 5,
+                'lineOpacity': 0.9
+            }
+        });
+        // 创建折线实例
+        var mini_new_polyline = new maptalks.LineString([], {
+            symbol: {
+                'lineColor': '#FF8C00',
+                'lineWidth': 5,
+                'lineOpacity': 0.9
+            }
+        });
+
+
+
+
+        // red circle
+        var marker = new maptalks.Marker(latlngs[0], {
+            symbol:
+            {
+                'markerType': 'ellipse',
+                'markerFill': '#FF6347',
+                'markerFillOpacity': 0.9,
+                'markerLineWidth': 0,
+                'markerWidth': 15,
+                'markerHeight': 15
+            }
+
+        });
+
+        var mini_marker = new maptalks.Marker(latlngs[0], {
+            symbol:
+            {
+                'markerType': 'ellipse',
+                'markerFill': '#FF6347',
+                'markerFillOpacity': 0.9,
+                'markerLineWidth': 0,
+                'markerWidth': 15,
+                'markerHeight': 15
+            }
+
+        });
+
+
+
+
+
+        var layer = new maptalks.VectorLayer('vector').addTo(map);
+        var minilayer = new maptalks.VectorLayer('vector').addTo(minimap);
+
+        // 将折线添加到地图上
+        layer.addGeometry(polyline, new_polyline, marker);
+        minilayer.addGeometry(mini_polyline, mini_new_polyline, mini_marker);
+        // 调整视野到折线范围
+        map.fitExtent(polyline.getExtent(), -0.125);
+        minimap.fitExtent(mini_polyline.getExtent(), 16);
+
+
+        function set_leafletmap_latlngs(rqjson) {
+            // 清空现有的latlngs数组
+            latlngs.length = 0;
+
+            // 遍历rqjson.data.trkpt数组
+            for (var i = 0; i < rqjson.data.trkpt.length; i++) {
+                // 获取每个点的纬度和经度
+                var lat = rqjson.data.trkpt[i].position_lat;
+                var lng = rqjson.data.trkpt[i].position_long;
+
+                // 注意：maptalks的经纬度顺序是先经度后纬度
+                latlngs.push([lng, lat]);
+            }
+
+            // 更新折线
+            polyline.setCoordinates(latlngs);
+            mini_polyline.setCoordinates(latlngs);
+            // 重新调整视野到折线范围
+            map.fitExtent(polyline.getExtent(), -0.125);
+            minimap.setCenterAndZoom(latlngs[0], 16)
+            //minimap.fitExtent(mini_polyline.getExtent());
+        }
+
+
+        function daohang(index) {
+            // 检查下标是否在latlngs数组的有效范围内
+            if (index < 0 || index >= latlngs.length) {
+                console.error('下标超出范围');
+                return;
+            }
+
+            // 获取指定下标的经纬度
+            var coordinates = latlngs[index];
+
+            // 移动标记到新的位置
+            marker.setCoordinates(coordinates);
+            mini_marker.setCoordinates(coordinates);
+
+            // 更新折线，只包含从开始到当前index的点
+            var polylineCoordinates = latlngs.slice(0, index * 1 + 1);
+            new_polyline.setCoordinates(polylineCoordinates);
+            mini_new_polyline.setCoordinates(polylineCoordinates);
+
+            // 如果需要，可以调整地图视野到标记位置
+            //map.panTo(coordinates);
+            minimap.setCenter(coordinates);
+        }
+
+
+        // Export map to an image
+        // External image(tiles, marker images) hosts need to support CORS
+        function save() {
+            var data = map.toDataURL({
+                'mimeType': 'image/jpeg', // or 'image/png'
+                'save': true,             // to pop a save dialog
+                'fileName': 'map'         // file name
+            });
+        }
+
+        function map_images() {
+            //web_map_pan.children[0].url = map.toDataURL();
+            return map.toDataURL();
+        }
+
+        function minimap_images() {
+            return minimap.toDataURL();
+        }
+
     </script>
 </body>
 

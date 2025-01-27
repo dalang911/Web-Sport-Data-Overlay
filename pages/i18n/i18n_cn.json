@@ -1,6 +1,6 @@
 {
     "title": "黑幕运动数据叠加",
-    "ver": "Bate 0.1",
+    "ver": "Beta 0.11",
     "readme": "无客户端、易用、快速、美观",
     "generate": "生成MP4视频",
     "sportsinfo": "运动信息",
@@ -20,6 +20,7 @@
     "elevation": "高程",
     "elevationwide": "高程长",
     "route": "轨迹",
+    "webroute": "web轨迹 +30ms",
     "Heart_pace_cadence": "心率配速踏频",
     "leida": "雷达",  
     "speed": "速度",
@@ -70,7 +71,7 @@
     "progress_route_thickness": "经过轨迹粗细",
     "progress_route_color": "经过轨迹颜色",
     "Current_position_size": "当前位置大小",
-    "Current_position_color": "当前位置大小",
+    "Current_position_color": "当前位置颜色",
     "distance_color": "长度文本颜色",
     "progress_distance_color": "行进文本颜色",
     "progress_Background_color": "进度条底色",
@@ -89,6 +90,9 @@
     "remove": "移除",
     "Object_already_exists": "对象已存在",
     "Preview": "预览",
-    "download_movie": "点击下载视频，如没有下载，稍等几秒再次点击"
-    
+    "download_movie": "点击下载视频，如没有下载，稍等几秒再次点击",
+    "border-color": "边框颜色",
+    "Setup": "设置",
+    "Setup-ps": "如果生成的视频跳帧、丢失，可以在这里进行调整，越小越快，越大越慢。速度快慢，由您的算力决定。",
+    "Setup-label-ps": "帧生成间隔时间（15-200ms，步进5ms）:"  
 }
