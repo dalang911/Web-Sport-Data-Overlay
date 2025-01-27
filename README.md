@@ -6,6 +6,8 @@ The current version is an initial release.
 
 Fully built with JavaScript.
 
+https://www.bilibili.com/video/BV1m9fEYRE6u/
+
 ## Runtime Environment Requirements
 Browsers that support the WebCodecs API; Chrome 94 and later versions support the WebCodecs API. Microsoft Edge and Google Chrome browsers are compatible. If not supported, please upgrade your browser engine.
 
