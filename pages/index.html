@@ -332,7 +332,7 @@
         </li>
 
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.11
+            Beta 0.20
         </li>
         <li class="layui-nav-item" i18n="readme"></li>
         <div class="ws-header-menu">
@@ -554,8 +554,8 @@
 
         </div>
     </div>
-    <div id="leafletmap" style="position: absolute;width: 300px;height: 300px;left: -2000px;bottom: 10px;"></div>
-    <div id="leafletmap_mini" style="position: absolute;width: 200px;height: 200px;left: -2000px;bottom: 410px;"></div>
+    <div id="leafletmap" style="position: absolute;width: 300px;height: 300px;left: -2500px;bottom: 10px;"></div>
+    <div id="leafletmap_mini" style="position: absolute;width: 200px;height: 200px;left: -2500px;bottom: 410px;"></div>
 
     <script>
         //祯时间间隔，默认20ms，根据机器性能酌情增减，20-200。
@@ -683,6 +683,12 @@
                         }
 
                         if (data && data['status'] === 0) {
+                            //对trkpt进行插值
+                            interpolationPoints(data);
+                            //更新地图数据
+                            set_leafletmap_latlngs(data);
+
+
                             const jsonInfoDiv = document.getElementById('jsonInfo');
                             jsonInfoDiv.innerHTML = ''; // 每次重新设置前先清空内容
                             // 检查data['data']['summary']['name']是否存在
@@ -720,10 +726,10 @@
                             // 检查data['data']['trkpt']是否存在
                             if (data['data'] && data['data']['trkpt']) {
                                 const trkptDiv = document.createElement('div');
-
+                                trkptLength = data['data']['trkpt'].length;
                                 trkptDiv.textContent = `${i18n.get('number_l')}: ${trkptLength}${i18n.get('number_r')}`;
                                 jsonInfoDiv.appendChild(trkptDiv);
-                                progressBar.max = trkptLength;
+                                progressBar.max = trkptLength - 1;
 
                                 //console.log("data['data']['trkpt']的长度为：", trkptLength); // 输出分段数据长度用于调试
                                 if (trkptLength > 1) { // 至少需要两段数据才能计算秒差
@@ -752,6 +758,10 @@
                             <button type="button" class="layui-btn layui-btn-sm" id="b169">${i18n.get('landscape')}</button>
                             <button type="button" class="layui-btn layui-btn-sm" id="b916">${i18n.get('portrait')}</button>
                         </div>
+                        <div class="layui-btn-group">
+        <button type="button" class="layui-btn layui-btn-sm" id="saveTemplate">保存模板</button>
+        <button type="button" class="layui-btn layui-btn-sm" id="loadTemplate">读取配置</button>
+    </div>
                         `);
 
                                     // 为ID为'b169'的按钮添加点击事件
@@ -1124,7 +1134,7 @@
                 id: 'appv_date_pan',
                 x: 20,//左上角位置
                 y: 20,//左上角位置
-                width: 400,
+                width: 420,
                 height: 56,
                 lockRatio: true,
                 editable: true,
@@ -1163,7 +1173,7 @@
 
             //图表
             appv_metrics_pan = new Box({
-                id: 'app_metrics_pan',
+                id: 'appv_metrics_pan',
                 x: 20,//左上角位置
                 y: 100,//左上角位置
                 width: 400,
@@ -1322,6 +1332,8 @@
                         lockRatio: true,
                         width: 11,
                         height: 11,
+                        offsetX: -6,
+                        offsetY: -6,
                         fill: "#FFCC00",
                     },
                 ],
@@ -1346,9 +1358,11 @@
 
             //状态
             appv_nowstatus_pan = new Box({
-                id: 'app_nowstatus_pan',
+                id: 'appv_nowstatus_pan',
                 x: 30,//左上角位置
                 y: 340,//左上角位置
+                width: 400,
+                height: 400,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -1359,6 +1373,7 @@
                     {
                         name: "now_status",
                         tag: 'Text',
+                        width: 400,
                         resizeFontSize: true,
                         fontSize: 28,
                         fontWeight: 'black',
@@ -1387,9 +1402,11 @@
 
             //分段信息
             appv_lap_pan = new Box({
-                id: 'app_lap_pan',
+                id: 'appv_lap_pan',
                 x: 30,//左上角位置
                 y: 560,//左上角位置
+                width: 400,
+                height: 400,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -1401,6 +1418,7 @@
                         name: "lap_status",
                         tag: 'Text',
                         resizeFontSize: true,
+                        width: 400,
                         fontSize: 20,
                         fontWeight: 'black',
                         text: `1Km用时：00:00\n2Km用时：03:00`,
@@ -1428,9 +1446,11 @@
 
             //运动时间框
             appv_nowtime_pan = new Box({
-                id: 'app_nowtime_pan',
+                id: 'appv_nowtime_pan',
                 x: appvWidth - 150,//左上角位置
                 y: 15,//左上角位置
+                width: 140,
+                height: 46,
                 lockRatio: true,
                 editable: true,
                 fill: '#CCEEFF',
@@ -1448,7 +1468,7 @@
                         fontSize: 28,
                         fontWeight: 'black',
                         text: '00:00:00',
-                        fill: ' #191970',
+                        fill: '	#191970',
                         textAlign: 'right',
                         verticalAlign: 'top',
                     }
@@ -1473,7 +1493,7 @@
 
             //地图
             appv_map_pan = new Box({
-                id: 'app_map_pan',
+                id: 'appv_map_pan',
                 x: appvWidth - 620,//左上角位置
                 y: 200,//左上角位置
                 width: 600,
@@ -1552,8 +1572,9 @@
                 resizeChildren: true,//子元素是否跟随 resize
                 children: [
                     {
-                        tag: 'Image',
-                        url: map_images(),
+                        tag: 'Canvas',
+                        width: 300,
+                        height: 300,
                         draggable: true
                     },
 
@@ -1570,6 +1591,7 @@
                                     { "name": `${i18n.get('Background_route_color')}`, "url": "polyline.updateSymbol({'lineColor': value})", "value": polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
                                     { "name": `${i18n.get('progress_route_color')}`, "url": "new_polyline.updateSymbol({'lineColor': value})", "value": new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
                                     { "name": `${i18n.get('Current_position_color')}`, "url": "marker.updateSymbol({'markerFill': value})", "value": marker._symbol.markerFill, "type": "funcolor", "tools": true },
+                                    { "name": `${i18n.get('map-Pitch')}`, "url": "map.setPitch(value);", "value": map.getPitch(), "type": "funnumber", "tools": true },
                                 ]
                             }
                             tosettable(json);
@@ -1577,6 +1599,8 @@
                     ],
                 },
             })
+
+
 
             //miniweb地图
             web_minimap_pan = new Box({
@@ -1595,8 +1619,9 @@
                 resizeChildren: true,//子元素是否跟随 resize
                 children: [
                     {
-                        tag: 'Image',
-                        url: map_images(),
+                        tag: 'Canvas',
+                        width: 200,
+                        height: 200,
                         draggable: true
                     },
 
@@ -1613,6 +1638,7 @@
                                     { "name": `${i18n.get('Background_route_color')}`, "url": "mini_polyline.updateSymbol({'lineColor': value})", "value": mini_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
                                     { "name": `${i18n.get('progress_route_color')}`, "url": "mini_new_polyline.updateSymbol({'lineColor': value})", "value": mini_new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
                                     { "name": `${i18n.get('Current_position_color')}`, "url": "mini_marker.updateSymbol({'markerFill': value})", "value": mini_marker._symbol.markerFill, "type": "funcolor", "tools": true },
+                                    { "name": `${i18n.get('map-Pitch')}`, "url": "minimap.setPitch(value);", "value": minimap.getPitch(), "type": "funnumber", "tools": true },
                                 ]
                             }
                             tosettable(json);
@@ -1621,11 +1647,15 @@
                 },
             })
 
+
+
             //距离框
             appv_distance_pan = new Box({
-                id: 'app_distance_pan',
+                id: 'appv_distance_pan',
                 x: appvWidth - 270,//左上角位置
                 y: 80,//左上角位置
+                width: 260,
+                height: 46,
                 //width: 130,
                 //height: 22,
                 lockRatio: true,
@@ -1720,6 +1750,8 @@
                 id: 'TO_pace_pan',
                 x: 330,//左上角位置
                 y: 340,//左上角位置
+                width: 350,
+                height: 50,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -1731,6 +1763,7 @@
                         tag: 'Text',
                         y: 1,
                         x: 55,
+                        width: 300,
                         resizeFontSize: true,
                         fontSize: 32,
                         fontWeight: 'black',
@@ -1771,6 +1804,8 @@
                 id: 'TO_heart_pan',
                 x: 330,//左上角位置
                 y: 390,//左上角位置
+                width: 350,
+                height: 50,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -1782,6 +1817,7 @@
                         tag: 'Text',
                         y: 1,
                         x: 55,
+                        width: 300,
                         resizeFontSize: true,
                         fontSize: 32,
                         fontWeight: 'black',
@@ -1822,6 +1858,8 @@
                 id: 'TO_cadence_pan',
                 x: 330,//左上角位置
                 y: 440,//左上角位置
+                width: 350,
+                height: 50,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -1833,6 +1871,7 @@
                         tag: 'Text',
                         y: 1,
                         x: 55,
+                        width: 300,
                         resizeFontSize: true,
                         fontSize: 32,
                         fontWeight: 'black',
@@ -1873,6 +1912,8 @@
                 id: 'TO_step_pan',
                 x: 330,//左上角位置
                 y: 490,//左上角位置
+                width: 350,
+                height: 50,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -1884,6 +1925,7 @@
                         tag: 'Text',
                         y: 1,
                         x: 55,
+                        width: 300,
                         resizeFontSize: true,
                         fontSize: 32,
                         fontWeight: 'black',
@@ -1924,6 +1966,8 @@
                 id: 'TO_gps_pan',
                 x: appvWidth - 400,
                 y: appvHeight - 400,
+                width: 400,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -1935,6 +1979,7 @@
                         tag: 'Text',
                         y: 1,
                         x: 75,
+                        width: 350,
                         resizeFontSize: true,
                         fontSize: 30,
                         fontWeight: 'black',
@@ -1974,6 +2019,8 @@
                 id: 'text_nowtime_pan',
                 x: appvWidth - 400,
                 y: appvHeight - 300,
+                width: 350,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -1981,6 +2028,7 @@
                 children: [
                     {
                         tag: 'Text',
+                        width: 350,
                         resizeFontSize: true,
                         fontSize: 72,
                         fontWeight: 'black',
@@ -2012,6 +2060,8 @@
                 id: 'text_time_pan',
                 x: appvWidth - 400,
                 y: appvHeight - 200,
+                width: 350,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2019,6 +2069,7 @@
                 children: [
                     {
                         tag: 'Text',
+                        width: 350,
                         resizeFontSize: true,
                         fontSize: 72,
                         fontWeight: 'black',
@@ -2050,6 +2101,8 @@
                 id: 'text_day_pan',
                 x: appvWidth - 400,
                 y: appvHeight - 100,
+                width: 350,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2057,6 +2110,7 @@
                 children: [
                     {
                         tag: 'Text',
+                        width: 350,
                         resizeFontSize: true,
                         fontSize: 52.5,
                         fontWeight: 'black',
@@ -2088,6 +2142,8 @@
                 id: 'text_str1_pan',
                 x: appvWidth / 2 - 200,
                 y: appvHeight / 2 - 100,
+                width: 350,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2127,6 +2183,8 @@
                 id: 'text_str2_pan',
                 x: appvWidth / 2 + 100,
                 y: appvHeight / 2 - 100,
+                width: 350,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2166,6 +2224,8 @@
                 id: 'text_str3_pan',
                 x: appvWidth / 2 - 200,
                 y: appvHeight / 2 + 100,
+                width: 350,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2205,6 +2265,8 @@
                 id: 'text_str4_pan',
                 x: appvWidth / 2 + 100,
                 y: appvHeight / 2 + 100,
+                width: 350,
+                height: 100,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2244,6 +2306,8 @@
                 id: 'el_heart_pan',
                 x: 100,
                 y: 800,
+                width: 200,
+                height: 200,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2325,6 +2389,8 @@
                 id: 'el_pace_pan',
                 x: 400,
                 y: 800,
+                width: 200,
+                height: 200,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -2406,6 +2472,8 @@
                 id: 'el_cadence_pan',
                 x: 700,
                 y: 800,
+                width: 200,
+                height: 200,
                 lockRatio: true,
                 editable: true,
                 //fill: '#CCEEFF',
@@ -2487,6 +2555,8 @@
                 id: 'l_distance_pan',
                 x: appvWidth / 2 - 500,
                 y: 20,
+                width: 1000,
+                height: 200,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2607,6 +2677,8 @@
                 id: 'el_leida_pan',
                 x: appvWidth / 2 - 500,
                 y: 500,
+                width: 300,
+                height: 300,
                 lockRatio: true,
                 editable: true,
                 hitBox: true,
@@ -2759,6 +2831,7 @@
                 appview.tree.zoom({ x: 0, y: 0, width: appvWidth, height: appvHeight }, [0, -0, 0, 0])
             }
 
+
         }
 
         //添加默认模板
@@ -2821,6 +2894,9 @@
 
             var canvas = document.getElementById('canv');
             var ctx = canvas.getContext('2d');
+            // 清空整个canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
             // 构造包装器
             muxer = new Mp4Muxer.Muxer({
                 target: new Mp4Muxer.ArrayBufferTarget(),
@@ -2845,16 +2921,18 @@
             });
             var frameCounter = 0;//祯计数器
             var currentFrame = 0;//运动数据长度计数器
+            //currentFrame = maxFrame - 5;
             //制作视频，插入帧
             function updateFrame() {
                 //判断是否有地图
                 if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
-                    var now_frame_delay = frame_delay*1 + 30;
+                    var now_frame_delay = frame_delay * 1 + 0;
                 } else {
-                    var now_frame_delay = frame_delay*1;
+                    var now_frame_delay = frame_delay * 1;
                 }
                 //if (currentFrame < 1000) {maxFrame
                 //
+
                 if (currentFrame < maxFrame) {
 
                     if (upFrame(currentFrame)) {
@@ -2864,9 +2942,10 @@
 
                             //duration: (1e6 * 5) ,
                         });
-                        if (currentFrame == 0) {
-                            console.log('Timestamp:', frame); // 打印timestamp信息
-                        }
+                        //console.log('Timestamp:', trkpt_data[currentFrame].timestamp);
+                        // if (currentFrame == 0) {
+                        //     console.log('Timestamp:', frame); // 打印timestamp信息
+                        // }
                         frameCounter++;
                         videoEncoder.encode(frame, {
                             keyFrame: trkpt_data[currentFrame].sec % 5 === 0
@@ -2874,41 +2953,36 @@
                         frame.close();
                         currentFrame++;
                         //循环
-                        timerId = setTimeout(updateFrame, now_frame_delay);
+                        timerId = setTimeout(updateFrame, now_frame_delay);//now_frame_delay延时
                     }
 
                 } else {
                     // 最后一帧
+                    upFrame(maxFrame - 1);
+                    console.log(maxFrame - 1);
                     frameTocanv();
                     let frame = new VideoFrame(canvas, {
-                        timestamp: (trkpt_data[currentFrame - 1].sec + 5) * 1e6
+                        timestamp: (trkpt_data[maxFrame - 1].sec + 1) * 1e6
                     });
                     videoEncoder.encode(frame, {
-                        keyFrame: trkpt_data[currentFrame - 1].sec % 5 === 0 //整秒关键祯 true
+                        keyFrame: true //整秒关键祯 true
                     });
+                    //console.log('Timestamp1:', trkpt_data[maxFrame-1].timestamp);
+
                     frame.close();
-                    let frame1 = new VideoFrame(canvas, {
-                        timestamp: (trkpt_data[currentFrame - 1].sec + 10) * 1e6
-                    });
-                    videoEncoder.encode(frame1, {
-                        keyFrame: trkpt_data[currentFrame - 1].sec % 5 === 0 //整秒关键祯 true
-                    });
-                    frame1.close();
+
                     //关闭录制
                     endEncoding();
                     clearTimeout(timerId);
                     $('#view_info').css('display', 'none');
-                    if (upFrame(-1)) {
-                        frameTocanv();
-                        setTimeout(() => { // JavaScript's setTimeout for a 20ms delay
-                            upFrame(parseInt(maxFrame * 0.7));
-                        }, 50);
-                    }
+
                 }
             }
             // 启动定时更新
             updateFrame();
         }
+
+
 
         // 更新编辑事件，json部件点击事件
         function tosettable(json) {
@@ -2935,7 +3009,6 @@
                             title.textContent = item.value;
                             inputDiv.appendChild(title);
                         }
-                        console.log(item.value);
                         if (item.name != `${i18n.get('Canvas_settings')}`) {
                             // 添加移除按钮
                             const removeButton = document.createElement('button');
@@ -2950,7 +3023,6 @@
                             };
                             inputDiv.appendChild(removeButton);
                         }
-
                         break;
                     case 'number':
                         const numberInput = document.createElement('input');
@@ -2997,6 +3069,20 @@
                         };
                         inputDiv.appendChild(funcolorInput);
                         break;
+
+                    case 'funnumber':
+                        const funnumberInput = document.createElement('input');
+                        funnumberInput.type = 'number';
+                        funnumberInput.value = item.value;
+                        funnumberInput.className = 'layui-input';
+                        funnumberInput.onchange = function () {
+                            const updateSymbolFunction = new Function('value', item.url);
+                            // 调用创建的函数，并传递当前输入框的值
+                            updateSymbolFunction(this.value);
+                            setTimeout(getProgressBarValueAndUpdate, 20);
+                        };
+                        inputDiv.appendChild(funnumberInput);
+                        break;
                     case 'text':
                         const textInput = document.createElement('input'); // 创建文本输入框
                         textInput.type = 'text'; // 设置类型为文本
@@ -3035,61 +3121,6 @@
 
         //更新画布
         function upFrame(currentFrame) {
-            if (currentFrame == -1) {
-                appv_distance_pan.children[2].text = `0Km`;//行进长度
-                appv_distance_pan.children[4].width = 0;
-                l_distance_pan.children[7].text = `0Km`;//行进长度
-                l_distance_pan.children[1].width = 0;
-                l_distance_pan.children[6].x = 80;
-                l_distance_pan.children[7].x = 90;
-                appv_ele18_pan.children[1].x = ele18_points[0] - 6;
-                appv_ele18_pan.children[1].y = ele18_points[1] - 6;
-                appv_ele_pan.children[1].x = ele_points[0];
-                appv_nowtime_pan.children[0].text = '--:--';
-                text_nowtime_pan.children[0].text = '--:--';
-
-                //画当前点
-                appv_map_pan.children[1].points = [];
-                appv_map_pan.children[2].x = map_points[0] - 8;
-                appv_map_pan.children[2].y = map_points[1] - 8;
-
-                TO_gps_pan.children[0].text = `--\n$--`;
-                appv_nowstatus_pan.children[0].text = `--\n--\n--\n--\n--`;
-                //to仪表盘
-                TO_pace_pan.children[0].text = `-- min/km`;
-                TO_heart_pan.children[0].text = `-- bpm`;
-                TO_cadence_pan.children[0].text = `-- steps/min`;
-                TO_step_pan.children[0].text = `-- m`;
-
-                el_heart_pan.children[0].text = `0`;
-                el_heart_pan.children[3].endAngle = -210;
-
-                //配速仪表盘
-                el_pace_pan.children[0].text = `0`;
-                //max22，min0，系数10.9
-                el_pace_pan.children[3].endAngle = -210;
-
-                el_cadence_pan.children[0].text = `0`;
-                //max240，min0，系数1
-                el_cadence_pan.children[3].endAngle = -210;
-
-                // 圈速
-                appv_lap_pan.children[0].text = ` `;
-
-                //综合图表画进度 metrics
-                appv_metrics_pan.children[3].x = 0;
-
-                //当前日期时间
-                appv_date_pan.children[0].text = `--:--`;
-
-                //当前时间
-                text_time_pan.children[0].text = `--:--`;
-
-                //当前日期
-                text_day_pan.children[0].text = `-- -- --`;
-
-                return true;
-            }
 
             // 给view_info的文本赋值，转换进度
             $('#view_info').html(currentFrame.toString() + '/' + maxFrame.toString());
@@ -3146,10 +3177,14 @@
             if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
                 daohang(currentFrame);
                 if (frame.find('#web_map_pan').length > 0) {
-                    web_map_pan.children[0].url = map.toDataURL();
+                    const mapCanvas = document.querySelector("#leafletmap > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
+                    web_map_pan.children[0].context.drawImage(mapCanvas, 0, 0, web_map_pan.children[0].width, web_map_pan.children[0].height);
+                    web_map_pan.children[0].paint()
                 }
                 if (frame.find('#web_minimap_pan').length > 0) {
-                    web_minimap_pan.children[0].url = minimap.toDataURL();
+                    const minimapCanvas = document.querySelector("#leafletmap_mini > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
+                    web_minimap_pan.children[0].context.drawImage(minimapCanvas, 0, 0, web_minimap_pan.children[0].width, web_minimap_pan.children[0].height);
+                    web_minimap_pan.children[0].paint()
                 }
             }
 
@@ -3327,7 +3362,7 @@
                         "training_at": "",//时间
                         "total_timer_time": 0,//总时长
                     },
-                    "motion": { //运动
+                    "motion": {	//运动
                         "distance": 0,//训练路程 米1
                         "total_ascent": 0,//总爬升
                         "total_descent": 0,//总下降
@@ -3462,7 +3497,7 @@
             // 注意：如果最后一个轨迹点的累计距离不是1000的整数倍，可能需要处理剩余的部分
             // 这里假设最后一个轨迹点已经处理过了，如果需要处理，可以添加相应的逻辑
             //console.log(rq);
-            set_leafletmap_latlngs(rq);
+
             return rq; // 返回解析后的gpx对象，假设它已经被转换为JSON兼容格式
         }
 
@@ -3477,7 +3512,7 @@
                         "training_at": "",//时间
                         "total_timer_time": 0,//总时长
                     },
-                    "motion": { //运动
+                    "motion": {	//运动
                         "distance": 0,//训练路程 米1
                         "total_ascent": 0,//总爬升
                         "total_descent": 0,//总下降
@@ -3612,7 +3647,7 @@
             // 注意：如果最后一个轨迹点的累计距离不是1000的整数倍，可能需要处理剩余的部分
             // 这里假设最后一个轨迹点已经处理过了，如果需要处理，可以添加相应的逻辑
             //console.log(rq);
-            set_leafletmap_latlngs(rq);
+
             return rq; // 返回解析后的gpx对象，假设它已经被转换为JSON兼容格式
         }
 
@@ -3627,7 +3662,7 @@
                         "training_at": "",//时间
                         "total_timer_time": 0,//总时长
                     },
-                    "motion": { //运动
+                    "motion": {	//运动
                         "distance": 0,//训练路程 米1
                         "total_ascent": 0,//总爬升
                         "total_descent": 0,//总下降
@@ -3651,7 +3686,7 @@
                 if (error) {
                     console.log(error);
                 } else {
-                    //console.log(data);
+                    console.log(data);
                     fit = data;
                 }
 
@@ -3675,7 +3710,11 @@
                 var timeCurrent = new Date(currentPoint.timestamp).getTime() / 1000;
                 var previoustimeCurrent = 0;
                 var distanceCurrent = currentPoint.distance * 1000;
-                let speed = currentPoint.speed;
+
+                var speed = currentPoint?.enhanced_speed ?? currentPoint?.speed ?? 0;
+                //console.log(speed);
+
+
                 let cadenceCorrected = currentPoint.cadence;//步频
 
                 // 将速度转换为公里/小时
@@ -3696,15 +3735,16 @@
                     //var cadencePerSecond = cadenceCorrected / 60 / 3;
                     // 步幅 = 速度（km每小时） / 步频（步/秒）
                     stepLength = (speed * 1000) / (cadenceCorrected * 60);
-                    //console.log(speed * 1000 , cadenceCorrected*60);
+
                 }
 
-                //上升和下降
-                let currentAltitude = fit.records[i].altitude;
-                if (i == 0) {
-                    var previousAltitude = fit.records[i].altitude;
+                // 上升和下降
+                let currentAltitude = fit.records[i].enhanced_altitude !== undefined ? fit.records[i].enhanced_altitude : fit.records[i].altitude;
+
+                if (i === 0) {
+                    var previousAltitude = fit.records[i].enhanced_altitude !== undefined ? fit.records[i].enhanced_altitude : fit.records[i].altitude;
                 } else {
-                    var previousAltitude = fit.records[i - 1].altitude;
+                    var previousAltitude = fit.records[i - 1].enhanced_altitude !== undefined ? fit.records[i - 1].enhanced_altitude : fit.records[i - 1].altitude;
                 }
 
 
@@ -3714,17 +3754,37 @@
                     total_descent += previousAltitude - currentAltitude;
                 }
 
+                //fit修正，防止第一个和最后一个gps打点为空，高驰
+                let position_lat;
+                let position_long;
+
+                if (i === fit.records.length - 1) {
+                    // 如果是最后一个元素，则取前一个
+                    position_lat = currentPoint.position_lat ?? fit.records[i - 1].position_lat ?? 0;
+                    position_long = currentPoint.position_long ?? fit.records[i - 1].position_long ?? 0;
+                } else {
+                    // 否则，取后一个
+                    position_lat = currentPoint.position_lat ?? fit.records[i + 1].position_lat ?? 0;
+                    position_long = currentPoint.position_long ?? fit.records[i + 1].position_long ?? 0;
+                }
+
+
                 //赋值
                 let newPoint = {
                     timestamp: timeCurrent,
                     sec: sec,
-                    position_lat: currentPoint.position_lat,
-                    position_long: currentPoint.position_long,
-                    altitude: parseFloat((currentPoint.altitude * 1000).toFixed(2)),
+                    position_lat: position_lat,
+                    position_long: position_long,
+                    altitude: parseFloat(
+                        ((currentPoint.enhanced_altitude !== undefined
+                            ? currentPoint.enhanced_altitude
+                            : (currentPoint.altitude !== undefined ? currentPoint.altitude : 0)) * 1000).toFixed(2)
+                    ),
+
                     is_pause: false,
                     speed: parseFloat(speed.toFixed(2)), // 更新速度
                     distance: parseFloat(distanceCurrent.toFixed(2)),
-                    heart_rate: currentPoint.heart_rate,
+                    heart_rate: currentPoint.heart_rate ?? 0,
                     cadence: cadenceCorrected,
                     step_length: parseFloat(stepLength.toFixed(2))
                 };
@@ -3775,7 +3835,7 @@
             // 注意：如果最后一个轨迹点的累计距离不是1000的整数倍，可能需要处理剩余的部分
             // 这里假设最后一个轨迹点已经处理过了，如果需要处理，可以添加相应的逻辑
             console.log(rq);
-            set_leafletmap_latlngs(rq);
+
             return rq; // 返回解析后的gpx对象，假设它已经被转换为JSON兼容格式
         }
 
@@ -3843,6 +3903,49 @@
             // 可以在这里添加其他需要执行的代码，例如更新页面显示或调用其他函数
             console.log("frame_delay updated to: " + frame_delay);
         }
+
+        //插值到1秒
+        function interpolationPoints(data) {
+            if (!data.data || !data.data.trkpt) {
+                return;
+            }
+
+            let trkpt = data.data.trkpt;
+            let i = 0;
+            while (i < trkpt.length - 1) {
+                let current = trkpt[i];
+                let nextPoint = trkpt[i + 1];
+
+                if (nextPoint.sec !== current.sec + 1) {
+                    let targetSec = current.sec + 1;
+                    let interpolatedPoint = {};
+
+                    ["timestamp", "position_lat", "position_long", "altitude", "speed", "distance", "heart_rate", "cadence", "step_length"].forEach(key => {
+                        if (current.hasOwnProperty(key) && nextPoint.hasOwnProperty(key)) {
+                            let interpolatedValue = current[key] + (nextPoint[key] - current[key]) * (targetSec - current.sec) / (nextPoint.sec - current.sec);
+
+                            // 根据属性类型进行格式化
+                            if (key === "cadence" || key === "heart_rate") {
+                                interpolatedPoint[key] = Math.round(interpolatedValue); // 取整
+                            } else if (["distance", "speed", "step_length", "altitude"].includes(key)) {
+                                interpolatedPoint[key] = parseFloat(interpolatedValue.toFixed(2)); // 保留两位小数
+                            } else if (["position_lat", "position_long"].includes(key)) {
+                                interpolatedPoint[key] = parseFloat(interpolatedValue.toFixed(6)); // 保留6位小数
+                            } else {
+                                interpolatedPoint[key] = interpolatedValue;
+                            }
+                        }
+                    });
+
+                    interpolatedPoint.sec = targetSec;
+                    trkpt.splice(i + 1, 0, interpolatedPoint);
+                }
+                i++;
+            }
+
+            data.data.trkpt = trkpt;
+        }
+
     </script>
     <script>
         layui.use(function () {
@@ -3864,16 +3967,88 @@
                 var find = frame.find(selector);
                 if (find.length == 0) {
                     frame.add(window[layActiveValue]);
-                    if (upFrame(-1)) {
-                        frameTocanv();
-                        setTimeout(() => { // JavaScript's setTimeout for a 20ms delay
-                            $('#progressBar').val(parseInt(maxFrame * 0.7));
-                            upFrame(parseInt(maxFrame * 0.7));
-                        }, 20);
-                    }
+
+                    $('#progressBar').val(parseInt(maxFrame * 0.7));
+                    upFrame(parseInt(maxFrame * 0.7));
+
                 } else {
                     alert(`${i18n.get('Object_already_exists')}`);
                 }
+            });
+
+            // 保存按钮逻辑（使用事件委托）
+            $(document).on('click', '#saveTemplate', function () {
+                layui.layer.prompt({
+                    title: 'saveTemplate',
+                    value: 'User_Template', // 默认值
+                    formType: 0 // 输入框类型，0 为文本输入
+                }, function (value, index) {
+                    // 调用保存函数
+                    saveFrameConfigToLocalStorage(frame, value);
+                    layui.layer.close(index); // 关闭弹层
+                });
+            });
+
+            // 读取配置按钮逻辑（使用事件委托）
+            $(document).on('click', '#loadTemplate', function () {
+                // 获取所有配置
+                const allConfigs = loadAllFrameConfigsFromLocalStorage();
+
+                // 构建表格内容
+                let tableHtml = `
+                    <table class="layui-table">
+                        <thead>
+                            <tr>
+                                <th>标题</th>
+                                <th>保存时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                allConfigs.forEach(config => {
+                    tableHtml += `
+                        <tr>
+                            <td>${config.title}</td>
+                            <td>${config.isCustomTitle ? '自定义' : config.title}</td>
+                            <td><button class="layui-btn layui-btn-sm loadConfig" data-config='${JSON.stringify(config.config)}'>载入</button></td>
+                        </tr>`;
+                });
+
+                tableHtml += `</tbody></table>`;
+
+                // 弹出层显示表格
+                layui.layer.open({
+                    type: 1,
+                    title: '选择配置',
+                    content: tableHtml,
+                    area: ['600px', '400px'],
+                    btn: ['关闭'],
+                    yes: function (index) {
+                        layui.layer.close(index); // 关闭弹层
+                    }
+                });
+
+                // 绑定载入按钮点击事件（使用事件委托）
+                $(document).on('click', '.loadConfig', function () {
+                    try {
+                        // 1. 获取原始属性值
+                        const rawData = $(this).attr('data-config');
+                        //console.log("原始 data-config:", rawData); // 调试输出
+                        // 2. 替换 HTML 实体 &quot; 为双引号
+                        const jsonString = rawData.replace(/&quot;/g, '"');
+                        //console.log("处理后的 JSON 字符串:", jsonString); // 调试输出
+                        // 3. 解析 JSON
+                        const config = JSON.parse(jsonString);
+                        //console.log("解析后的配置对象:", config); // 调试输出
+                        // 4. 调用载入函数
+                        load_user_tmp(config);
+                        layui.layer.closeAll();
+                    } catch (e) {
+                        //console.error("解析配置失败:", e);
+                        layui.layer.msg('配置解析失败，请检查数据格式。', { icon: 2 });
+                    }
+                });
             });
 
             var util = layui.util;
@@ -4031,6 +4206,7 @@
         // 调整视野到折线范围
         map.fitExtent(polyline.getExtent(), -0.125);
         minimap.fitExtent(mini_polyline.getExtent(), 16);
+        minimap.setPitch(40);
 
 
         function set_leafletmap_latlngs(rqjson) {
@@ -4100,6 +4276,208 @@
         function minimap_images() {
             return minimap.toDataURL();
         }
+
+
+
+    </script>
+    <script>
+
+
+        // 函数用于加载用户模板
+        function load_user_tmp(json) {
+            // 检查 json.children 是否存在且有成员
+            if (json.children && Array.isArray(json.children) && json.children.length > 0) {
+                json.children.forEach(child => {
+                    // 获取 id 值
+                    if (child.id) {
+
+                        const idValue = child.id;
+                        console.log(idValue);
+                        // 假设 idValue 是系统内已存在的变量名
+                        if (window[idValue]) {
+                            const variable = window[idValue];
+                            console.log(variable);
+
+                            // 将变量添加到 frame 中
+                            frame.add(variable);
+
+                            if (child.width !== undefined && variable.resizeWidth) {
+                                variable.resizeWidth(child.width);
+                            }
+
+
+
+                            // 赋值 x, y, width
+                            if (child.x !== undefined) {
+                                variable.x = child.x;
+                            }
+                            if (child.y !== undefined) {
+                                variable.y = child.y;
+                            }
+                            if (child.rotation !== undefined) {
+                                variable.rotation = child.rotation;
+                            }
+
+
+                            // 遍历 children 处理 fill 和 stroke 属性
+                            if (child.children && Array.isArray(child.children)) {
+                                child.children.forEach((subChild, index) => {
+                                    // 假设 variable.children 是一个数组，且顺序与 child.children 一致
+                                    if (variable.children && Array.isArray(variable.children) && variable.children[index]) {
+                                        const subVariable = variable.children[index];
+
+                                        // 赋值 fill 和 stroke 属性
+                                        if (subChild.fill !== undefined) {
+                                            subVariable.fill = subChild.fill;
+                                        }
+                                        if (subChild.stroke !== undefined) {
+                                            subVariable.stroke = subChild.stroke;
+                                        }
+                                        if (subChild.width !== undefined) {
+                                            subVariable.width = subChild.width;
+                                        }
+                                        if (subChild.height !== undefined) {
+                                            subVariable.height = subChild.height;
+                                        }
+                                        if (subChild.offsetX !== undefined) {
+                                            subVariable.offsetX = subChild.offsetX;
+                                        }
+                                        if (subChild.offsetY !== undefined) {
+                                            subVariable.offsetY = subChild.offsetY;
+                                        }
+                                        if (subChild.fontSize !== undefined) {
+                                            subVariable.fontSize = subChild.fontSize;
+                                        }
+
+
+
+                                    } else {
+                                        console.warn(`Sub-child at index ${index} not found in variable.children.`);
+                                    }
+                                });
+                            }
+
+
+                        } else {
+                            console.warn(`Variable ${idValue} not found in global scope.`);
+                        }
+                    } else {
+                        console.warn("No 'id' found in child.");
+                    }
+                });
+            } else {
+                console.warn("No children found in json.");
+            }
+
+            return frame;
+        }
+
+        //导出用户配置模板
+        function exportFrameConfig(frame) {
+            // 定义需要保留的字段
+            const allowedFields = new Set([
+                'tag', 'children', 'id', 'x', 'y', 'width', 'height',
+                'rotation', 'fill', 'stroke', 'strokeWidth', 'offsetX',
+                'offsetY', 'fontSize'
+            ]);
+
+            // 递归函数，提取指定字段
+            function extractFields(obj) {
+                if (typeof obj !== 'object' || obj === null) {
+                    return obj; // 如果是基本类型，直接返回
+                }
+
+                // 创建一个新对象，只保留需要的字段
+                const result = {};
+                for (const key in obj) {
+                    if (allowedFields.has(key)) {
+                        result[key] = obj[key];
+                    }
+                }
+
+                // 递归处理 children
+                if (Array.isArray(obj.children)) {
+                    result.children = obj.children.map(child => extractFields(child));
+                }
+
+                return result;
+            }
+
+            // 调用递归函数并返回结果
+            return extractFields(frame);
+        }
+
+        //将用户配置保存到localStorage
+        function saveFrameConfigToLocalStorage(frame, title = null) {
+            // 导出 JSON 对象
+            const exportedConfig = exportFrameConfig(frame);
+
+            // 生成标题
+            const configTitle = title || new Date().toLocaleString(); // 如果没有传入标题，则使用当前时间
+
+            // 添加标志前缀
+            const storageKey = `frameConfig_${configTitle}`;
+
+            // 获取所有已保存的配置
+            const allConfigs = loadAllFrameConfigsFromLocalStorage();
+
+            // 检查是否超过 20 个配置
+            if (allConfigs.length >= 20 && !title) {
+                // 找到最早的默认标题配置
+                const defaultConfigs = allConfigs.filter(config => !config.isCustomTitle);
+                if (defaultConfigs.length > 0) {
+                    // 按时间排序，找到最早的配置
+                    defaultConfigs.sort((a, b) => new Date(a.title) - new Date(b.title));
+                    const oldestConfig = defaultConfigs[0];
+
+                    // 删除最早的配置
+                    localStorage.removeItem(`frameConfig_${oldestConfig.title}`);
+                    console.log(`Oldest configuration "${oldestConfig.title}" deleted.`);
+                }
+            }
+
+            // 保存新配置
+            localStorage.setItem(storageKey, JSON.stringify(exportedConfig));
+            console.log(`Configuration saved to localStorage with key: "${storageKey}"`);
+        }
+
+        // 获取所有localStorage配置（带标志和标题类型）
+        function loadAllFrameConfigsFromLocalStorage() {
+            const configs = [];
+
+            // 遍历 localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+
+                // 检查键是否以标志前缀开头
+                if (key.startsWith("frameConfig_")) {
+                    const configString = localStorage.getItem(key);
+                    if (configString) {
+                        const config = JSON.parse(configString);
+                        const title = key.replace("frameConfig_", "");
+
+                        // 判断是否为自定义标题
+                        const isCustomTitle = !isTimestampTitle(title);
+
+                        configs.push({
+                            title: title,
+                            config: config,
+                            isCustomTitle: isCustomTitle
+                        });
+                    }
+                }
+            }
+
+            return configs;
+        }
+
+        // 判断标题是否为时间戳格式
+        function isTimestampTitle(title) {
+            // 简单判断是否为时间戳格式（如 "2023-10-05 14:30:00"）
+            return /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(title);
+        }
+
+
 
     </script>
 </body>
