@@ -1,6 +1,5 @@
 {
     "title": "Web Sport Data Overlay",
-    "ver": "Beta 0.11",
     "readme": "No client, easy-to-use, fast, aesthetic",
     "generate": "Generate MP4 Video",
     "sportsinfo": "Sports Information",
@@ -94,5 +93,6 @@
     "border-color": "Border Color",
     "Setup": "Settings",
     "Setup-ps": "If the generated video has frame - skipping or data loss, you can adjust it here. The smaller the value, the faster; the larger the value, the slower. The speed depends on your computing power.",
-    "Setup-label-ps": "Frame generation interval time (15 - 200ms, step 5ms):"
+    "Setup-label-ps": "Frame generation interval time (15 - 200ms, step 5ms):",
+    "map-Pitch": "Pitch 0-80"
 }
