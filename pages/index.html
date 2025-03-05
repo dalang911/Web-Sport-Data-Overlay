@@ -3397,7 +3397,7 @@
                 //速度
                 if (gpx?.metadata?.link?.text === "COROS" && gpx?.currentPoint?.speed) {
                     speed = gpx.currentPoint.speed * 3600 / 1000;
-                    console.log('转换后的速度:', speed);
+
                 }else{//计算
                     // 计算前后点的速度
                     if (i > 0 && i < gpx.tracks[0].points.length - 1) {
