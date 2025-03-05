@@ -217,7 +217,7 @@ gpxParser.prototype.parse = function (gpxstring) {
 
                 //尝试获取速度
                 let gspeedElement = extensions.querySelector('gpxdata\\:speed,speed');
-                console.log(gspeedElement);
+                //console.log(gspeedElement);
                 if (gspeedElement) {
                     pt.speed = gspeedElement && gspeedElement.textContent ? parseFloat(gspeedElement.textContent) : 0;
                 }
@@ -226,7 +226,7 @@ gpxParser.prototype.parse = function (gpxstring) {
             trackpoints.push(pt);
         }
         //测试
-        console.log(trackpoints);
+        //console.log(trackpoints);
 
         track.distance = keepThis.calculDistance(trackpoints);//总距离，分段距离组
 
