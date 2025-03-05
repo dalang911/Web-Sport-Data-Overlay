@@ -3395,7 +3395,7 @@
                     previoustimeCurrent = new Date(gpx.tracks[0].points[i - 1].time).getTime() / 1000;
                 }
                 //速度
-                if (gpx.metadata && gpx.metadata.link && gpx.metadata.link.text === "COROS" && gpx.currentPoint && gpx.currentPoint.speed) {
+                if (gpx.metadata && gpx.metadata.link && gpx.metadata.link.text === "COROS" && currentPoint.speed) {
                     speed = currentPoint.speed * 3600 / 1000;
 
                 }else{//计算
