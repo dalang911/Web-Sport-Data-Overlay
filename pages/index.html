@@ -575,7 +575,7 @@
             filePath: "./i18n/",// 路径
             filePrefix: "i18n_",// 文件前缀
             fileSuffix: "",
-            forever: true,// 默认为 true  保存当前语言，设置为 false 后，每次刷新都为cn 
+            forever: true,// 默认为 true  保存当前语言，设置为 false 后，每次刷新都为cn
             get: true,// 缺省为 false 。当需要在其他js文件中使用 i18n.get(key),获取语言时开启，参考 index.js
             only: ['html', 'placeholder', 'title'], // 全局设置i18n-only，默认值：['value', 'html', 'placeholder', 'title']
             callback: function () {
@@ -1018,7 +1018,7 @@
 
                     let ele = trkpt_data[i].altitude;
                     if (typeof ele === 'number') {
-                        // 找出配速数据的最大值和最小值
+                        // 找出高程数据的最大值和最小值
                         eleMin = Math.min(eleMin, ele);
                         eleMax = Math.max(eleMax, ele);
                     } else {
@@ -3394,30 +3394,39 @@
                     distanceCurrent = gpx.tracks[0].distance.cumul[i - 1]; // 当前点的累积距离，索引减1
                     previoustimeCurrent = new Date(gpx.tracks[0].points[i - 1].time).getTime() / 1000;
                 }
-                // 计算前后点的速度
-                if (i > 0 && i < gpx.tracks[0].points.length - 1) {
-                    // 不是第一个点也不是最后一个点
-                    var previousPoint = gpx.tracks[0].points[i - 1];
-                    var nextPoint = gpx.tracks[0].points[i + 1];
-                    var timePrevious = new Date(previousPoint.time).getTime() / 1000;
-                    var timeNext = new Date(nextPoint.time).getTime() / 1000;
-                    var distancePrevious = i > 1 ? gpx.tracks[0].distance.cumul[i - 1] : 0; // 前一个点的累积距离，索引减2
-                    var distanceNext = gpx.tracks[0].distance.cumul[i + 1]; // 后一个点的累积距离，索引不变
-                    // 计算前后两个点的速度
-                    var speedPrevious = (distanceCurrent - distancePrevious) / (timeCurrent - timePrevious);
-                    var speedNext = (distanceNext - distanceCurrent) / (timeNext - timeCurrent);
-                    // 计算平均速度
-                    speed = (speedPrevious + speedNext) / 2;
-                } else if (i == 0) {
-                    // 第一个点
-                    speed = 0;
-                } else if (i == gpx.tracks[0].points.length - 1) {
-                    // 最后一个点，无法计算速度，因为后一个点已经被抛弃
-                    // 可以选择忽略或者设置速度为0
-                    speed = 0;
+                //速度
+                if (gpx.metadata.link.text == "COROS" && currentPoint.speed) { //判断数据是否为高驰
+                    speed = currentPoint.speed * 3600;//高驰原始值为每秒距离米
+                }else{//计算
+                    // 计算前后点的速度
+                    if (i > 0 && i < gpx.tracks[0].points.length - 1) {
+                        // 不是第一个点也不是最后一个点
+                        var previousPoint = gpx.tracks[0].points[i - 1];
+                        var nextPoint = gpx.tracks[0].points[i + 1];
+                        var timePrevious = new Date(previousPoint.time).getTime() / 1000;
+                        var timeNext = new Date(nextPoint.time).getTime() / 1000;
+                        var distancePrevious = i > 1 ? gpx.tracks[0].distance.cumul[i - 1] : 0; // 前一个点的累积距离，索引减2
+                        var distanceNext = gpx.tracks[0].distance.cumul[i + 1]; // 后一个点的累积距离，索引不变
+                        // 计算前后两个点的速度
+                        var speedPrevious = (distanceCurrent - distancePrevious) / (timeCurrent - timePrevious);
+                        var speedNext = (distanceNext - distanceCurrent) / (timeNext - timeCurrent);
+                        // 计算平均速度
+                        speed = (speedPrevious + speedNext) / 2;
+                    } else if (i == 0) {
+                        // 第一个点
+                        speed = 0;
+                    } else if (i == gpx.tracks[0].points.length - 1) {
+                        // 最后一个点，无法计算速度，因为后一个点已经被抛弃
+                        // 可以选择忽略或者设置速度为0
+                        speed = 0;
+                    }
+                    // 将速度转换为公里/小时
+                    speed = speed * 3.6;
                 }
-                // 将速度转换为公里/小时
-                speed = speed * 3.6;
+
+
+
+
                 // 累加步频并计数
                 cadenceSum += currentPoint.cad;
                 cadenceCount++;
