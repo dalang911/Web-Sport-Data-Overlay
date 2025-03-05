@@ -3380,6 +3380,10 @@
             // 初始化变量来存储步频的总和和计数
             let cadenceSum = 0;
             let cadenceCount = 0;
+
+            // 安全访问 metadata.link.text 并校验是否为 COROS
+            var isCoros = gpx.metadata?.link?.text === "COROS";
+
             for (let i = 0; i < gpx.tracks[0].points.length; i++) {
                 var currentPoint = gpx.tracks[0].points[i];
                 var sec = (new Date(currentPoint.time).getTime() - firstPointTime) / 1000;
@@ -3395,13 +3399,7 @@
                     previoustimeCurrent = new Date(gpx.tracks[0].points[i - 1].time).getTime() / 1000;
                 }
                 //速度
-                // 安全访问 metadata.link.text 并校验是否为 COROS
-                const isCoros = gpx.metadata?.link?.text === "COROS";
-
-                // 安全访问 currentPoint.speed 并校验是否有效数值
-                const hasSpeed = currentPoint?.speed != null && typeof currentPoint.speed === 'number' && currentPoint.speed > 0;
-
-                if (isCoros && hasSpeed) {
+                if (isCoros) {
                     speed = (currentPoint.speed * 3600) / 1000; // 米/秒 → 千米/小时
                 }else{//计算
                     // 计算前后点的速度
