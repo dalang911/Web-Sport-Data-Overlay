@@ -1,6 +1,6 @@
 /**
  * GPX file parser
- * 
+ *
  * @constructor
  */
 let gpxParser = function () {
@@ -15,7 +15,7 @@ let gpxParser = function () {
  * Parse a gpx formatted string to a GPXParser Object
  * 将GPX格式的字符串解析为GPXParser对象
  * @param {string} gpxstring - A GPX formatted String GPX格式的字符串
- * 
+ *
  * @return {gpxParser} A GPXParser object 一个GPXParser对象
  *
  */
@@ -214,12 +214,19 @@ gpxParser.prototype.parse = function (gpxstring) {
                 if (gdistanceElement) {
                     pt.distance = gdistanceElement && gdistanceElement.textContent ? parseFloat(gdistanceElement.textContent) : 0;
                 }
+
+                //尝试获取速度
+                let gspeedElement = extensions.querySelector('gpxdata\\:speed,speed');
+                console.log(gspeedElement);
+                if (gspeedElement) {
+                    pt.speed = gspeedElement && gspeedElement.textContent ? parseFloat(gspeedElement.textContent) : 0;
+                }
             }
 
             trackpoints.push(pt);
         }
         //测试
-        //console.log(trackpoints);
+        console.log(trackpoints);
 
         track.distance = keepThis.calculDistance(trackpoints);//总距离，分段距离组
 
@@ -233,10 +240,10 @@ gpxParser.prototype.parse = function (gpxstring) {
 
 /**
  * Get value from a XML DOM element 从XML DOM元素中获取值
- * 
+ *
  * @param  {Element} parent - Parent DOM Element 父DOM元素
  * @param  {string} needle - Name of the searched element 要查找的元素名称
- * 
+ *
  * @return {} The element value 元素的值
  */
 gpxParser.prototype.getElementValue = function (parent, needle) {
@@ -250,11 +257,11 @@ gpxParser.prototype.getElementValue = function (parent, needle) {
 
 /**
  * Search the value of a direct child XML DOM element 查找直接子XML DOM元素的值
- * 
+ *
  * @param  {Element} parent - Parent DOM Element 父DOM元素
  * @param  {string} needle - Name of the searched element 要搜索的元素名称
- * 
- * @return {} The element value 子元素的值 
+ *
+ * @return {} The element value 子元素的值
  */
 gpxParser.prototype.queryDirectSelector = function (parent, needle) {
 
@@ -277,9 +284,9 @@ gpxParser.prototype.queryDirectSelector = function (parent, needle) {
 
 /**
  * Calcul the Distance Object from an array of points 根据点数组计算距离对象
- * 
+ *
  * @param  {} points - An array of points with lat and lon properties 包含纬度和经度属性的点数组
- * 
+ *
  * @return {DistanceObject} An object with total distance and Cumulative distances 包含总距离和累积距离的对象
  */
 gpxParser.prototype.calculDistance = function (points) {
@@ -317,7 +324,7 @@ gpxParser.prototype.calculDistance = function (points) {
  * 计算两个具有纬度和经度属性的地理点之间的距离
  * @param  {} wpt1 - A geographic point with lat and lon properties 具有纬度和经度属性的地理点1
  * @param  {} wpt2 - A geographic point with lat and lon properties 具有纬度和经度属性的地理点2
- * 
+ *
  * @returns {float} The distance between the two points 两个点之间的距离
  */
 gpxParser.prototype.calcDistanceBetween = function (wpt1, wpt2) {
@@ -341,7 +348,7 @@ gpxParser.prototype.calcDistanceBetween = function (wpt1, wpt2) {
  * Generate Elevation Object from an array of points
  * 从点数组生成海拔对象
  * @param  {} points - An array of points with ele property 具有ele属性的点数组
- * 
+ *
  * @returns {ElevationObject} An object with negative and positive height difference and average, max and min altitude data 一个包含正负高度差和平均、最大、最小海拔数据的对象
  */
 gpxParser.prototype.calcElevation = function (points) {
@@ -387,11 +394,11 @@ gpxParser.prototype.calcElevation = function (points) {
 };
 
 /**
- * Generate slopes Object from an array of Points and an array of Cumulative distance 
+ * Generate slopes Object from an array of Points and an array of Cumulative distance
  * 从点数组和累积距离数组生成坡度对象
  * @param  {} points - An array of points with ele property 具有ele属性的点数组
  * @param  {} cumul - An array of cumulative distance 累积距离数组
- * 
+ *
  * @returns {SlopeObject} An array of slopes 坡度数组
  */
 gpxParser.prototype.calculSlope = function (points, cumul) {
