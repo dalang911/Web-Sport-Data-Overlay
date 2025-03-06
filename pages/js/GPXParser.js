@@ -159,6 +159,9 @@ gpxParser.prototype.parse = function (gpxstring) {
         //分段数据
         trackpoints = [];
         let trkpts = [].slice.call(trk.querySelectorAll('trkpt'));//
+
+        // 在循环外部声明prevTime变量，用于记录上一个时间
+        let prevTimeStr = null;
         //循环
         for (let idxIn in trkpts) {
             var trkpt = trkpts[idxIn];
@@ -175,10 +178,22 @@ gpxParser.prototype.parse = function (gpxstring) {
             }
             //当前时间
             let time = keepThis.getElementValue(trkpt, "time");
-            if (time == null) {
+            // 处理时间的代码修改如下：
+            let timeStr = keepThis.getElementValue(trkpt, "time").trim(); // 添加 .trim() 去除空格/换行符
+            //pt.originalTime = timeStr;
+
+            if (timeStr == null || timeStr === "") {
                 pt.time = null;
+                pt.timestamp = null;
             } else {
-                pt.time = new Date(time);
+                pt.time = new Date(timeStr);
+                pt.timestamp = pt.time.getTime();
+            }
+
+            // 修改判断条件为直接比较原始时间字符串
+            if (prevTimeStr != null && timeStr === prevTimeStr) {
+                console.log(`跳过重复时间点:`, timeStr);
+                continue;
             }
 
             // 获取 hr 和 cad 的值
@@ -224,6 +239,7 @@ gpxParser.prototype.parse = function (gpxstring) {
             }
 
             trackpoints.push(pt);
+            prevTimeStr = timeStr; // 更新为当前时间字符串
         }
         //测试
         //console.log(trackpoints);
@@ -301,8 +317,8 @@ gpxParser.prototype.calculDistance = function (points) {
                 totalDistance = trackpoints[i].distance;
                 cumulDistance[i] = trackpoints[i].distance;
             } else {//如果为空，取上一个值
-                totalDistance = trackpoints[i-1].distance;
-                cumulDistance[i] = trackpoints[i-1].distance;
+                totalDistance = trackpoints[i - 1].distance;
+                cumulDistance[i] = trackpoints[i - 1].distance;
             }
         }
         distance.total = totalDistance;
