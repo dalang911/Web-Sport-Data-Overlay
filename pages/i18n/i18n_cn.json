@@ -1,5 +1,6 @@
 {
     "title": "黑幕运动数据叠加",
+    "ver": "Beta 0.30",
     "readme": "无客户端、易用、快速、美观",
     "generate": "生成MP4视频",
     "sportsinfo": "运动信息",
@@ -21,7 +22,7 @@
     "route": "轨迹",
     "webroute": "web轨迹 +30ms",
     "Heart_pace_cadence": "心率配速踏频",
-    "leida": "雷达",  
+    "leida": "雷达",
     "speed": "速度",
     "pace": "配速",
     "cadence": "踏频",
@@ -94,5 +95,9 @@
     "Setup": "设置",
     "Setup-ps": "如果生成的视频跳帧、丢失，可以在这里进行调整，越小越快，越大越慢。速度快慢，由您的算力决定。",
     "Setup-label-ps": "帧生成间隔时间（15-200ms，步进5ms）:",
-    "map-Pitch": "倾斜0-80"
+    "map-Pitch": "倾斜0-80",
+    "weather": "天气",
+    "weather_icon": "天气图标",
+    "weather_icon": "天气图标",
+    "slope": "坡度"
 }

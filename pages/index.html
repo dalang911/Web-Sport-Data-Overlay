@@ -429,6 +429,10 @@
 								<div class="layui-anim" lay-active="appv_nowtime_pan"><img src="./images/m5.png"></div>
 								<div i18n="Elapsedtime">用时</div>
 							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="el_weather_pan"><img src="./images/m6.png"></div>
+								<div i18n="weather">天气</div>
+							</div>
 						</div>
 						<div>
 							<div class="layui-col-sm12">
@@ -447,10 +451,18 @@
 								<div class="layui-anim" lay-active="appv_ele18_pan"><img src="./images/l4.png"></div>
 								<div i18n="elevationwide">高程长</div>
 							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="el_slope_pan"><img src="./images/l5.png"></div>
+								<div i18n="slope">坡度</div>
+							</div>
 						</div>
 						<div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_map_pan"><img src="./images/w1.png"></div>
+								<div i18n="route">轨迹</div>
+							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="appv_map_a_pan"><img src="./images/w5.png"></div>
 								<div i18n="route">轨迹</div>
 							</div>
 							<div class="layui-col-sm12">
@@ -756,16 +768,16 @@
 										jsonInfoDiv.appendChild(unequalDiffDiv);
 									}
 									$('#jsonInfo').html($('#jsonInfo').html() + `
-                        <div class="layui-btn-group">
-                            <div type="button" style="display: inline-block;height: 30px;line-height: 30px;padding: 0 10px;font-size: 14px;vertical-align: middle;">${i18n.get('aspect_ratio')}</div>
-                            <button type="button" class="layui-btn layui-btn-sm" id="b169">${i18n.get('landscape')}</button>
-                            <button type="button" class="layui-btn layui-btn-sm" id="b916">${i18n.get('portrait')}</button>
-                        </div>
-                        <div class="layui-btn-group" style="margin-top: 10px;">
-        <button type="button" class="layui-btn layui-btn-sm" id="saveTemplate">保存模板</button>
-        <button type="button" class="layui-btn layui-btn-sm" id="loadTemplate">读取配置</button>
-    </div>
-                        `);
+										<div class="layui-btn-group">
+											<div type="button" style="display: inline-block;height: 30px;line-height: 30px;padding: 0 10px;font-size: 14px;vertical-align: middle;">${i18n.get('aspect_ratio')}</div>
+											<button type="button" class="layui-btn layui-btn-sm" id="b169">${i18n.get('landscape')}</button>
+											<button type="button" class="layui-btn layui-btn-sm" id="b916">${i18n.get('portrait')}</button>
+										</div>
+										<div class="layui-btn-group" style="margin-top: 10px;">
+											<button type="button" class="layui-btn layui-btn-sm" id="saveTemplate">保存模板</button>
+											<button type="button" class="layui-btn layui-btn-sm" id="loadTemplate">读取配置</button>
+										</div>
+                        			`);
 
 									// 为ID为'b169'的按钮添加点击事件
 									$('#b169').click(function () {
@@ -908,14 +920,16 @@
 			hr_zone_data = null;
 
 			max_distance_in_km = 0;//地图总长度
-			map_points = [];//地图xy变量
-			heart_points = [];//心率变量
-			cadences_points = [];//步频变量
-			paces_points = [];//配速变量
-			ele_points = [];//高程变量
+			map_points = [];//地图xy数据
+			heart_points = [];//心率数据
+			cadences_points = [];//步频数据
+			paces_points = [];//配速数据
+			ele_points = [];//高程数据
 			ele18_points = [];//高程变量1:8
+			slopes_points = [];//坡度数据
 
 			if (data.status === 0) {
+				//定义数据
 				json_data = data.data;
 				summary_data = data.data.summary;
 				motion_data = data.data.motion;
@@ -925,6 +939,58 @@
 				hr_zone_data = data.data.hr_zone;
 				//总长度
 				max_distance_in_km = Math.round(trkpt_data[trkpt_data.length - 1].distance / 1000 * 100) / 100;
+
+				//计算坡度，坡度（正切值） = (高程差/水平距离)，slope*容器宽度为高度
+				data.data.trkpt.forEach((point, index) => {
+					if (index === 0 || index === data.data.trkpt.length - 1) {
+						point.slope = 0;
+						return;
+					}
+
+					// 获取前一个点和后一个点
+					const prevPoint = data.data.trkpt[index - 1];
+					const nextPoint = data.data.trkpt[index + 1];
+
+					// 计算前后总距离差，（i-1 → i+1）
+					const totalDistance = nextPoint.distance - prevPoint.distance;
+
+					if (totalDistance === 0) {
+						point.slope = 0;
+						return;
+					}
+
+					// 计算前后总高程差
+					const totalAltitude = nextPoint.altitude - prevPoint.altitude;
+
+					// 当前点的坡度 = 总高程差 / 总距离差保留两位小数
+					point.slope = Math.round((totalAltitude / totalDistance) * 100) / 100;
+				});
+
+				//计算方位角
+				data.data.trkpt.forEach((point, index) => {
+					if (index === data.data.trkpt.length - 1) {
+						// 最后一个点：继承前一个点的方位角
+						point.azimuth = data.data.trkpt[index - 1].azimuth;
+						return;
+					}
+
+					const nextPoint = data.data.trkpt[index + 1];
+					const lat1 = point.position_lat * Math.PI / 180;
+					const lon1 = point.position_long * Math.PI / 180;
+					const lat2 = nextPoint.position_lat * Math.PI / 180;
+					const lon2 = nextPoint.position_long * Math.PI / 180;
+
+					// 计算经度差
+					const deltaLambda = lon2 - lon1;
+
+					// 球面三角学公式计算方位角（弧度）
+					const y = Math.sin(deltaLambda) * Math.cos(lat2);
+					const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLambda);
+					const thetaRad = Math.atan2(y, x);
+
+					// 转换为整数度数（0~360）
+					point.azimuth = Math.round((thetaRad * 180 / Math.PI + 360) % 360);
+				});
 
 				//地图xy变量
 				// 先获取经纬度数据的范围
@@ -1548,6 +1614,68 @@
 				},
 			})
 
+			//地图方向角
+			appv_map_a_pan = new Box({
+				id: 'appv_map_a_pan',
+				x: appvWidth - 620,//左上角位置
+				y: 200,//左上角位置
+				width: 600,
+				height: 600,
+				lockRatio: true,
+				editable: true,
+				hitBox: true,
+				cornerRadius: 4,//圆角
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: map_points,  // [x,y, x,y ...]
+						cornerRadius: 4,
+						strokeWidth: 4,
+						stroke: '#FFFF00',
+						strokeCap: 'round'
+					},
+					{
+						name: 'now_map',
+						tag: 'Line',
+						lockRatio: true,
+						points: [],  // [x,y, x,y ...]
+						cornerRadius: 6,
+						strokeWidth: 6,
+						stroke: '#FF8C00',
+						strokeCap: 'round'
+					},
+					{
+						name: 'now_point',
+						tag: 'Polygon',
+						lockRatio: true,
+						points: [8, 0, 0, 16, 8, 12, 16, 16, 8, 0],
+						around: 'center',
+						fill: "#FF6347"
+					},
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "appv_map_a_pan",
+								"set": [
+									{ "name": `${i18n.get('route')}`, "url": appv_map_a_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `${i18n.get('Background_route_thickness')}`, "url": "appv_map_a_pan.children[0].strokeWidth", "value": appv_map_a_pan.children[0].strokeWidth, "type": "number", "tools": true },
+									{ "name": `${i18n.get('Background_route_color')}`, "url": "appv_map_a_pan.children[0].stroke", "value": appv_map_a_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `${i18n.get('progress_route_thickness')}`, "url": "appv_map_a_pan.children[1].strokeWidth", "value": appv_map_a_pan.children[1].strokeWidth, "type": "number", "tools": true },
+									{ "name": `${i18n.get('progress_route_color')}`, "url": "appv_map_a_pan.children[1].stroke", "value": appv_map_a_pan.children[1].stroke, "type": "color", "tools": true },
+									{ "name": `${i18n.get('Current_position_color')}`, "url": "appv_map_a_pan.children[2].fill", "value": appv_map_a_pan.children[2].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
 
 			//web地图
 			web_map_pan = new Box({
@@ -1594,8 +1722,6 @@
 				},
 			})
 
-
-
 			//miniweb地图
 			web_minimap_pan = new Box({
 				id: 'web_minimap_pan',
@@ -1640,8 +1766,6 @@
 					],
 				},
 			})
-
-
 
 			//距离框
 			appv_distance_pan = new Box({
@@ -2805,6 +2929,155 @@
 				},
 			})
 
+			//坡度
+			el_slope_pan = new Box({
+				id: 'el_slope_pan',
+				x: 100,
+				y: 100,
+				width: 100,
+				height: 100,
+				lockRatio: true,
+				editable: true,
+				//fill: '#CCEEFF',
+				cornerRadius: 4,//圆角
+				hitBox: true,
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Polygon',
+						resizeFontSize: true,
+						points: [0, 60, 0, 70, 100, 70, 100, 60, 100, 60],
+						fill: '#FF4500'
+					},
+					{
+						tag: 'Text',
+						y: 0,
+						x: 50,
+						resizeFontSize: true,
+						fontSize: 32,
+						fontWeight: 'black',
+						text: `0°`,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+					}
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "el_slope_pan",
+								"set": [
+									{ "name": `${i18n.get('cadence')}`, "url": el_slope_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `${i18n.get('Text_color')}`, "url": "el_slope_pan.children[1].fill", "value": el_slope_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `${i18n.get('Graphic_color')}`, "url": "el_slope_pan.children[0].fill", "value": el_slope_pan.children[1].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
+			//天气
+			el_weather_pan = new Box({
+				id: 'el_weather_pan',
+				x: appvWidth - 300,
+				y: appvHeight - 650,
+				width: 200,
+				height: 230,
+				lockRatio: true,
+				editable: true,
+				hitBox: true,
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Rect',
+						width: 200,
+						height: 230,
+						fill: {
+							type: 'linear',
+							from: 'top-left',
+							to: 'bottom-right',
+							stops: [{ offset: 0, color: '#A09EF5' }, { offset: 1, color: '#112950' }]
+						},
+						cornerRadius: 20
+					},
+					{
+						tag: 'Text',
+						y: 10,
+						x: 10,
+						resizeFontSize: true,
+						fontSize: 26,
+						fontWeight: 'black',
+						text: `ShangHai`,
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Text',
+						y: 138,
+						x: 100,
+						resizeFontSize: true,
+						fontSize: 30,
+						fontWeight: 'black',
+						text: `18~25`,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Text',
+						y: 190,
+						x: 100,
+						resizeFontSize: true,
+						fontSize: 24,
+						fontWeight: 'black',
+						text: `2025-12-12`,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Rect',
+						x: 100,
+						y: 100,
+						scale: 0.1,
+						around: 'center',
+						path: weather_sunny_icon,
+						fill: '#FFFFFF'
+					}
+
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "el_weather_pan",
+								"set": [
+									{ "name": `${i18n.get('weather')}`, "url": el_weather_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `${i18n.get('Graphic_backgrounds')}1`, "url": "el_weather_pan.children[0].fill.stops[0].color", "value": el_weather_pan.children[0].fill.stops[0].color, "type": "color2", "tools": true },
+									{ "name": `${i18n.get('Graphic_backgrounds')}2`, "url": "el_weather_pan.children[0].fill.stops[1].color", "value": el_weather_pan.children[0].fill.stops[1].color, "type": "color2", "tools": true },
+									{ "name": `${i18n.get('Text_content')}1`, "url": "el_weather_pan.children[1].text", "value": el_weather_pan.children[1].text, "type": "text", "tools": true },
+									{ "name": `${i18n.get('Text_color')}1`, "url": "el_weather_pan.children[1].fill", "value": el_weather_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `${i18n.get('Text_content')}2`, "url": "el_weather_pan.children[2].text", "value": el_weather_pan.children[2].text, "type": "text", "tools": true },
+									{ "name": `${i18n.get('Text_color')}2`, "url": "el_weather_pan.children[2].fill", "value": el_weather_pan.children[2].fill, "type": "color", "tools": true },
+									{ "name": `${i18n.get('Text_content')}3`, "url": "el_weather_pan.children[3].text", "value": el_weather_pan.children[3].text, "type": "text", "tools": true },
+									{ "name": `${i18n.get('Text_color')}3`, "url": "el_weather_pan.children[3].fill", "value": el_weather_pan.children[3].fill, "type": "color", "tools": true },
+									{ "name": `${i18n.get('weather_icon')}`, "url": "el_weather_pan.children[4].path", "value": el_weather_pan.children[4].path, "type": "weather", "tools": true },
+									{ "name": `${i18n.get('icon_color')}`, "url": "el_weather_pan.children[4].fill", "value": el_weather_pan.children[4].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
+
 
 			//默认画布容器
 			frame = new Frame({
@@ -2864,6 +3137,9 @@
 			frame.add(el_leida_pan);
 
 			frame.add(web_map_pan);
+			frame.add(el_slope_pan);
+
+			frame.add(el_weather_pan);
 		}
 
 		//生成视频
@@ -3050,6 +3326,37 @@
 						inputDiv.appendChild(colorInput);
 						break;
 
+					case 'color2':
+						const colorInput2 = document.createElement('input');
+						colorInput2.type = 'color';
+						colorInput2.value = item.value;
+						colorInput2.className = 'layui-input';
+						colorInput2.onchange = function () {
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							// 解析路径并生成刷新逻辑
+							const pathSegments = item.url.split('.');
+							const baseElementName = pathSegments[0];
+							if (!baseElementName) return;
+
+							// 动态创建执行函数
+							const refreshCode = `
+								(function() {
+									const element = window.${baseElementName};
+									if (element && typeof element.resizeWidth === 'function') {
+										element.resizeWidth(element.width - 1);
+										setTimeout(() => {
+											element.resizeWidth(element.width + 1);
+										}, 10);
+									}
+								})();
+							`;
+
+							new Function(refreshCode)();
+
+						};
+						inputDiv.appendChild(colorInput2);
+						break;
+
 					case 'funcolor':
 						const funcolorInput = document.createElement('input');
 						funcolorInput.type = 'color';
@@ -3077,6 +3384,7 @@
 						};
 						inputDiv.appendChild(funnumberInput);
 						break;
+
 					case 'text':
 						const textInput = document.createElement('input'); // 创建文本输入框
 						textInput.type = 'text'; // 设置类型为文本
@@ -3087,6 +3395,60 @@
 						};
 						inputDiv.appendChild(textInput);
 						break;
+
+					case 'weather':
+						// 创建按钮容器
+						const buttonGroup = document.createElement('div');
+						buttonGroup.className = 'layui-btn-group layui-row layui-col-space1';
+
+						// 天气配置数据
+						const weatherTypes = [
+							{ class: 'weather_sunny_icon', text: 'sunny' },
+							{ class: 'weather_cloudy_icon', text: 'cloudy' },
+							{ class: 'weather_rain_icon', text: 'rain' },
+							{ class: 'weather_fog_icon', text: 'fog' },
+							{ class: 'weather_windy_icon', text: 'windy' },
+							{ class: 'weather_snow_icon', text: 'snow' },
+							{ class: 'weather_night_icon', text: 'night' }
+						];
+
+						// 内部函数直接访问外部变量
+						function updateIcon(index) {
+							const icon = weatherTypes[index];
+							el_weather_pan.children[4].path = window[icon.class];
+						}
+
+						// 生成按钮并绑定事件
+						weatherTypes.forEach((type, i) => {
+							const btn = document.createElement('button');
+							btn.className = `layui-btn layui-btn-xs ${type.class} layui-margin-1`;
+							btn.textContent = type.text;
+							btn.onclick = () => {
+								updateIcon(i);
+								document.querySelectorAll('.weather-btn').forEach(b => b.classList.remove('active'));
+								btn.classList.add('active');
+							};
+							buttonGroup.appendChild(btn);
+						});
+
+						inputDiv.appendChild(buttonGroup);
+						// 添加底部链接
+						const linkContainer = document.createElement('div');
+						linkContainer.className = 'layui-row layui-col-space1';
+
+						const weatherLink = document.createElement('a');
+						weatherLink.className = 'layui-btn layui-btn-xs active';
+						weatherLink.href = 'https://meteostat.net/';
+						weatherLink.textContent = 'Link meteostat.net';
+						weatherLink.target = '_blank'; // 新标签页打开
+
+						linkContainer.appendChild(weatherLink);
+						inputDiv.appendChild(linkContainer);
+
+						break;
+
+
+
 				}
 
 				div.appendChild(inputDiv);
@@ -3138,9 +3500,10 @@
 			l_distance_pan.children[6].x = jdtcd + 80;
 			l_distance_pan.children[7].x = jdtcd + 90;
 
-			//设置高程
-			appv_ele18_pan.children[1].x = ele18_points[2 * currentFrame] - 6;
-			appv_ele18_pan.children[1].y = ele18_points[2 * currentFrame + 1] - 6;
+			//设置高程图型坐标
+			let offsetXY = appv_ele18_pan.children[1].width / 2;
+			appv_ele18_pan.children[1].x = ele18_points[2 * currentFrame] - offsetXY;
+			appv_ele18_pan.children[1].y = ele18_points[2 * currentFrame + 1] - offsetXY;
 
 			appv_ele_pan.children[1].x = ele_points[2 * currentFrame];
 
@@ -3164,6 +3527,7 @@
 
 			}
 			appv_map_pan.children[1].points = now_points;
+			appv_map_a_pan.children[1].points = now_points;
 
 
 
@@ -3185,6 +3549,10 @@
 			//画当前点
 			appv_map_pan.children[2].x = map_points[currentFrame * 2] - 8;
 			appv_map_pan.children[2].y = map_points[currentFrame * 2 + 1] - 8;
+			appv_map_a_pan.children[2].x = map_points[currentFrame * 2];
+			appv_map_a_pan.children[2].y = map_points[currentFrame * 2 + 1];
+			appv_map_a_pan.children[2].rotation = trkpt_data[currentFrame].azimuth;
+
 			//当前经纬度
 			TO_gps_pan.children[0].text = `${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_lat)}\n${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_long)}`;
 
@@ -3222,6 +3590,13 @@
 			TO_heart_pan.children[0].text = `${count} bpm`;
 			TO_cadence_pan.children[0].text = `${cadence} steps/min`;
 			TO_step_pan.children[0].text = `${step_length} m`;
+
+			// 根据奇偶性设置心率图标缩放比例
+			if (currentFrame % 2 === 0) {
+				TO_heart_pan.children[1].scale = 0.038; // 偶数帧缩放值
+			} else {
+				TO_heart_pan.children[1].scale = 0.04;  // 奇数帧缩放值
+			}
 
 			//心率仪表盘
 			el_heart_pan.children[0].text = `${count}`;
@@ -3289,6 +3664,28 @@
 
 			//当前日期
 			text_day_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp, 1);
+
+			//画坡度
+			//const slope_points = [0, 60, 0, 70, 100, 70, 100, 60, 100, 60];
+			var slope_points = el_slope_pan.children[0].points;
+			slope_points[1] = slope_points[7];
+			slope_points[9] = slope_points[7];
+			const slopeValue = parseFloat(trkpt_data[currentFrame].slope) * slope_points[6];
+			const slopeValuestr = parseFloat(trkpt_data[currentFrame].slope) * 100;
+			// 创建副本以避免修改原始数组
+			const newSlopePoints = slope_points.slice();
+			// 根据坡度调整坐标
+			if (slopeValue > 0) {
+				// 修改第8位（索引7）的y值：向下移动
+				newSlopePoints[9] -= slopeValue;
+			} else if (slopeValue < 0) {
+				// 修改第2位（索引1）的y值：向上移动
+				newSlopePoints[1] += slopeValue;
+			}
+			//更新points 属性
+			el_slope_pan.children[1].text = slopeValuestr.toFixed(0) + "°";
+			el_slope_pan.children[0].points = newSlopePoints;
+
 
 			return true;
 		}
@@ -4485,6 +4882,8 @@
 			// 简单判断是否为时间戳格式（如 "2023-10-05 14:30:00"）
 			return /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(title);
 		}
+
+		//
 
 
 
