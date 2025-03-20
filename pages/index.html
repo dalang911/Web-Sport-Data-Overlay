@@ -337,8 +337,7 @@
 		<li class="layui-nav-item" i18n="readme"></li>
 		<div class="ws-header-menu">
 			<li class="layui-nav-item" style="position: absolute;right: 240px;top: 0;">
-				<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="setup"
-					i18n="generate">生成MP4视频</button>
+				<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="setup" i18n="generate">生成MP4视频</button>
 			</li>
 
 			<li class="layui-nav-item" style="position: absolute;right: 80px;top: 0px;color: #000;width: 100px;">
@@ -3144,7 +3143,7 @@
 		}
 
 		//生成视频
-		function generate () {
+		function generate() {
 			// 假设bl是倍率变量
 			var bl = 2;
 			// 构造器，和音视频编码对象
@@ -3778,9 +3777,9 @@
 
 			for (let i = 0; i < gpx.tracks[0].points.length; i++) {
 				var currentPoint = gpx.tracks[0].points[i];
-				var sec = (new Date(currentPoint.time).getTime() - firstPointTime) / 1000;
+				var sec = Math.floor((new Date(currentPoint.time).getTime() - firstPointTime) / 1000);
 				//console.log(sec);
-				var timeCurrent = new Date(currentPoint.time).getTime() / 1000;
+				var timeCurrent = Math.floor(new Date(currentPoint.time).getTime() / 1000);//舍弃毫秒，取整
 				var previoustimeCurrent = 0;
 				let distanceCurrent = 0;
 				let speed = 0;
@@ -3848,12 +3847,12 @@
 					sec: sec,
 					position_lat: currentPoint.lat,
 					position_long: currentPoint.lon,
-					altitude: currentPoint.ele,
+					altitude: normalValue(currentPoint.ele),
 					is_pause: false,
 					speed: parseFloat(speed.toFixed(2)), // 更新速度
 					distance: parseFloat(distanceCurrent.toFixed(2)),
-					heart_rate: currentPoint.hr,
-					cadence: cadenceCorrected,
+					heart_rate: normalValue(currentPoint.hr),
+					cadence: normalValue(cadenceCorrected),
 					step_length: parseFloat(stepLength.toFixed(2))
 				};
 				rq.data.trkpt.push(newPoint);//分段数据
@@ -3938,9 +3937,8 @@
 			let cadenceCount = 0;
 			for (let i = 0; i < tcx.tracks[0].points.length; i++) {
 				var currentPoint = tcx.tracks[0].points[i];
-				var sec = (new Date(currentPoint.time).getTime() - firstPointTime) / 1000;
-				//console.log(sec);
-				var timeCurrent = new Date(currentPoint.time).getTime() / 1000;
+				var sec = Math.floor((new Date(currentPoint.time).getTime() - firstPointTime) / 1000);
+				var timeCurrent = Math.floor(new Date(currentPoint.time).getTime() / 1000);//舍弃毫秒，取整
 				var previoustimeCurrent = 0;
 				let distanceCurrent = 0;
 				let speed = 0;
@@ -3998,12 +3996,12 @@
 					sec: sec,
 					position_lat: currentPoint.lat,
 					position_long: currentPoint.lon,
-					altitude: currentPoint.ele,
+					altitude: normalValue(currentPoint.ele),
 					is_pause: false,
 					speed: parseFloat(speed.toFixed(2)), // 更新速度
 					distance: parseFloat(distanceCurrent.toFixed(2)),
-					heart_rate: currentPoint.hr,
-					cadence: cadenceCorrected,
+					heart_rate: normalValue(currentPoint.hr),
+					cadence: normalValue(cadenceCorrected),
 					step_length: parseFloat(stepLength.toFixed(2))
 				};
 				rq.data.trkpt.push(newPoint);//分段数据
@@ -4381,6 +4379,17 @@
 			}
 		}
 
+		// 检验值是否合规、存在
+		const normalValue = (value) => {
+			// 1. 过滤 null/undefined
+			if (value === null || value === undefined) return 0;
+			// 2. 过滤非数值类型（包括字符串、对象等）
+			if (typeof value !== "number") return 0;
+			// 3. 过滤无效数值（NaN、负数、无穷大等）
+			if (!Number.isFinite(value) || value < 0) return 0;
+			// 4. 有效数值
+			return value;
+		};
 	</script>
 	<script>
 		layui.use(function () {
@@ -4598,8 +4607,8 @@
 			startFrame = start;
 			endFrame = end;
 			// 更新时间
-			document.getElementById('startFrameInput_time').textContent  = `time:`+secondsToHHMMSS(start);
-			document.getElementById('endFrameInput_time').textContent  = `time:`+secondsToHHMMSS(end);
+			document.getElementById('startFrameInput_time').textContent = `time:` + secondsToHHMMSS(start);
+			document.getElementById('endFrameInput_time').textContent = `time:` + secondsToHHMMSS(end);
 		}
 
 		// 辅助函数：显示错误信息
