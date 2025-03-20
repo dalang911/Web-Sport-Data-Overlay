@@ -98,5 +98,6 @@
     "map-Pitch": "Pitch Angle 0-80°",
     "weather": "Weather",
     "weather_icon": "Weather Icon",
-    "slope": "slope"
+    "slope": "slope",
+    "generate_setup_ps": "Segmented Rendering:<br>Below, select the start and end timeframes to render the desired sections. For longer videos, a recommended interval of 5000 frames is safer. If your PC has strong performance, you can also render the entire video directly."
 }

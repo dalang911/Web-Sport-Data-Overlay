@@ -332,20 +332,15 @@
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.30 .新增：坡度、带箭头的轨迹、心跳动画、天气组件（手动）。
+			Beta 0.31 .新增：分段导出，适用于长视频分割。
 		</li>
 		<li class="layui-nav-item" i18n="readme"></li>
 		<div class="ws-header-menu">
 			<li class="layui-nav-item" style="position: absolute;right: 240px;top: 0;">
-				<button id="generate" class="layui-btn layui-btn-xs layui-btn-normal" lay-on="onmp4-page"
+				<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="setup"
 					i18n="generate">生成MP4视频</button>
+			</li>
 
-			</li>
-			<li class="layui-nav-item"
-				style="position: absolute;right: 200px;top: 0px;color: #000;width: 30px;text-align: center;"
-				lay-on="setup">
-				<i class="layui-icon layui-icon-set-fill" style="font-size: 18px; color: #000000;"></i>
-			</li>
 			<li class="layui-nav-item" style="position: absolute;right: 80px;top: 0px;color: #000;width: 100px;">
 				<a href="javascript:;" style="color: #000000;"><i class="layui-icon layui-icon-website"
 						style="font-size: 18px; color: #000000;"></i><span id="language">中文</span></a>
@@ -572,6 +567,12 @@
 	<script>
 		//祯时间间隔，默认20ms，根据机器性能酌情增减，20-200。
 		var frame_delay = 35;
+		//开始祯
+		var startFrame = 0;
+		//结束祯
+		var endFrame = 0;
+		//最大祯
+		var maxFrame = 0;
 
 		//检测是否支持视频编码webcodecs
 		if ('VideoEncoder' in window) {
@@ -674,6 +675,7 @@
 							console.log("成功解析FIT文件，并转换为JSON，解析后的数据如下：", data); // 输出解析后的完整数据用于调试
 							trkptLength = data['data']['trkpt'].length - 1;
 
+
 						} else if (file.name.endsWith('.gpx')) {
 							// 文件是GPX格式，调用gpxToJson函数
 							data = gpxToJson(e.target.result);
@@ -696,13 +698,11 @@
 						}
 
 						if (data && data['status'] === 0) {
-
 							//对trkpt进行插值
 							interpolationPoints(data);
 
 							//更新地图数据
 							set_leafletmap_latlngs(data);
-
 
 							const jsonInfoDiv = document.getElementById('jsonInfo');
 							jsonInfoDiv.innerHTML = ''; // 每次重新设置前先清空内容
@@ -936,6 +936,7 @@
 				trkpt_data = data.data.trkpt;
 				trkpt_length = trkpt_data.length;
 				maxFrame = trkpt_data.length;
+				endFrame = trkpt_data.length;
 				hr_zone_data = data.data.hr_zone;
 				//总长度
 				max_distance_in_km = Math.round(trkpt_data[trkpt_data.length - 1].distance / 1000 * 100) / 100;
@@ -3143,7 +3144,7 @@
 		}
 
 		//生成视频
-		generate.onclick = async function () {
+		function generate () {
 			// 假设bl是倍率变量
 			var bl = 2;
 			// 构造器，和音视频编码对象
@@ -3190,7 +3191,7 @@
 				bitrate: 10e6//质量
 			});
 			var frameCounter = 0;//祯计数器
-			var currentFrame = 0;//运动数据长度计数器
+			var currentFrame = startFrame;//开始点运动数据长度计数器
 			//currentFrame = maxFrame - 5;
 			//制作视频，插入帧
 			function updateFrame() {
@@ -3203,7 +3204,7 @@
 				//if (currentFrame < 1000) {maxFrame
 				//
 
-				if (currentFrame < maxFrame) {
+				if (currentFrame < endFrame) {
 
 					if (upFrame(currentFrame)) {
 						frameTocanv();
@@ -3228,11 +3229,11 @@
 
 				} else {
 					// 最后一帧
-					upFrame(maxFrame - 1);
-					console.log(maxFrame - 1);
+					upFrame(endFrame - 1);
+					console.log(endFrame - 1);
 					frameTocanv();
 					let frame = new VideoFrame(canvas, {
-						timestamp: (trkpt_data[maxFrame - 1].sec + 1) * 1e6
+						timestamp: (trkpt_data[endFrame - 1].sec + 1) * 1e6
 					});
 					videoEncoder.encode(frame, {
 						keyFrame: true //整秒关键祯 true
@@ -3479,7 +3480,7 @@
 		function upFrame(currentFrame) {
 
 			// 给view_info的文本赋值，转换进度
-			$('#view_info').html(currentFrame.toString() + '/' + maxFrame.toString());
+			$('#view_info').html(currentFrame.toString() + '/' + endFrame.toString() + ' MAX:' + maxFrame.toString());
 
 			//开始填充
 			// 获取trkpt_data数组中最后一个元素的distance属性值，除以1000后进行四舍五入保留两位小数
@@ -4096,6 +4097,8 @@
 				}
 
 			});
+			//console.log(fit);
+			//debugger;
 
 
 			//第一个时间
@@ -4312,44 +4315,70 @@
 
 		//插值到1秒
 		function interpolationPoints(data) {
-			if (!data.data || !data.data.trkpt) {
-				return;
-			}
+			if (!data?.data?.trkpt || data.data.trkpt.length < 2) return;
 
-			let trkpt = data.data.trkpt;
+			let trkpt = [...data.data.trkpt]; // 使用副本避免修改原始数据
 			let i = 0;
+
 			while (i < trkpt.length - 1) {
-				let current = trkpt[i];
-				let nextPoint = trkpt[i + 1];
+				const current = trkpt[i];
+				const nextPoint = trkpt[i + 1];
 
-				if (nextPoint.sec !== current.sec + 1) {
-					let targetSec = current.sec + 1;
-					let interpolatedPoint = {};
+				// 处理时间戳相同或逆序的情况
+				if (nextPoint.sec <= current.sec) {
+					console.warn("跳过无效时间戳的点对", current, nextPoint);
+					i++;
+					continue;
+				}
 
-					["timestamp", "position_lat", "position_long", "altitude", "speed", "distance", "heart_rate", "cadence", "step_length"].forEach(key => {
+				const timeDiff = nextPoint.sec - current.sec;
+				if (timeDiff === 1) {
+					i++;
+					continue;
+				}
+
+				// 插入多个中间点（优化大时间差）
+				const steps = timeDiff - 1;
+				const stepSize = timeDiff / (steps + 1);
+
+				for (let j = 1; j <= steps; j++) {
+					const interpolatedPoint = { sec: current.sec + j };
+					Object.keys(current).forEach(key => {
 						if (current.hasOwnProperty(key) && nextPoint.hasOwnProperty(key)) {
-							let interpolatedValue = current[key] + (nextPoint[key] - current[key]) * (targetSec - current.sec) / (nextPoint.sec - current.sec);
-
-							// 根据属性类型进行格式化
-							if (key === "cadence" || key === "heart_rate") {
-								interpolatedPoint[key] = Math.round(interpolatedValue); // 取整
-							} else if (["distance", "speed", "step_length", "altitude"].includes(key)) {
-								interpolatedPoint[key] = parseFloat(interpolatedValue.toFixed(2)); // 保留两位小数
-							} else if (["position_lat", "position_long"].includes(key)) {
-								interpolatedPoint[key] = parseFloat(interpolatedValue.toFixed(6)); // 保留6位小数
-							} else {
-								interpolatedPoint[key] = interpolatedValue;
-							}
+							// 根据属性类型格式化值
+							const value = current[key] + (nextPoint[key] - current[key]) * (j / (steps + 1));
+							interpolatedPoint[key] = formatValue(key, value);
 						}
 					});
-
-					interpolatedPoint.sec = targetSec;
-					trkpt.splice(i + 1, 0, interpolatedPoint);
+					trkpt.splice(i + j, 0, interpolatedPoint);
 				}
-				i++;
+
+				// 跳过已处理的点
+				i += steps + 1;
 			}
 
 			data.data.trkpt = trkpt;
+		}
+
+		// 格式化辅助函数
+		function formatValue(key, value) {
+			if (typeof value !== 'number') return value;
+
+			switch (key) {
+				case 'cadence':
+				case 'heart_rate':
+					return Math.round(value);
+				case 'distance':
+				case 'speed':
+				case 'step_length':
+				case 'altitude':
+					return parseFloat(value.toFixed(2));
+				case 'position_lat':
+				case 'position_long':
+					return parseFloat(value.toFixed(6));
+				default:
+					return value;
+			}
 		}
 
 	</script>
@@ -4483,23 +4512,135 @@
 					// 页面层
 					layer.open({
 						type: 1,
-						area: ['420px', '240px'], // 宽高
+						area: ['420px', '400px'], // 增加高度
 						title: `${i18n.get('Setup')}`,
 						content: `
-                            <div style="padding: 11px;">
-                                <!-- 数字选择器 -->
-                                ${i18n.get('Setup-ps')}<br>
-                                <label for="frameDelayInput">${i18n.get('Setup-label-ps')}</label>
-                                <input type="number" id="frameDelayInput" name="frameDelay"
-                                    min="15" max="200" step="5" value="20"
-                                    onchange="updateFrameDelay(this.value)">
-                            </div>
-                        `
+							<div style="padding: 11px;">
+								<!-- 原有数字选择器 -->
+								${i18n.get('Setup-ps')}<br>
+								<label for="frameDelayInput">${i18n.get('Setup-label-ps')}</label>
+								<input type="number" id="frameDelayInput" name="frameDelay"
+									min="15" max="200" step="5" value="20"
+									onchange="updateFrameDelay(this.value)">
+
+								<!-- 新增说明区域 -->
+								<div style="margin-bottom: 15px;margin-top: 15px;">${i18n.get('generate_setup_ps')}</div>
+								<!-- 新增帧数控制区域 -->
+								<div style="margin-top: 15px;">
+									<div class="frame-control">
+										<label>Start</label>
+										<input type="number" id="startFrameInput"
+											min="0" max="${maxFrame}"
+											value="${startFrame}"
+											onchange="validateFrames()">
+											<span id="startFrameInput_time">time:${secondsToHHMMSS(startFrame)}</span>
+									</div>
+									<div class="frame-control">
+										<label>End</label>
+										<input type="number" id="endFrameInput"
+											min="1" max="${maxFrame}"
+											value="${endFrame}"
+											onchange="validateFrames()">
+											<span id="endFrameInput_time">time:${secondsToHHMMSS(endFrame)}</span>
+									</div>
+									<div class="frame-control">
+										<label>Max</label>
+										<span id="maxFrameDisplay">${maxFrame}</span>
+										<span id="maxFrameDisplay_time">、 Total Time:${secondsToHHMMSS(maxFrame)}</span>
+									</div>
+								</div>
+								<div style="margin-bottom: 15px;margin-top: 15px;">
+									<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="onmp4-page" i18n="generate" onclick="generate()">${i18n.get('generate')}</button>
+								</div>
+							</div>
+						`,
+						success: function (layero, index) {
+							// 初始化输入框
+							frameDelayInput.value = frame_delay;
+							updateFrameMax();
+						}
 					});
-					frameDelayInput.value = frame_delay;
 				},
 			})
 		});
+
+		// 更新帧延迟处理
+		function updateFrameDelay(value) {
+			frame_delay = parseInt(value);
+			// 这里可以添加其他相关逻辑
+		}
+
+		// 帧数验证逻辑
+		function validateFrames() {
+			const start = parseInt(document.getElementById('startFrameInput').value);
+			const end = parseInt(document.getElementById('endFrameInput').value);
+
+			// 起始帧验证
+			if (start < 0) {
+				showError(`start < 0`);
+				document.getElementById('startFrameInput').value = 1;
+				return;
+			}
+
+			// 结束帧验证
+			if (end <= start) {
+				showError(`end <= start`);
+				document.getElementById('endFrameInput').value = start + 1;
+			}
+
+			// 总帧数验证
+			if (end > maxFrame) {
+				showError(`end > maxFrame`);
+				document.getElementById('endFrameInput').value = maxFrame;
+			}
+
+			// 更新全局变量
+			startFrame = start;
+			endFrame = end;
+			// 更新时间
+			document.getElementById('startFrameInput_time').textContent  = `time:`+secondsToHHMMSS(start);
+			document.getElementById('endFrameInput_time').textContent  = `time:`+secondsToHHMMSS(end);
+		}
+
+		// 辅助函数：显示错误信息
+		function showError(message) {
+			var layer = layui.layer;
+			layer.msg(message, { icon: 2, time: 1500 });
+		}
+
+		// 最大帧数变更处理
+		function updateMaxFrame() {
+			const newMax = parseInt(document.getElementById('maxFrameInput').value);
+
+			// 更新全局变量
+			maxFrame = newMax;
+
+			// 更新相关输入框限制
+			document.getElementById('endFrameInput').max = newMax;
+			document.getElementById('startFrameInput').max = newMax - 1;
+
+			// 自动调整结束帧
+			if (endFrame > newMax) {
+				document.getElementById('endFrameInput').value = newMax;
+				endFrame = newMax;
+			}
+
+			// 自动调整起始帧
+			if (startFrame > newMax - 1) {
+				document.getElementById('startFrameInput').value = newMax - 1;
+				startFrame = newMax - 1;
+			}
+		}
+
+
+
+		// 初始化最大值（可根据需要调用）
+		function updateFrameMax() {
+
+			document.getElementById('endFrameInput').max = maxFrame;
+			document.getElementById('startFrameInput').max = maxFrame - 1;
+		}
+
 	</script>
 	<script>
 		// maptalks地图

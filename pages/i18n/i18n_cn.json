@@ -98,6 +98,6 @@
     "map-Pitch": "倾斜0-80",
     "weather": "天气",
     "weather_icon": "天气图标",
-    "weather_icon": "天气图标",
-    "slope": "坡度"
+    "slope": "坡度",
+    "generate_setup_ps": "分段渲染：<br>在下方选择start、end时间帧，渲染需要的部分。较长的视频，间隔5000帧是较为安全的选择。如果您的PC性能强大，也可以直接渲染全部。"
 }
