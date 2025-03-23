@@ -332,7 +332,7 @@
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.31 .新增：分段导出，适用于长视频分割。
+			Beta 0.31 .新增：分段导出，适用于长视频分割。增加对只有时间点和经纬度的数据支持。
 		</li>
 		<li class="layui-nav-item" i18n="readme"></li>
 		<div class="ws-header-menu">
@@ -992,16 +992,19 @@
 					point.azimuth = Math.round((thetaRad * 180 / Math.PI + 360) % 360);
 				});
 
-				//地图xy变量
-				// 先获取经纬度数据的范围
+				// 获取画布实际尺寸
+				const canvasWidth = 600;
+				const canvasHeight = 600;
+
+				// 计算经纬度范围
 				let minLongitude = Infinity;
 				let maxLongitude = -Infinity;
 				let minLatitude = Infinity;
 				let maxLatitude = -Infinity;
 
 				trkpt_data.forEach(function (dataPoint) {
-					let longitude = dataPoint.position_long;
-					let latitude = dataPoint.position_lat;
+					const longitude = dataPoint.position_long;
+					const latitude = dataPoint.position_lat;
 
 					minLongitude = Math.min(minLongitude, longitude);
 					maxLongitude = Math.max(maxLongitude, longitude);
@@ -1009,30 +1012,18 @@
 					maxLatitude = Math.max(maxLatitude, latitude);
 				});
 
-				// 计算经纬度范围对应的宽度和高度
-				let longitudeRange = maxLongitude - minLongitude;
-				let latitudeRange = maxLatitude - minLatitude;
+				// 计算独立缩放因子（处理边界情况）
+				const longitudeRange = maxLongitude - minLongitude || 1;
+				const latitudeRange = maxLatitude - minLatitude || 1;
+				const scaleX = canvasWidth / longitudeRange;
+				const scaleY = canvasHeight / latitudeRange;
 
-				// 根据数据范围的宽高比例以及画布的宽高，确定合适的缩放因子
-				let scaleFactor;
-				if (longitudeRange / latitudeRange > 1) {
-					// 如果经度范围相对更大，以经度范围来确定缩放因子，确保能完整显示在宽度为300的画布内
-					scaleFactor = 600 / longitudeRange;
-				} else {
-					// 如果纬度范围相对更大，以纬度范围来确定缩放因子，确保能完整显示在高度为300的画布内
-					scaleFactor = 600 / latitudeRange;
-				}
-
-				// 重新遍历trkpt_data，将经纬度转换为画布坐标并添加到map_points
+				// 转换坐标并存储
 				trkpt_data.forEach(function (dataPoint) {
-					let longitude = (dataPoint.position_long - minLongitude) * scaleFactor;
-					//let latitude = (dataPoint.position_lat - minLatitude) * scaleFactor;
-					let latitude = (maxLatitude - dataPoint.position_lat) * scaleFactor;
+					const x = (dataPoint.position_long - minLongitude) * scaleX;
+					const y = (maxLatitude - dataPoint.position_lat) * scaleY; // 北纬对应画布顶部
 
-					// 将坐标添加到map_points数组，格式为[x, y]
-					map_points.push(longitude);
-					map_points.push(latitude);
-
+					map_points.push(x, y);
 				});
 
 
@@ -1587,6 +1578,7 @@
 						name: 'now_point',
 						tag: 'Ellipse',
 						lockRatio: true,
+						around: 'center',
 						width: 16,
 						height: 16,
 						fill: "#FF6347"
@@ -1650,7 +1642,7 @@
 						name: 'now_point',
 						tag: 'Polygon',
 						lockRatio: true,
-						points: [8, 0, 0, 16, 8, 12, 16, 16, 8, 0],
+						points: [16, 0, 0, 32, 16, 24, 32, 32, 16, 0],
 						around: 'center',
 						fill: "#FF6347"
 					},
@@ -3547,8 +3539,8 @@
 			}
 
 			//画当前点
-			appv_map_pan.children[2].x = map_points[currentFrame * 2] - 8;
-			appv_map_pan.children[2].y = map_points[currentFrame * 2 + 1] - 8;
+			appv_map_pan.children[2].x = map_points[currentFrame * 2];
+			appv_map_pan.children[2].y = map_points[currentFrame * 2 + 1];
 			appv_map_a_pan.children[2].x = map_points[currentFrame * 2];
 			appv_map_a_pan.children[2].y = map_points[currentFrame * 2 + 1];
 			appv_map_a_pan.children[2].rotation = trkpt_data[currentFrame].azimuth;
