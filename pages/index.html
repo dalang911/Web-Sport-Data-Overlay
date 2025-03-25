@@ -511,6 +511,10 @@
 								<div class="layui-anim" lay-active="el_cadence_pan"><img src="./images/z7.png"></div>
 								<div i18n="cadence">踏频</div>
 							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="pl_heart_pan"><img src="./images/z8.png"></div>
+								<div i18n="heart_rate">心率</div>
+							</div>
 
 						</div>
 						<div>
@@ -1034,8 +1038,9 @@
 				let xScale = 400 / (trkpt_data.length - 1);
 
 				// 计算心率数据的最大值和最小值，用于后续y轴范围映射
-				let heartRateMin = Infinity;
-				let heartRateMax = -Infinity;
+				heartRateMin = Infinity;
+				heartRateMax = -Infinity;
+				user_heartRateMax = heartRateMax;
 				// 计算步频数据的最大值和最小值，用于后续y轴范围映射
 				let cadenceMin = Infinity;
 				let cadenceMax = -Infinity;
@@ -1053,6 +1058,7 @@
 					if (typeof heartRate === 'number') {
 						heartRateMin = Math.min(heartRateMin, heartRate);
 						heartRateMax = Math.max(heartRateMax, heartRate);
+						user_heartRateMax = Math.ceil((heartRateMax + 10) / 10) * 10;//加10取整
 					}
 
 					// 处理步频
@@ -3069,6 +3075,200 @@
 				},
 			})
 
+			//高级心率
+			pl_heart_pan = new Box({
+				id: 'pl_heart_pan',
+				x: 100,
+				y: 800,
+				width: 200,
+				height: 200,
+				lockRatio: true,
+				editable: true,
+				hitBox: true,
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Ellipse',//标尺
+						width: 200,
+						height: 200,
+						startAngle: -210,
+						endAngle: 30,
+						innerRadius: 1,
+						stroke: "#FFFFFF",
+						strokeWidth: 20,
+						strokeAlign: 'inside',
+						dashPattern: [2, 20]
+					},
+					{
+						tag: 'Text',//低心率文字
+						y: 140,
+						x: 26,
+						resizeFontSize: true,
+						fontSize: 14,
+						fontWeight: 'black',
+						text: heartRateMin,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+						rotation: -120
+					},
+					{
+						tag: 'Text',//高心率
+						y: 140,
+						x: 172,
+						resizeFontSize: true,
+						fontSize: 14,
+						fontWeight: 'black',
+						text: user_heartRateMax,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+						rotation: 120
+					},
+					{
+						tag: 'Text',//2
+						y: 58,
+						x: 30,
+						resizeFontSize: true,
+						fontSize: 14,
+						fontWeight: 'black',
+						text: '120',
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+						rotation: -60
+					},
+					{
+						tag: 'Text',//3
+						y: 22,
+						x: 100,
+						resizeFontSize: true,
+						fontSize: 14,
+						fontWeight: 'black',
+						text: '140',
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+						rotation: 0
+					},
+					{
+						tag: 'Text',//4
+						y: 58,
+						x: 170,
+						resizeFontSize: true,
+						fontSize: 14,
+						fontWeight: 'black',
+						text: '160',
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+						rotation: 60
+					},
+					{
+						tag: 'Text',//4
+						y: 130,
+						x: 80,
+						resizeFontSize: true,
+						fontSize: 36,
+						fontWeight: 'black',
+						text: `188`,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Rect',
+						x: 125,
+						y: 130,
+						scale: 0.02,
+						path: heart_icon,
+						fill: '#FF0000'
+					},
+					{
+						tag: 'Rect',
+						y: 155,
+						x: 120,
+						resizeFontSize: true,
+						width: 30,
+						height: 3,
+						fill: '#FFFFFF'
+					},
+					{
+						tag: 'Text',
+						y: 160,
+						x: 120,
+						resizeFontSize: true,
+						fontSize: 14,
+						fontWeight: 'black',
+						text: `bpm`,
+						fill: '#FFFFFF',
+					},
+					{
+						tag: 'Ellipse',
+						width: 200,
+						height: 200,
+						startAngle: -210,
+						endAngle: 30,
+						innerRadius: 1,
+						stroke: "#ff5c58",
+						strokeWidth: 24,
+						strokeWidthFixed: true,
+						strokeAlign: 'center',
+						strokeCap: 'round',
+					},
+					{
+						tag: 'Ellipse',
+						width: 200,
+						height: 200,
+						startAngle: -210,
+						endAngle: -150,
+						innerRadius: 1,
+						stroke: "#bad1ff",
+						strokeWidth: 24,
+						strokeWidthFixed: false,
+						strokeAlign: 'center',
+						strokeCap: 'round',
+					},
+					{
+						tag: 'Line',
+						x: 19,
+						y: 60,
+						points: [],
+						strokeWidth: 5,
+						stroke: "#FF0000",
+					}
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "pl_heart_pan",
+								"set": [
+									{ "name": `${i18n.get('heart_rate')}`, "url": el_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `标尺颜色`, "url": "pl_heart_pan.children[0].stroke", "value": pl_heart_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `低心率值`, "url": "pl_heart_pan.children[1].text", "value": pl_heart_pan.children[1].text, "type": "heart_text", "tools": true },
+									{ "name": `高心率值`, "url": "pl_heart_pan.children[2].text", "value": pl_heart_pan.children[2].text, "type": "heart_text", "tools": true },
+									{ "name": `标尺文字颜色`, "url": "pl_heart_pan.children[1].fill", "value": pl_heart_pan.children[1].fill, "type": "heart_color", "tools": true },
+
+
+								]
+							}
+							tosettable(json);
+							var min = parseInt(pl_heart_pan.children[1].text);
+							var max = parseInt(pl_heart_pan.children[2].text);
+
+							// 计算区间参数
+							var interval = max - min;
+							var step = interval / 4;
+
+							pl_heart_pan.children[3].text = Math.round(min + step * 1);
+							pl_heart_pan.children[4].text = Math.round(min + step * 2);
+							pl_heart_pan.children[5].text = Math.round(min + step * 3);
+						}
+					],
+				},
+			})
 
 
 			//默认画布容器
@@ -3132,6 +3332,8 @@
 			frame.add(el_slope_pan);
 
 			frame.add(el_weather_pan);
+
+			frame.add(pl_heart_pan);
 		}
 
 		//生成视频
@@ -3439,7 +3641,44 @@
 
 						break;
 
+					//高级心率文本
+					case 'heart_text':
+						const heart_textInput = document.createElement('input'); // 创建文本输入框
+						heart_textInput.type = 'text'; // 设置类型为文本
+						heart_textInput.value = item.value; // 同样修正了拼写错误
+						heart_textInput.className = 'layui-input';
+						heart_textInput.onchange = function () {
+							//pl_heart_pan.children[1].text
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							var min = parseInt(pl_heart_pan.children[1].text);
+							var max = parseInt(pl_heart_pan.children[2].text);
 
+							// 计算区间参数
+							var interval = max - min;
+							var step = interval / 4;
+
+							pl_heart_pan.children[3].text = Math.round(min + step * 1);
+							pl_heart_pan.children[4].text = Math.round(min + step * 2);
+							pl_heart_pan.children[5].text = Math.round(min + step * 3);
+
+						};
+						inputDiv.appendChild(heart_textInput);
+						break;
+
+					case 'heart_color':
+						const heart_colorInput = document.createElement('input');
+						heart_colorInput.type = 'color';
+						heart_colorInput.value = item.value;
+						heart_colorInput.className = 'layui-input';
+						heart_colorInput.onchange = function () {
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							pl_heart_pan.children[2].fill = pl_heart_pan.children[1].fill;
+							pl_heart_pan.children[3].fill = pl_heart_pan.children[1].fill;
+							pl_heart_pan.children[4].fill = pl_heart_pan.children[1].fill;
+							pl_heart_pan.children[5].fill = pl_heart_pan.children[1].fill;
+						};
+						inputDiv.appendChild(heart_colorInput);
+						break;
 
 				}
 
@@ -3583,6 +3822,8 @@
 			TO_cadence_pan.children[0].text = `${cadence} steps/min`;
 			TO_step_pan.children[0].text = `${step_length} m`;
 
+
+
 			// 根据奇偶性设置心率图标缩放比例
 			if (currentFrame % 2 === 0) {
 				TO_heart_pan.children[1].scale = 0.038; // 偶数帧缩放值
@@ -3597,6 +3838,57 @@
 				count = 40;
 			}
 			el_heart_pan.children[3].endAngle = -210 + (count - 40) * 1.33;
+
+			//高级心率仪表盘
+			// 获取原始数值并转换为整数
+			var min = parseInt(pl_heart_pan.children[1].text);
+			var max = parseInt(pl_heart_pan.children[2].text);
+			// 计算区间参数
+			var interval = max - min;
+
+			pl_heart_pan.children[6].text = `${count}`;
+			pl_heart_pan.children[11].endAngle = -210 + (count - min) * 240 / interval;
+			//计算心率区间
+			if (count - min > interval * 0.95) {
+				pl_heart_pan.children[11].stroke = "#FF0000";
+			} else if (count - min > interval * 0.88) {
+				pl_heart_pan.children[11].stroke = "#FF8800";
+			} else if (count - min > interval * 0.84) {
+				pl_heart_pan.children[11].stroke = "#FFD700";
+			} else if (count - min > interval * 0.74) {
+				pl_heart_pan.children[11].stroke = "#3CB371";
+			} else {
+				pl_heart_pan.children[11].stroke = "#7FFFD4";
+			}
+			// 获取最近10条心率数据（含当前帧）
+			const heartRates = [];
+			for (let i = 0; i < 10; i++) {
+				const frameIndex = currentFrame - i;
+				// 确保数据有效性，越界或无效数据返回0
+				heartRates.push(frameIndex >= 0 && trkpt_data[frameIndex] ? trkpt_data[frameIndex].heart_rate : 0);
+			}
+
+			// 计算折线点坐标
+			const heart_points = [];
+			const xStep = 150 / (10 - 1); // X轴间隔计算（保持10个点平均分布）
+
+			for (let i = 0; i < 10; i++) {
+				// X坐标计算：从右向左排列（最新数据在最右侧）
+				const x = 150 - i * xStep;
+
+				// Y坐标计算（关键修改部分）：
+				// 1. 将0-80的心率映射到0-10的显示范围（因40px高度/4px/unit=10units）
+				// 2. 计算垂直偏移量（每个单位对应4像素）
+				// 3. 坐标系转换：画布底部为150，向上递减
+				const heartRate = heartRates[i];
+				const displayValue = heartRates[i] - heartRates[i + 1]; // 80→10
+				const y = 40 - (displayValue * 6);
+
+				heart_points.push(x, y);
+			}
+
+			// 更新路径数据
+			pl_heart_pan.children[12].points = heart_points;
 
 			//配速仪表盘
 			el_pace_pan.children[0].text = `${pace}`;
