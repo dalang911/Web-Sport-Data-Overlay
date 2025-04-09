@@ -332,7 +332,7 @@
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.32 .修复：高程异常。
+			Beta 0.40 .更新：心率、配速折线图标。
 		</li>
 		<li class="layui-nav-item" i18n="readme"></li>
 		<div class="ws-header-menu">
@@ -480,6 +480,14 @@
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_leida_pan"><img src="./images/t2.png"></div>
 								<div i18n="leida">雷达</div>
+							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="pt_heart_pan"><img src="./images/t3.png"></div>
+								<div>心率</div>
+							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="pt_pace_pan"><img src="./images/t4.png"></div>
+								<div>配速</div>
 							</div>
 						</div>
 						<div>
@@ -925,8 +933,10 @@
 			max_distance_in_km = 0;//地图总长度
 			map_points = [];//地图xy数据
 			heart_points = [];//心率数据
+			pt_heart_points = [];//心率数据
 			cadences_points = [];//步频数据
 			paces_points = [];//配速数据
+			pt_paces_points = [];//配速数据
 			ele_points = [];//高程数据
 			ele18_points = [];//高程变量1:8
 			slopes_points = [];//坡度数据
@@ -1052,8 +1062,8 @@
 				let cadenceMin = Infinity;
 				let cadenceMax = -Infinity;
 				// 计算配速数据的最大值和最小值，用于后续y轴范围映射
-				let paceMin = Infinity;
-				let paceMax = -Infinity;
+				paceMin = Infinity;
+				paceMax = -Infinity;
 				// 计算高程数据的最大值和最小值，用于后续y轴范围映射
 				let eleMin = Infinity;
 				let eleMax = -Infinity;
@@ -1093,9 +1103,13 @@
 
 				for (let i = 0; i < trkpt_data.length; i++) {
 					// 处理心率数据，将y轴值映射到0 - 200范围
-					let heartY = mapToRange(trkpt_data[i].heart_rate, 40, heartRateMax, 100, 200);
+					let heartY = mapToRange(trkpt_data[i].heart_rate, 40, heartRateMax, 40, 200);
 					heart_points.push(i * xScale);
 					heart_points.push(200 - heartY);
+
+					heartY = mapToRange(trkpt_data[i].heart_rate, heartRateMin, heartRateMax, 0, 200);
+					pt_heart_points.push(i * xScale);
+					pt_heart_points.push(200 - heartY);
 
 					// 处理步频数据，将y轴值映射到0 - 200范围
 					let cadenceY = mapToRange(trkpt_data[i].cadence, 120, cadenceMax, 60, 160);
@@ -1106,6 +1120,10 @@
 					let paceY = mapToRange(trkpt_data[i].speed, 0, paceMax, 20, 120);
 					paces_points.push(i * xScale);
 					paces_points.push(200 - paceY);
+
+					paceY = mapToRange(trkpt_data[i].speed, paceMin, paceMax, 0, 200);
+					pt_paces_points.push(i * xScale);
+					pt_paces_points.push(200 - paceY);
 
 					// 处理高程数据，将y轴值映射到0 - 200范围
 					var jdtcd = (trkpt_data[i].distance / trkpt_data[trkpt_data.length - 1].distance) * 400;//计算实时长度，当前距离除全距离，乘容器长度，得到现在位置
@@ -1312,6 +1330,311 @@
 					],
 				},
 			})
+
+			//心率图表
+			pt_heart_pan = new Box({
+				id: 'pt_heart_pan',
+				x: 20,//左上角位置
+				y: 850,//左上角位置
+				width: 400,
+				height: 200,
+				lockRatio: true,
+				editable: true,
+				hitBox: true,
+				cornerRadius: 8,//圆角
+				//overflow: 'hide',	//越界隐藏
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Line',
+						lockRatio: true,
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10]
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: [0, 100, 400, 100],
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10],
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: [0, 200, 400, 200],
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10],
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x:2,
+						y:0,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: heartRateMax,
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						width:100,
+						x:2,
+						y:100,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: Math.round((heartRateMax + heartRateMin) / 2),
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x:2,
+						y:200,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: heartRateMin,
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: pt_heart_points,  // [x,y, x,y ...]
+						cornerRadius: 1,
+						strokeWidth: 3,
+						stroke: '#f6416c',
+						strokeCap: 'round'
+					},
+					{
+						name: 'metrics',
+						tag: 'Line',
+						lockRatio: true,
+						x: 50,
+						width: 200,
+						rotation: 90,
+						fill: "blue",
+						strokeWidth: 4,
+						stroke: '#00b8a9',
+						strokeCap: 'round'
+					},
+					{
+						tag: 'Rect',
+						x: 360,
+						y: 160,
+						scale: 0.03,
+						path: heart_icon,
+						fill: '#f6416c'
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x:55,
+						y:180,
+						fontSize: 24,
+						fontWeight: 'black',
+						text: '180',
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Ellipse',
+						lockRatio: true,
+						around: 'center',
+						x:50,
+						y:100,
+						width: 13,
+						height: 13,
+						fill: "#ffde7d"
+					},
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "pt_heart_pan",
+								"set": [
+									{ "name": `心率`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `标尺颜色`, "url": "pt_heart_pan.children[0].stroke", "value": pt_heart_pan.children[0].stroke, "type": "heart_color_line", "tools": true },
+									{ "name": `标尺文字颜色`, "url": "pt_heart_pan.children[3].fill", "value": pt_heart_pan.children[3].fill, "type": "heart_line_text", "tools": true },
+									{ "name": `${i18n.get('Heart_line_thickness')}`, "url": "pt_heart_pan.children[6].strokeWidth", "value": pt_heart_pan.children[6].strokeWidth, "type": "number", "tools": true },
+									{ "name": `${i18n.get('Heart_color')}`, "url": "pt_heart_pan.children[6].stroke", "value": pt_heart_pan.children[6].stroke, "type": "color", "tools": true },
+									{ "name": `进度线粗细`, "url": "pt_heart_pan.children[7].strokeWidth", "value": pt_heart_pan.children[7].strokeWidth, "type": "number", "tools": true },
+									{ "name": `进度线颜色`, "url": "pt_heart_pan.children[7].stroke", "value": pt_heart_pan.children[7].stroke, "type": "color", "tools": true },
+									{ "name": `进度点颜色`, "url": "pt_heart_pan.children[10].fill", "value": pt_heart_pan.children[10].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
+
+			//配速图标
+			pt_pace_pan = new Box({
+				id: 'pt_pace_pan',
+				x: 20,//左上角位置
+				y: 600,//左上角位置
+				width: 400,
+				height: 200,
+				lockRatio: true,
+				editable: true,
+				hitBox: true,
+				cornerRadius: 8,//圆角
+				//overflow: 'hide',	//越界隐藏
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Line',
+						lockRatio: true,
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10]
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: [0, 100, 400, 100],
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10],
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: [0, 200, 400, 200],
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10],
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x:2,
+						y:0,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: SpeedformatPace(paceMax),
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						width:100,
+						x:2,
+						y:100,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: SpeedformatPace((paceMax + paceMin) / 2),
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x:2,
+						y:200,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: SpeedformatPace(paceMin),
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: pt_paces_points,  // [x,y, x,y ...]
+						curve: true,
+						strokeWidth: 3,
+						stroke: '#00FFA2',
+						strokeCap: 'round'
+					},
+					{
+						name: 'metrics',
+						tag: 'Line',
+						lockRatio: true,
+						x: 50,
+						width: 200,
+						rotation: 90,
+						fill: "blue",
+						strokeWidth: 4,
+						stroke: '#c6f1e7',
+						strokeCap: 'round'
+					},
+					{
+						tag: 'Rect',
+						x: 360,
+						y: 160,
+						scale: 0.03,
+						path: run_icon,
+						fill: '#00FFA2'
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x:55,
+						y:180,
+						fontSize: 24,
+						fontWeight: 'black',
+						text: '180',
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Ellipse',
+						lockRatio: true,
+						around: 'center',
+						x:50,
+						y:100,
+						width: 13,
+						height: 13,
+						fill: "#ffde7d"
+					},
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "pt_pace_pan",
+								"set": [
+									{ "name": `配速`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `标尺颜色`, "url": "pt_pace_pan.children[0].stroke", "value": pt_pace_pan.children[0].stroke, "type": "pace_color_line", "tools": true },
+									{ "name": `标尺文字颜色`, "url": "pt_pace_pan.children[3].fill", "value": pt_pace_pan.children[3].fill, "type": "pace_line_text", "tools": true },
+									{ "name": `配速线条粗细`, "url": "pt_pace_pan.children[6].strokeWidth", "value": pt_pace_pan.children[6].strokeWidth, "type": "number", "tools": true },
+									{ "name": `配速线条颜色`, "url": "pt_pace_pan.children[6].stroke", "value": pt_pace_pan.children[6].stroke, "type": "color", "tools": true },
+									{ "name": `进度线粗细`, "url": "pt_pace_pan.children[7].strokeWidth", "value": pt_pace_pan.children[7].strokeWidth, "type": "number", "tools": true },
+									{ "name": `进度线颜色`, "url": "pt_pace_pan.children[7].stroke", "value": pt_pace_pan.children[7].stroke, "type": "color", "tools": true },
+									{ "name": `进度点颜色`, "url": "pt_pace_pan.children[10].fill", "value": pt_pace_pan.children[10].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			});
 
 			//高程
 			appv_ele_pan = new Box({
@@ -3089,7 +3412,6 @@
 				y: 800,
 				width: 200,
 				height: 200,
-
 				lockRatio: true,
 				editable: true,
 				hitBox: true,
@@ -3688,6 +4010,61 @@
 						inputDiv.appendChild(heart_colorInput);
 						break;
 
+					//高级心率表背景线
+					case 'heart_color_line':
+						const heart_color_lineInput = document.createElement('input');
+						heart_color_lineInput.type = 'color';
+						heart_color_lineInput.value = item.value;
+						heart_color_lineInput.className = 'layui-input';
+						heart_color_lineInput.onchange = function () {
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							pt_heart_pan.children[1].stroke = pt_heart_pan.children[0].stroke;
+							pt_heart_pan.children[2].stroke = pt_heart_pan.children[0].stroke;
+						};
+						inputDiv.appendChild(heart_color_lineInput);
+						break;
+
+					case 'heart_line_text':
+						const heart_line_textInput = document.createElement('input'); // 创建文本输入框
+						heart_line_textInput.type = 'color'; // 设置类型为文本
+						heart_line_textInput.value = item.value; // 同样修正了拼写错误
+						heart_line_textInput.className = 'layui-input';
+						heart_line_textInput.onchange = function () {
+							//pl_heart_pan.children[1].text
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							pt_heart_pan.children[4].fill = pt_heart_pan.children[3].fill;
+							pt_heart_pan.children[5].fill = pt_heart_pan.children[3].fill;
+						};
+						inputDiv.appendChild(heart_line_textInput);
+						break;
+						//高级心率表背景线
+					case 'pace_color_line':
+						const pace_color_lineInput = document.createElement('input');
+						pace_color_lineInput.type = 'color';
+						pace_color_lineInput.value = item.value;
+						pace_color_lineInput.className = 'layui-input';
+						pace_color_lineInput.onchange = function () {
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							pt_pace_pan.children[1].stroke = pt_pace_pan.children[0].stroke;
+							pt_pace_pan.children[2].stroke = pt_pace_pan.children[0].stroke;
+						};
+						inputDiv.appendChild(pace_color_lineInput);
+						break;
+
+					case 'pace_line_text':
+						const pace_line_textInput = document.createElement('input'); // 创建文本输入框
+						pace_line_textInput.type = 'color'; // 设置类型为文本
+						pace_line_textInput.value = item.value; // 同样修正了拼写错误
+						pace_line_textInput.className = 'layui-input';
+						pace_line_textInput.onchange = function () {
+							//pl_heart_pan.children[1].text
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							pt_pace_pan.children[4].fill = pt_pace_pan.children[3].fill;
+							pt_pace_pan.children[5].fill = pt_pace_pan.children[3].fill;
+						};
+						inputDiv.appendChild(pace_line_textInput);
+						break;
+
 				}
 
 				div.appendChild(inputDiv);
@@ -3818,6 +4195,10 @@
 			let step_length = trkpt_data[currentFrame] && trkpt_data[currentFrame].step_length ? trkpt_data[currentFrame].step_length : 0;
 
 
+
+
+
+
 			//雷达图
 			let flatPoints = to_leida_xy(count, speed, cadence);
 			el_leida_pan.children[9].points = flatPoints;
@@ -3877,7 +4258,7 @@
 			}
 
 			// 计算折线点坐标
-			const heart_points = [];
+			const zheart_points = [];
 			const xStep = 150 / (10 - 1); // X轴间隔计算（保持10个点平均分布）
 
 			for (let i = 0; i < 10; i++) {
@@ -3897,11 +4278,11 @@
 				}else if (y > 80 ) {
 					y = 80;
 				}
-				heart_points.push(x, y);
+				zheart_points.push(x, y);
 			}
 
 			// 更新路径数据
-			pl_heart_pan.children[12].points = heart_points;
+			pl_heart_pan.children[12].points = zheart_points;
 
 			//配速仪表盘
 			el_pace_pan.children[0].text = `${pace}`;
@@ -3910,6 +4291,7 @@
 
 			//步频仪表盘
 			el_cadence_pan.children[0].text = `${cadence}`;
+
 
 
 
@@ -3952,6 +4334,20 @@
 
 			//综合图表画进度 metrics
 			appv_metrics_pan.children[3].x = appv_metrics_pan.width / maxFrame * currentFrame;
+			//带标尺的心率
+			pt_heart_pan.children[7].x = pt_heart_pan.width / maxFrame * currentFrame;
+			pt_heart_pan.children[9].x = pt_heart_pan.width / maxFrame * currentFrame + 5;
+			pt_heart_pan.children[10].x = pt_heart_pan.width / maxFrame * currentFrame;
+			pt_heart_pan.children[10].y = pt_heart_points[currentFrame * 2 + 1];
+			pt_heart_pan.children[9].text = count;
+
+			//带标尺的配速
+			pt_pace_pan.children[7].x = pt_pace_pan.width / maxFrame * currentFrame;
+			pt_pace_pan.children[9].x = pt_pace_pan.width / maxFrame * currentFrame + 5;
+			pt_pace_pan.children[10].x = pt_pace_pan.width / maxFrame * currentFrame;
+			pt_pace_pan.children[10].y = pt_paces_points[currentFrame * 2 + 1];
+			pt_pace_pan.children[9].text = pace;
+
 
 			//当前日期时间
 			appv_date_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp);
@@ -4000,6 +4396,23 @@
 		}
 
 		// 地图转换
+		// 	/​**​
+		//  * 将数值从一个线性范围映射到另一个线性范围
+		//  * @param {number} value - 需要转换的原始数值
+		//  * @param {number} fromMin - 原始范围的最小值
+		//  * @param {number} fromMax - 原始范围的最大值
+		//  * @param {number} toMin - 目标范围的最小值
+		//  * @param {number} toMax - 目标范围的最大值
+		//  * @returns {number} 转换后的新数值
+		//  *
+		//  * 使用示例:
+		//  * mapToRange(50, 0, 100, 0, 1) // 返回 0.5（将0-100范围的50映射到0-1范围）
+		//  *
+		//  * 注意事项:
+		//  * 1. 原始范围fromMin和fromMax不能相等（避免除以零错误）
+		//  * 2. 支持任何数字范围的映射，包括负数范围
+		//  * 3. 保持严格的线性比例关系
+		//  */
 		function mapToRange(value, fromMin, fromMax, toMin, toMax) {
 			return (value - fromMin) * (toMax - toMin) / (fromMax - fromMin) + toMin;
 		}
@@ -4037,6 +4450,20 @@
 			const direction = latOrLon >= 0 ? (latOrLon > 90 ? 'E' : 'N') : (latOrLon < -90 ? 'W' : 'S');
 			// 返回格式化的度分秒字符串
 			return `${degrees}°${minutes}'${seconds}"${direction}`;
+		}
+
+		//秒距离转配速
+		function SpeedformatPace(speed) {
+			if (speed <= 0) return "00:00";
+
+			const totalSeconds = 60 / speed * 60; // 转换为总秒数（60/(速度单位转换系数)）
+			const minutes = Math.floor(totalSeconds / 60);
+			const seconds = Math.floor(totalSeconds % 60);
+
+			return [
+				String(minutes).padStart(2, '0'),
+				String(seconds).padStart(2, '0')
+			].join(':');
 		}
 
 		// 解析GPX，gpxParser是已经定义好的GPX解析器类
