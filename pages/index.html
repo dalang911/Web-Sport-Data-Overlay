@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 
 <head>
 	<meta charset="UTF-8">
-	<title i18n="title">黑幕叠加视频</title>
+	<title>黑幕叠加视频 Blackout Sports Data Overlay</title>
 	<link rel="stylesheet" href="./css/layui.css">
 	<script src="./js/layui.js"></script>
 	<script src="./js/web.min.js"></script>
@@ -13,10 +13,10 @@
 	<script src="./js/TCXParser.js"></script>
 	<script src="./js/bf-backfit.js"></script>
 	<script src="./js/svg.js"></script>
-	<script src="./js/i18n.js"></script>
 	<link rel="stylesheet" href="./css/maptalks.css">
 	<script src="./js/maptalks.min.js"></script>
 	<script src="./js/mp4-muxer.js"></script>
+	<script src="./js/webm-muxer.js"></script>
 
 
 
@@ -327,33 +327,24 @@
 
 <body>
 	<div class="layui-nav">
-		<li class="layui-nav-item" style="margin-right: 30px;font-size: 22px;" i18n="title">
-			黑幕叠加视频
+		<li class="layui-nav-item" style="margin-right: 30px;font-size: 22px;">
+			Blackout Sports Data Overlay
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.40 .更新：心率、配速折线图标。
+			Beta 0.41 .更新：心率、配速折线图，更新视频生成方式，其他...
 		</li>
-		<li class="layui-nav-item" i18n="readme"></li>
+		<li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
 		<div class="ws-header-menu">
 			<li class="layui-nav-item" style="position: absolute;right: 240px;top: 0;">
-				<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="setup" i18n="generate">生成MP4视频</button>
+				<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="setup">Generate Video</button>
 			</li>
+			<li class="layui-nav-item" style="position: absolute;right: 50px;top: 0px;color: #000;text-align: center;">
+				<a href="https://www.bilibili.com/video/BV1m9fEYRE6u/" target="_blank"><i class="layui-icon layui-icon-read" style="font-size: 18px; color: #000000;"></i></a>
 
-			<li class="layui-nav-item" style="position: absolute;right: 80px;top: 0px;color: #000;width: 100px;">
-				<a href="javascript:;" style="color: #000000;"><i class="layui-icon layui-icon-website"
-						style="font-size: 18px; color: #000000;"></i><span id="language">中文</span></a>
-
-				<dl class="layui-nav-child" style="top: 0px;">
-					<dd class="chinese">中文</dd>
-					<dd class="english">English</dd>
-					<dd class="Japanese">日本语</dd>
-					<dd class="Korean">한국어</dd>
-				</dl>
 			</li>
 			<li class="layui-nav-item" style="position: absolute;right: 10px;top: 0px;color: #000;text-align: center;">
-				<a href="https://github.com/dalang911/Web-Sport-Data-Overlay" target="_blank"><i
-						class="layui-icon layui-icon-github" style="font-size: 18px; color: #000000;"></i></a>
+				<a href="https://github.com/dalang911/Web-Sport-Data-Overlay" target="_blank"><i class="layui-icon layui-icon-github" style="font-size: 18px; color: #000000;"></i></a>
 			</li>
 		</div>
 	</div>
@@ -363,7 +354,7 @@
 				<input type="file" id="fileInput" class="layui-btn demo-class-accept -disabled" style="padding: 1px;"
 					accept=".json,.gpx,.tcx,.fit">
 				<fieldset class="layui-elem-field">
-					<legend i18n="sportsinfo">运动信息</legend>
+					<legend>Information</legend>
 					<div class="layui-field-box" id="jsonInfo">
 
 					</div>
@@ -375,27 +366,25 @@
 				<div class="tt">
 
 					<div class="demo-tab-header layui-btn-container layui-col-md3 grid-demo-bg1" id="tabHeader">
-						<div class="layui-col-md12" style="text-align: center;margin-top: 5px;margin-bottom: 5px;"
-							i18n="dashboard">仪表盘
-						</div>
+						<div class="layui-col-md12" style="text-align: center;margin-top: 5px;margin-bottom: 5px;">DashB</div>
 						<div class="tab layui-btn-primary layui-this">
 							<i class="layui-icon layui-icon-log iconcc"></i>
-							<div class="docs-icon-name" i18n="dateandtime">时间</div>
+							<div class="docs-icon-name">Time</div>
 						</div>
 						<div class="tab layui-btn-primary"><i class="layui-icon layui-icon-next iconcc"></i>
-							<div class="docs-icon-name" i18n="distance">距离</div>
+							<div class="docs-icon-name">Dist.</div>
 						</div>
 						<div class="tab layui-btn-primary"><i class="layui-icon layui-icon-location iconcc"></i>
-							<div class="docs-icon-name" i18n="map">地图</div>
+							<div class="docs-icon-name">Map</div>
 						</div>
 						<div class="tab layui-btn-primary"><i class="layui-icon layui-icon-chart iconcc"></i>
-							<div class="docs-icon-name" i18n="chart">图表</div>
+							<div class="docs-icon-name">Chart</div>
 						</div>
 						<div class="tab layui-btn-primary"><i class="layui-icon layui-icon-console iconcc"></i>
-							<div class="docs-icon-name" i18n="attribute">属性</div>
+							<div class="docs-icon-name">Attr</div>
 						</div>
 						<div class="tab layui-btn-primary"><i class="layui-icon layui-icon-fonts-strong iconcc"></i>
-							<div class="docs-icon-name" i18n="text">文本</div>
+							<div class="docs-icon-name">Text</div>
 						</div>
 					</div>
 
@@ -405,123 +394,123 @@
 						<div class="layui-show">
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_date_pan"><img src="./images/m1.png"></div>
-								<div i18n="dateandtime">日期时间</div>
+								<div>Time</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_day_pan"><img src="./images/m2.png"></div>
-								<div i18n="date">日期</div>
+								<div>Date</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_time_pan"><img src="./images/m3.png"></div>
-								<div i18n="time">时间</div>
+								<div>Time</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_nowtime_pan"><img src="./images/m4.png"></div>
-								<div i18n="Elapsedtime">用时</div>
+								<div>Elapsedtime</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_nowtime_pan"><img src="./images/m5.png"></div>
-								<div i18n="Elapsedtime">用时</div>
+								<div>Sport ET</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_weather_pan"><img src="./images/m6.png"></div>
-								<div i18n="weather">天气</div>
+								<div>Weather</div>
 							</div>
 						</div>
 						<div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="l_distance_pan"><img src="./images/l1.png"></div>
-								<div i18n="distancewide">距离长</div>
+								<div>Distance</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_distance_pan"><img src="./images/l2.png"></div>
-								<div i18n="distance">距离</div>
+								<div>Distance</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_ele_pan"><img src="./images/l3.png"></div>
-								<div i18n="elevation">高程</div>
+								<div>Elevation</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_ele18_pan"><img src="./images/l4.png"></div>
-								<div i18n="elevationwide">高程长</div>
+								<div>Elevation</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_slope_pan"><img src="./images/l5.png"></div>
-								<div i18n="slope">坡度</div>
+								<div>Slope</div>
 							</div>
 						</div>
 						<div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_map_pan"><img src="./images/w1.png"></div>
-								<div i18n="route">轨迹</div>
+								<div>Route</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_map_a_pan"><img src="./images/w5.png"></div>
-								<div i18n="route">轨迹</div>
+								<div>Route</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="web_map_pan"><img src="./images/w3.png"></div>
-								<div i18n="webroute">轨迹</div>
+								<div>WebRoute</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="web_minimap_pan"><img src="./images/w4.png"></div>
-								<div i18n="webroute">轨迹</div>
+								<div>WebRoute</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="TO_gps_pan"><img src="./images/w2.png"></div>
-								<div i18n="location">位置</div>
+								<div>Location</div>
 							</div>
 						</div>
 						<div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_metrics_pan"><img src="./images/t1.png"></div>
-								<div i18n="Heart_pace_cadence">心率配速踏频</div>
+								<div>HPC</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_leida_pan"><img src="./images/t2.png"></div>
-								<div i18n="leida">雷达</div>
+								<div>Radar</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="pt_heart_pan"><img src="./images/t3.png"></div>
-								<div>心率</div>
+								<div>Heart</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="pt_pace_pan"><img src="./images/t4.png"></div>
-								<div>配速</div>
+								<div>Pace</div>
 							</div>
 						</div>
 						<div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="TO_pace_pan"><img src="./images/z1.png"></div>
-								<div i18n="pace">配速</div>
+								<div>Pace</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="TO_heart_pan"><img src="./images/z2.png"></div>
-								<div i18n="heart_rate">心率</div>
+								<div>Heart</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="TO_cadence_pan"><img src="./images/z3.png"></div>
-								<div i18n="cadence">踏频</div>
+								<div>Cadence</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="TO_step_pan"><img src="./images/z4.png"></div>
-								<div i18n="step_length">步幅</div>
+								<div>Step</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_heart_pan"><img src="./images/z5.png"></div>
-								<div i18n="heart_rate">心率</div>
+								<div>Cadence</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_pace_pan"><img src="./images/z6.png"></div>
-								<div i18n="pace">配速</div>
+								<div>Pace</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_cadence_pan"><img src="./images/z7.png"></div>
-								<div i18n="cadence">踏频</div>
+								<div>Cadence</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="pl_heart_pan"><img src="./images/z8.png"></div>
-								<div i18n="heart_rate">心率</div>
+								<div>Heart</div>
 							</div>
 
 						</div>
@@ -529,27 +518,27 @@
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_nowstatus_pan"><img src="./images/s1.png">
 								</div>
-								<div i18n="allattribute">综合</div>
+								<div>All</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_lap_pan"><img src="./images/s2.png"></div>
-								<div i18n="lap">圈速</div>
+								<div>Lap</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_str1_pan"><img src="./images/s3.png"></div>
-								<div i18n="Custom_text">自定义1</div>
+								<div>Custom 1</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_str2_pan"><img src="./images/s3.png"></div>
-								<div i18n="Custom_text">自定义2</div>
+								<div>Custom 2</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_str3_pan"><img src="./images/s3.png"></div>
-								<div i18n="Custom_text">自定义3</div>
+								<div>Custom 3</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_str4_pan"><img src="./images/s3.png"></div>
-								<div i18n="Custom_text">自定义4</div>
+								<div>Custom 4</div>
 							</div>
 						</div>
 					</div>
@@ -576,14 +565,14 @@
 	<div id="leafletmap_mini" style="position: absolute;width: 200px;height: 200px;left: -2500px;bottom: 410px;"></div>
 
 	<script>
-		//祯时间间隔，默认20ms，根据机器性能酌情增减，20-200。
-		var frame_delay = 35;
 		//开始祯
 		var startFrame = 0;
 		//结束祯
 		var endFrame = 0;
 		//最大祯
 		var maxFrame = 0;
+		//
+		var videomode = 'mp4';
 
 		//检测是否支持视频编码webcodecs
 		if ('VideoEncoder' in window) {
@@ -592,53 +581,6 @@
 			console.error("webcodecs is not supported. Please upgrade Chrome, Safari, and Edge browsers to the latest version.")
 			alert("webcodecs is not supported. Please upgrade Chrome, Safari, and Edge browsers to the latest version.")
 		}
-
-		// 多语言
-		i18n("[i18n]", {
-			lang: 'cn', // 缺省时为 defaultLang 初始化时不建议设置
-			filePath: "./i18n/",// 路径
-			filePrefix: "i18n_",// 文件前缀
-			fileSuffix: "",
-			forever: true,// 默认为 true  保存当前语言，设置为 false 后，每次刷新都为cn
-			get: true,// 缺省为 false 。当需要在其他js文件中使用 i18n.get(key),获取语言时开启，参考 index.js
-			only: ['html', 'placeholder', 'title'], // 全局设置i18n-only，默认值：['value', 'html', 'placeholder', 'title']
-			callback: function () {
-				$('#language').html('中文');
-			}
-		});
-		$(".chinese").click(function () {
-			i18n("[i18n]", {
-				lang: "cn",// 变更语言
-				filePath: "./i18n/",
-				get: true
-			});
-			$('#language').html('中文');
-		});
-		/*切换为英文 - 按钮*/
-		$(".english").click(function () {
-			i18n("[i18n]", {
-				lang: "en",
-				filePath: "./i18n/",
-				get: true
-			});
-			$('#language').html('English');
-		});
-		$(".Japanese").click(function () {
-			i18n("[i18n]", {
-				lang: "jp",
-				filePath: "./i18n/",
-				get: true
-			});
-			$('#language').html('日本语');
-		});
-		$(".Korean").click(function () {
-			i18n("[i18n]", {
-				lang: "kr",
-				filePath: "./i18n/",
-				get: true
-			});
-			$('#language').html('한국어');
-		});
 
 		// 读取json文件，并简单校验
 		$('#fileInput').on('change', function (e) {
@@ -656,7 +598,7 @@
 					try {
 						if (file.name.endsWith('.gpx') || file.name.endsWith('.tcx') || file.name.endsWith('.fit') || file.name.endsWith('.json')) {
 							// 弹出询问框询问是否上传文件
-							var uploadFile = confirm(`${i18n.get('up_inquire')}`);
+							var uploadFile = confirm(`开发者需要一些文件样本，是否愿意将您的文件上传给开发者用作分析？无论您是否同意，都不影响您的使用，您的数据不会被公开。<br>The developer needs sample files for analysis. Would you like to upload your file? Your usage won't be affected regardless of your decision, and data remains private.`);
 
 							if (uploadFile) {
 								// 用户点击了“是”，准备上传文件到服务器
@@ -720,7 +662,7 @@
 							// 检查data['data']['summary']['name']是否存在
 							if (data['data'] && data['data']['summary'] && data['data']['summary']['name']) {
 								const nameDiv = document.createElement('div');
-								nameDiv.textContent = `${i18n.get('sports_name')}: ${data['data']['summary']['name']}`;
+								nameDiv.textContent = `Title: ${data['data']['summary']['name']}`;
 								jsonInfoDiv.appendChild(nameDiv);
 							} else {
 								console.log("data['data']['summary']['name']不存在");
@@ -728,7 +670,7 @@
 							// 检查data['data']['summary']['training_at']是否存在
 							if (data['data'] && data['data']['summary'] && data['data']['summary']['training_at']) {
 								const trainingAtDiv = document.createElement('div');
-								trainingAtDiv.textContent = `${i18n.get('Training_time')}: ${data['data']['summary']['training_at']}`;
+								trainingAtDiv.textContent = `Start Time: ${data['data']['summary']['training_at']}`;
 								jsonInfoDiv.appendChild(trainingAtDiv);
 							} else {
 								console.log("data['data']['summary']['training_at']不存在");
@@ -736,7 +678,7 @@
 							// 检查data['data']['summary']['total_time']是否存在
 							if (data['data'] && data['data']['summary'] && data['data']['summary']['total_time']) {
 								const totalTimeDiv = document.createElement('div');
-								totalTimeDiv.textContent = `${i18n.get('Training_length')}: ${secondsToHHMMSS(data['data']['summary']['total_time'])}`;
+								totalTimeDiv.textContent = `Total Time: ${secondsToHHMMSS(data['data']['summary']['total_time'])}`;
 								jsonInfoDiv.appendChild(totalTimeDiv);
 							} else {
 								console.log("data['data']['summary']['total_time']不存在");
@@ -744,7 +686,7 @@
 							// 检查data['data']['motion']['distance']是否存在
 							if (data['data'] && data['data']['motion'] && data['data']['motion']['distance']) {
 								const distanceDiv = document.createElement('div');
-								distanceDiv.textContent = `${i18n.get('Training_distance')}: ${data['data']['motion']['distance']}${i18n.get('meter')}`;
+								distanceDiv.textContent = `Distance: ${data['data']['motion']['distance']}Meters`;
 								jsonInfoDiv.appendChild(distanceDiv);
 							} else {
 								console.log("data['data']['motion']['distance']不存在");
@@ -753,40 +695,22 @@
 							if (data['data'] && data['data']['trkpt']) {
 								const trkptDiv = document.createElement('div');
 								trkptLength = data['data']['trkpt'].length;
-								trkptDiv.textContent = `${i18n.get('number_l')}: ${trkptLength}${i18n.get('number_r')}`;
+								trkptDiv.textContent = `${trkptLength} segments`;
 								jsonInfoDiv.appendChild(trkptDiv);
 								progressBar.max = trkptLength - 1;
 
 								//console.log("data['data']['trkpt']的长度为：", trkptLength); // 输出分段数据长度用于调试
 								if (trkptLength > 1) { // 至少需要两段数据才能计算秒差
-									let secDiffSum = 0;
-									let secDiffArr = [];
-									for (let i = 0; i < trkptLength - 1; i++) {
-										const secDiff = data['data']['trkpt'][i + 1]['sec'] - data['data']['trkpt'][i]['sec'];
-										secDiffSum += secDiff;
-										secDiffArr.push(secDiff);
-										//console.log(`第${i + 1}段与第${i}段的sec属性秒差计算，当前i为：${i}，秒差为：${secDiff}`); // 输出每段秒差计算的相关信息用于调试
-									}
-									const averageSecDiff = secDiffSum / (trkptLength - 1);
-									const secDiffDiv = document.createElement('div');
-									secDiffDiv.textContent = `${i18n.get('Averagesegmen_tationl')}: ${averageSecDiff}${i18n.get('Averagesegmen_tationr')}`;
-									jsonInfoDiv.appendChild(secDiffDiv);
-									// 检查秒差是否一致
-									const isAllEqual = secDiffArr.every((value, index, array) => value === array[0]);
-									if (!isAllEqual) {
-										const unequalDiffDiv = document.createElement('div');
-										unequalDiffDiv.textContent = `${i18n.get('Averagesegmen_tationn')}`;
-										jsonInfoDiv.appendChild(unequalDiffDiv);
-									}
+
 									$('#jsonInfo').html($('#jsonInfo').html() + `
 										<div class="layui-btn-group">
-											<div type="button" style="display: inline-block;height: 30px;line-height: 30px;padding: 0 10px;font-size: 14px;vertical-align: middle;">${i18n.get('aspect_ratio')}</div>
-											<button type="button" class="layui-btn layui-btn-sm" id="b169">${i18n.get('landscape')}</button>
-											<button type="button" class="layui-btn layui-btn-sm" id="b916">${i18n.get('portrait')}</button>
+											<div type="button" style="display: inline-block;height: 30px;line-height: 30px;padding: 0 10px;font-size: 14px;vertical-align: middle;">Ratio</div>
+											<button type="button" class="layui-btn layui-btn-sm" id="b169">16:9</button>
+											<button type="button" class="layui-btn layui-btn-sm" id="b916">9:16</button>
 										</div>
 										<div class="layui-btn-group" style="margin-top: 10px;">
-											<button type="button" class="layui-btn layui-btn-sm" id="saveTemplate">保存模板</button>
-											<button type="button" class="layui-btn layui-btn-sm" id="loadTemplate">读取配置</button>
+											<button type="button" class="layui-btn layui-btn-sm" id="saveTemplate">Save Template</button>
+											<button type="button" class="layui-btn layui-btn-sm" id="loadTemplate">Load Template</button>
 										</div>
                         			`);
 
@@ -832,7 +756,7 @@
 
 								} else if (trkptLength === 1) {
 									const singleTrkptDiv = document.createElement('div');
-									singleTrkptDiv.textContent = `${i18n.get('Averagesegmentation_one')}`;
+									singleTrkptDiv.textContent = `Only one segment exists - second difference calculation unavailable`;
 									jsonInfoDiv.appendChild(singleTrkptDiv);
 								}
 
@@ -980,9 +904,9 @@
 					let now_slope = Math.round((totalAltitude / totalDistance) * 100) / 100;
 					if (now_slope > 1) {
 						point.slope = 1;
-					}else if (now_slope < -1) {
+					} else if (now_slope < -1) {
 						point.slope = -1;
-					}else{
+					} else {
 						point.slope = now_slope
 					}
 				});
@@ -1014,36 +938,52 @@
 				});
 
 				// 获取画布实际尺寸
+				// 获取画布尺寸
 				const canvasWidth = 600;
 				const canvasHeight = 600;
 
-				// 计算经纬度范围
-				let minLongitude = Infinity;
-				let maxLongitude = -Infinity;
-				let minLatitude = Infinity;
-				let maxLatitude = -Infinity;
+				// 计算地理范围
+				let minLon = Infinity, maxLon = -Infinity;
+				let minLat = Infinity, maxLat = -Infinity;
 
-				trkpt_data.forEach(function (dataPoint) {
-					const longitude = dataPoint.position_long;
-					const latitude = dataPoint.position_lat;
-
-					minLongitude = Math.min(minLongitude, longitude);
-					maxLongitude = Math.max(maxLongitude, longitude);
-					minLatitude = Math.min(minLatitude, latitude);
-					maxLatitude = Math.max(maxLatitude, latitude);
+				trkpt_data.forEach(point => {
+					minLon = Math.min(minLon, point.position_long);
+					maxLon = Math.max(maxLon, point.position_long);
+					minLat = Math.min(minLat, point.position_lat);
+					maxLat = Math.max(maxLat, point.position_lat);
 				});
 
-				// 计算独立缩放因子（处理边界情况）
-				const longitudeRange = maxLongitude - minLongitude || 1;
-				const latitudeRange = maxLatitude - minLatitude || 1;
-				const scaleX = canvasWidth / longitudeRange;
-				const scaleY = canvasHeight / latitudeRange;
+				// 计算地理跨度（防止零除）
+				const lonSpan = maxLon - minLon || 1;
+				const latSpan = maxLat - minLat || 1;
 
-				// 转换坐标并存储
-				trkpt_data.forEach(function (dataPoint) {
-					const x = (dataPoint.position_long - minLongitude) * scaleX;
-					const y = (maxLatitude - dataPoint.position_lat) * scaleY; // 北纬对应画布顶部
+				// 计算比例尺
+				const geoRatio = lonSpan / latSpan;
+				const canvasRatio = canvasWidth / canvasHeight;
+				const scale = geoRatio > canvasRatio
+					? canvasWidth / lonSpan   // 横向优先
+					: canvasHeight / latSpan; // 纵向优先
 
+				// 计算实际绘制区域尺寸
+				const contentWidth = lonSpan * scale;
+				const contentHeight = latSpan * scale;
+
+				// 居中偏移量
+				const offsetX = (canvasWidth - contentWidth) / 2;
+				const offsetY = (canvasHeight - contentHeight) / 2;
+
+				// 生成扁平坐标数组 [x,y,x,y...]
+
+				trkpt_data.forEach(point => {
+					// 计算原始坐标
+					const rawX = (point.position_long - minLon) * scale;
+					const rawY = (maxLat - point.position_lat) * scale; // 北纬在上
+
+					// 应用居中偏移
+					const x = offsetX + rawX;
+					const y = offsetY + rawY;
+
+					// 推入数组
 					map_points.push(x, y);
 				});
 
@@ -1149,9 +1089,19 @@
 		// 调用函数获取json数据
 		//processJson();
 
+
+
 		// 全局变量 LeaferUI
 		const { App, Leafer, Line, Rect, Ellipse, Polygon, Box, Text, PointerButton, PointerEvent, Frame, ZoomEvent, LeafHelper } = LeaferUI;
 		const { HTMLText } = LeaferIN.html;
+
+		document.head.insertAdjacentHTML('beforeend', `
+    <style>
+        .leafer-canvas {
+            font-family: Arial, system-ui, sans-serif !important;
+        }
+    </style>
+`);
 
 		appview = new App({
 			id: 'appview',
@@ -1167,7 +1117,6 @@
 				rotatePoint: { width: 16, height: 16 },
 				rect: { dashPattern: [3, 2] }
 			},
-
 		});
 
 		const { interaction } = appview;
@@ -1201,8 +1150,8 @@
 							{
 								"id": "appv_bg_pan",
 								"set": [
-									{ "name": `${i18n.get('Canvas_settings')}`, "url": '', "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Canvas_color')}`, "url": "appv_bg_pan.children[0].fill", "value": appv_date_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Canvas Settings`, "url": '', "value": "", "type": "title", "tools": false },
+									{ "name": `Canvas color`, "url": "appv_bg_pan.children[0].fill", "value": appv_bg_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1243,8 +1192,8 @@
 							{
 								"id": "appv_date_pan",
 								"set": [
-									{ "name": `${i18n.get('dateTime')}`, "url": appv_date_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "appv_date_pan.children[0].fill", "value": appv_date_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `DateTime`, "url": appv_date_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "appv_date_pan.children[0].fill", "value": appv_date_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1314,15 +1263,15 @@
 							{
 								"id": "appv_metrics_pan",
 								"set": [
-									{ "name": `${i18n.get('Heart_pace_cadence')}`, "url": "", "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Heart_line_thickness')}`, "url": "appv_metrics_pan.children[0].strokeWidth", "value": appv_metrics_pan.children[0].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('Heart_color')}`, "url": "appv_metrics_pan.children[0].stroke", "value": appv_metrics_pan.children[0].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('cadence_line_thickness')}`, "url": "appv_metrics_pan.children[1].strokeWidth", "value": appv_metrics_pan.children[1].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('cadence_color')}`, "url": "appv_metrics_pan.children[1].stroke", "value": appv_metrics_pan.children[1].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('pace_line_thickness')}`, "url": "appv_metrics_pan.children[2].strokeWidth", "value": appv_metrics_pan.children[2].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('pace_color')}`, "url": "appv_metrics_pan.children[2].stroke", "value": appv_metrics_pan.children[2].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_color')}`, "url": "appv_metrics_pan.children[3].strokeWidth", "value": appv_metrics_pan.children[3].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('line_thickness')}`, "url": "appv_metrics_pan.children[3].stroke", "value": appv_metrics_pan.children[3].stroke, "type": "color", "tools": true },
+									{ "name": `Heart_pace_cadence`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `Heart_line_thickness`, "url": "appv_metrics_pan.children[0].strokeWidth", "value": appv_metrics_pan.children[0].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Heart_color`, "url": "appv_metrics_pan.children[0].stroke", "value": appv_metrics_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `cadence_line_thickness`, "url": "appv_metrics_pan.children[1].strokeWidth", "value": appv_metrics_pan.children[1].strokeWidth, "type": "number", "tools": true },
+									{ "name": `cadence_color`, "url": "appv_metrics_pan.children[1].stroke", "value": appv_metrics_pan.children[1].stroke, "type": "color", "tools": true },
+									{ "name": `pace_line_thickness`, "url": "appv_metrics_pan.children[2].strokeWidth", "value": appv_metrics_pan.children[2].strokeWidth, "type": "number", "tools": true },
+									{ "name": `pace_color`, "url": "appv_metrics_pan.children[2].stroke", "value": appv_metrics_pan.children[2].stroke, "type": "color", "tools": true },
+									{ "name": `progress_color`, "url": "appv_metrics_pan.children[3].strokeWidth", "value": appv_metrics_pan.children[3].strokeWidth, "type": "number", "tools": true },
+									{ "name": `line_thickness`, "url": "appv_metrics_pan.children[3].stroke", "value": appv_metrics_pan.children[3].stroke, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1334,7 +1283,7 @@
 			//心率图表
 			pt_heart_pan = new Box({
 				id: 'pt_heart_pan',
-				x: 20,//左上角位置
+				x: 80,//左上角位置
 				y: 850,//左上角位置
 				width: 400,
 				height: 200,
@@ -1374,38 +1323,37 @@
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						x:2,
-						y:0,
+						x: -6,
+						y: 0,
 						fontSize: 20,
 						fontWeight: 'black',
 						text: heartRateMax,
 						fill: '#FFFFFF',
-						textAlign: 'left',
+						textAlign: 'right',
 						verticalAlign: 'middle',
 					},
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						width:100,
-						x:2,
-						y:100,
+						x: -6,
+						y: 100,
 						fontSize: 20,
 						fontWeight: 'black',
 						text: Math.round((heartRateMax + heartRateMin) / 2),
 						fill: '#FFFFFF',
-						textAlign: 'left',
+						textAlign: 'right',
 						verticalAlign: 'middle',
 					},
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						x:2,
-						y:200,
+						x: -6,
+						y: 200,
 						fontSize: 20,
 						fontWeight: 'black',
 						text: heartRateMin,
 						fill: '#FFFFFF',
-						textAlign: 'left',
+						textAlign: 'right',
 						verticalAlign: 'middle',
 					},
 					{
@@ -1440,8 +1388,8 @@
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						x:55,
-						y:180,
+						x: 55,
+						y: 180,
 						fontSize: 24,
 						fontWeight: 'black',
 						text: '180',
@@ -1453,8 +1401,8 @@
 						tag: 'Ellipse',
 						lockRatio: true,
 						around: 'center',
-						x:50,
-						y:100,
+						x: 50,
+						y: 100,
 						width: 13,
 						height: 13,
 						fill: "#ffde7d"
@@ -1470,8 +1418,8 @@
 									{ "name": `心率`, "url": "", "value": "", "type": "title", "tools": false },
 									{ "name": `标尺颜色`, "url": "pt_heart_pan.children[0].stroke", "value": pt_heart_pan.children[0].stroke, "type": "heart_color_line", "tools": true },
 									{ "name": `标尺文字颜色`, "url": "pt_heart_pan.children[3].fill", "value": pt_heart_pan.children[3].fill, "type": "heart_line_text", "tools": true },
-									{ "name": `${i18n.get('Heart_line_thickness')}`, "url": "pt_heart_pan.children[6].strokeWidth", "value": pt_heart_pan.children[6].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('Heart_color')}`, "url": "pt_heart_pan.children[6].stroke", "value": pt_heart_pan.children[6].stroke, "type": "color", "tools": true },
+									{ "name": `Heart_line_thickness`, "url": "pt_heart_pan.children[6].strokeWidth", "value": pt_heart_pan.children[6].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Heart_color`, "url": "pt_heart_pan.children[6].stroke", "value": pt_heart_pan.children[6].stroke, "type": "color", "tools": true },
 									{ "name": `进度线粗细`, "url": "pt_heart_pan.children[7].strokeWidth", "value": pt_heart_pan.children[7].strokeWidth, "type": "number", "tools": true },
 									{ "name": `进度线颜色`, "url": "pt_heart_pan.children[7].stroke", "value": pt_heart_pan.children[7].stroke, "type": "color", "tools": true },
 									{ "name": `进度点颜色`, "url": "pt_heart_pan.children[10].fill", "value": pt_heart_pan.children[10].fill, "type": "color", "tools": true },
@@ -1487,7 +1435,7 @@
 			//配速图标
 			pt_pace_pan = new Box({
 				id: 'pt_pace_pan',
-				x: 20,//左上角位置
+				x: 80,//左上角位置
 				y: 600,//左上角位置
 				width: 400,
 				height: 200,
@@ -1527,38 +1475,37 @@
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						x:2,
-						y:0,
+						x: -6,
+						y: 0,
 						fontSize: 20,
 						fontWeight: 'black',
 						text: SpeedformatPace(paceMax),
 						fill: '#FFFFFF',
-						textAlign: 'left',
+						textAlign: 'right',
 						verticalAlign: 'middle',
 					},
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						width:100,
-						x:2,
-						y:100,
+						x: -6,
+						y: 100,
 						fontSize: 20,
 						fontWeight: 'black',
 						text: SpeedformatPace((paceMax + paceMin) / 2),
 						fill: '#FFFFFF',
-						textAlign: 'left',
+						textAlign: 'right',
 						verticalAlign: 'middle',
 					},
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						x:2,
-						y:200,
+						x: -6,
+						y: 200,
 						fontSize: 20,
 						fontWeight: 'black',
 						text: SpeedformatPace(paceMin),
 						fill: '#FFFFFF',
-						textAlign: 'left',
+						textAlign: 'right',
 						verticalAlign: 'middle',
 					},
 					{
@@ -1593,8 +1540,8 @@
 					{
 						tag: 'Text',
 						resizeFontSize: true,
-						x:55,
-						y:180,
+						x: 55,
+						y: 180,
 						fontSize: 24,
 						fontWeight: 'black',
 						text: '180',
@@ -1606,8 +1553,8 @@
 						tag: 'Ellipse',
 						lockRatio: true,
 						around: 'center',
-						x:50,
-						y:100,
+						x: 50,
+						y: 100,
 						width: 13,
 						height: 13,
 						fill: "#ffde7d"
@@ -1679,10 +1626,10 @@
 							{
 								"id": "appv_ele_pan",
 								"set": [
-									{ "name": `${i18n.get('elevation')}`, "url": "", "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('line_thickness')}`, "url": "appv_ele_pan.children[0].strokeWidth", "value": appv_ele_pan.children[0].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('elevation_color')}`, "url": "appv_ele_pan.children[0].stroke", "value": appv_ele_pan.children[0].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_color')}`, "url": "appv_ele_pan.children[1].stroke", "value": appv_ele_pan.children[1].stroke, "type": "color", "tools": true },
+									{ "name": `elevation`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `line_thickness`, "url": "appv_ele_pan.children[0].strokeWidth", "value": appv_ele_pan.children[0].strokeWidth, "type": "number", "tools": true },
+									{ "name": `elevation_color`, "url": "appv_ele_pan.children[0].stroke", "value": appv_ele_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `progress_color`, "url": "appv_ele_pan.children[1].stroke", "value": appv_ele_pan.children[1].stroke, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1717,10 +1664,9 @@
 					{
 						tag: 'Ellipse',
 						lockRatio: true,
-						width: 11,
-						height: 11,
-						offsetX: -6,
-						offsetY: -6,
+						around: 'center',
+						width: 14,
+						height: 14,
 						fill: "#FFCC00",
 					},
 				],
@@ -1731,10 +1677,10 @@
 							{
 								"id": "appv_ele18_pan",
 								"set": [
-									{ "name": `${i18n.get('elevationwide')}`, "url": "", "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('line_thickness')}`, "url": "appv_ele18_pan.children[0].strokeWidth", "value": appv_ele18_pan.children[0].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('elevation_color')}`, "url": "appv_ele18_pan.children[0].stroke", "value": appv_ele18_pan.children[0].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_color')}`, "url": "appv_ele18_pan.children[1].fill", "value": appv_ele18_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `elevationwide`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `line_thickness`, "url": "appv_ele18_pan.children[0].strokeWidth", "value": appv_ele18_pan.children[0].strokeWidth, "type": "number", "tools": true },
+									{ "name": `elevation_color`, "url": "appv_ele18_pan.children[0].stroke", "value": appv_ele18_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `progress_color`, "url": "appv_ele18_pan.children[1].fill", "value": appv_ele18_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1777,8 +1723,8 @@
 							{
 								"id": "appv_nowstatus_pan",
 								"set": [
-									{ "name": `${i18n.get('attribute')}`, "url": appv_nowstatus_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "appv_nowstatus_pan.children[0].fill", "value": appv_nowstatus_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `attribute`, "url": appv_nowstatus_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "appv_nowstatus_pan.children[0].fill", "value": appv_nowstatus_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1810,7 +1756,7 @@
 						fontWeight: 'black',
 						text: `1Km用时：00:00\n2Km用时：03:00`,
 						fill: '#FFFFFF',
-						textAlign: 'left',
+						textAlign: 'right',
 						verticalAlign: 'top',
 					}
 				],
@@ -1821,8 +1767,8 @@
 							{
 								"id": "appv_lap_pan",
 								"set": [
-									{ "name": `${i18n.get('lap')}`, "url": appv_lap_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "appv_lap_pan.children[0].fill", "value": appv_lap_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `lap`, "url": appv_lap_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "appv_lap_pan.children[0].fill", "value": appv_lap_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1867,9 +1813,9 @@
 							{
 								"id": "appv_nowtime_pan",
 								"set": [
-									{ "name": `${i18n.get('nowtime')}`, "url": appv_nowtime_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Background_color')}`, "url": "appv_nowtime_pan.fill", "value": appv_nowtime_pan.fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "appv_nowtime_pan.children[0].fill", "value": appv_nowtime_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Sport ET`, "url": appv_nowtime_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Background_color`, "url": "appv_nowtime_pan.fill", "value": appv_nowtime_pan.fill, "type": "color", "tools": true },
+									{ "name": `Text_color`, "url": "appv_nowtime_pan.children[0].fill", "value": appv_nowtime_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1927,13 +1873,13 @@
 							{
 								"id": "appv_map_pan",
 								"set": [
-									{ "name": `${i18n.get('route')}`, "url": appv_map_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Background_route_thickness')}`, "url": "appv_map_pan.children[0].strokeWidth", "value": appv_map_pan.children[0].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('Background_route_color')}`, "url": "appv_map_pan.children[0].stroke", "value": appv_map_pan.children[0].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_route_thickness')}`, "url": "appv_map_pan.children[1].strokeWidth", "value": appv_map_pan.children[1].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('progress_route_color')}`, "url": "appv_map_pan.children[1].stroke", "value": appv_map_pan.children[1].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Current_position_size')}`, "url": "appv_map_pan.children[2]", "value": appv_map_pan.children[2].width, "type": "Ellipse", "tools": true },
-									{ "name": `${i18n.get('Current_position_color')}`, "url": "appv_map_pan.children[2].fill", "value": appv_map_pan.children[2].fill, "type": "color", "tools": true },
+									{ "name": `route`, "url": appv_map_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Background_route_thickness`, "url": "appv_map_pan.children[0].strokeWidth", "value": appv_map_pan.children[0].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Background_route_color`, "url": "appv_map_pan.children[0].stroke", "value": appv_map_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `progress_route_thickness`, "url": "appv_map_pan.children[1].strokeWidth", "value": appv_map_pan.children[1].strokeWidth, "type": "number", "tools": true },
+									{ "name": `progress_route_color`, "url": "appv_map_pan.children[1].stroke", "value": appv_map_pan.children[1].stroke, "type": "color", "tools": true },
+									{ "name": `Current_position_size`, "url": "appv_map_pan.children[2]", "value": appv_map_pan.children[2].width, "type": "Ellipse", "tools": true },
+									{ "name": `Current_position_color`, "url": "appv_map_pan.children[2].fill", "value": appv_map_pan.children[2].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1990,12 +1936,12 @@
 							{
 								"id": "appv_map_a_pan",
 								"set": [
-									{ "name": `${i18n.get('route')}`, "url": appv_map_a_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Background_route_thickness')}`, "url": "appv_map_a_pan.children[0].strokeWidth", "value": appv_map_a_pan.children[0].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('Background_route_color')}`, "url": "appv_map_a_pan.children[0].stroke", "value": appv_map_a_pan.children[0].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_route_thickness')}`, "url": "appv_map_a_pan.children[1].strokeWidth", "value": appv_map_a_pan.children[1].strokeWidth, "type": "number", "tools": true },
-									{ "name": `${i18n.get('progress_route_color')}`, "url": "appv_map_a_pan.children[1].stroke", "value": appv_map_a_pan.children[1].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Current_position_color')}`, "url": "appv_map_a_pan.children[2].fill", "value": appv_map_a_pan.children[2].fill, "type": "color", "tools": true },
+									{ "name": `route`, "url": appv_map_a_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Background_route_thickness`, "url": "appv_map_a_pan.children[0].strokeWidth", "value": appv_map_a_pan.children[0].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Background_route_color`, "url": "appv_map_a_pan.children[0].stroke", "value": appv_map_a_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `progress_route_thickness`, "url": "appv_map_a_pan.children[1].strokeWidth", "value": appv_map_a_pan.children[1].strokeWidth, "type": "number", "tools": true },
+									{ "name": `progress_route_color`, "url": "appv_map_a_pan.children[1].stroke", "value": appv_map_a_pan.children[1].stroke, "type": "color", "tools": true },
+									{ "name": `Current_position_color`, "url": "appv_map_a_pan.children[2].fill", "value": appv_map_a_pan.children[2].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2036,12 +1982,12 @@
 							{
 								"id": "web_map_pan",
 								"set": [
-									{ "name": `${i18n.get('webroute')}`, "url": web_map_pan.id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('border-color')}`, "url": "web_map_pan.stroke", "value": web_map_pan.stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Background_route_color')}`, "url": "polyline.updateSymbol({'lineColor': value})", "value": polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-									{ "name": `${i18n.get('progress_route_color')}`, "url": "new_polyline.updateSymbol({'lineColor': value})", "value": new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-									{ "name": `${i18n.get('Current_position_color')}`, "url": "marker.updateSymbol({'markerFill': value})", "value": marker._symbol.markerFill, "type": "funcolor", "tools": true },
-									{ "name": `${i18n.get('map-Pitch')}`, "url": "map.setPitch(value);", "value": map.getPitch(), "type": "funnumber", "tools": true },
+									{ "name": `webroute`, "url": web_map_pan.id, "value": "", "type": "title", "tools": false },
+									{ "name": `border_color`, "url": "web_map_pan.stroke", "value": web_map_pan.stroke, "type": "color", "tools": true },
+									{ "name": `Background_route_color`, "url": "polyline.updateSymbol({'lineColor': value})", "value": polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+									{ "name": `progress_route_color`, "url": "new_polyline.updateSymbol({'lineColor': value})", "value": new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+									{ "name": `Current_position_color`, "url": "marker.updateSymbol({'markerFill': value})", "value": marker._symbol.markerFill, "type": "funcolor", "tools": true },
+									{ "name": `Map_Pitch`, "url": "map.setPitch(value);", "value": map.getPitch(), "type": "funnumber", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2081,12 +2027,12 @@
 							{
 								"id": "web_minimap_pan",
 								"set": [
-									{ "name": `${i18n.get('webroute')}`, "url": web_minimap_pan.id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('border-color')}`, "url": "web_minimap_pan.stroke", "value": web_minimap_pan.stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Background_route_color')}`, "url": "mini_polyline.updateSymbol({'lineColor': value})", "value": mini_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-									{ "name": `${i18n.get('progress_route_color')}`, "url": "mini_new_polyline.updateSymbol({'lineColor': value})", "value": mini_new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-									{ "name": `${i18n.get('Current_position_color')}`, "url": "mini_marker.updateSymbol({'markerFill': value})", "value": mini_marker._symbol.markerFill, "type": "funcolor", "tools": true },
-									{ "name": `${i18n.get('map-Pitch')}`, "url": "minimap.setPitch(value);", "value": minimap.getPitch(), "type": "funnumber", "tools": true },
+									{ "name": `webroute`, "url": web_minimap_pan.id, "value": "", "type": "title", "tools": false },
+									{ "name": `border_color`, "url": "web_minimap_pan.stroke", "value": web_minimap_pan.stroke, "type": "color", "tools": true },
+									{ "name": `Background_route_color`, "url": "mini_polyline.updateSymbol({'lineColor': value})", "value": mini_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+									{ "name": `progress_route_color`, "url": "mini_new_polyline.updateSymbol({'lineColor': value})", "value": mini_new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
+									{ "name": `Current_position_color`, "url": "mini_marker.updateSymbol({'markerFill': value})", "value": mini_marker._symbol.markerFill, "type": "funcolor", "tools": true },
+									{ "name": `Map_Pitch`, "url": "minimap.setPitch(value);", "value": minimap.getPitch(), "type": "funnumber", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2177,12 +2123,12 @@
 							{
 								"id": "appv_distance_pan",
 								"set": [
-									{ "name": `${i18n.get('distance')}`, "url": appv_distance_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Background_color')}`, "url": "appv_distance_pan.fill", "value": appv_distance_pan.fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('distance_color')}`, "url": "appv_distance_pan.children[0].fill", "value": appv_distance_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_distance_color')}`, "url": "appv_distance_pan.children[2].fill", "value": appv_distance_pan.children[2].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_Background_color')}`, "url": "appv_distance_pan.children[3].fill", "value": appv_distance_pan.children[3].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_color')}`, "url": "appv_distance_pan.children[4].fill", "value": appv_distance_pan.children[4].fill, "type": "color", "tools": true },
+									{ "name": `distance`, "url": appv_distance_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Background_color`, "url": "appv_distance_pan.fill", "value": appv_distance_pan.fill, "type": "color", "tools": true },
+									{ "name": `distance_color`, "url": "appv_distance_pan.children[0].fill", "value": appv_distance_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `progress_distance_color`, "url": "appv_distance_pan.children[2].fill", "value": appv_distance_pan.children[2].fill, "type": "color", "tools": true },
+									{ "name": `progress_Background_color`, "url": "appv_distance_pan.children[3].fill", "value": appv_distance_pan.children[3].fill, "type": "color", "tools": true },
+									{ "name": `progress_color`, "url": "appv_distance_pan.children[4].fill", "value": appv_distance_pan.children[4].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2213,7 +2159,7 @@
 						resizeFontSize: true,
 						fontSize: 32,
 						fontWeight: 'black',
-						text: `${i18n.get('pace')}：km/h`,
+						text: `Pace：km/h`,
 						fill: '#FFFFFF',
 						textAlign: 'left',
 						verticalAlign: 'top',
@@ -2234,9 +2180,9 @@
 							{
 								"id": "TO_pace_pan",
 								"set": [
-									{ "name": `${i18n.get('pace')}`, "url": TO_pace_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "TO_pace_pan.children[0].fill", "value": TO_pace_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('icon_color')}`, "url": "TO_pace_pan.children[1].fill", "value": TO_pace_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Pace`, "url": TO_pace_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_pace_pan.children[0].fill", "value": TO_pace_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_pace_pan.children[1].fill", "value": TO_pace_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2267,7 +2213,7 @@
 						resizeFontSize: true,
 						fontSize: 32,
 						fontWeight: 'black',
-						text: `${i18n.get('heart_rate')}：bpm`,
+						text: `Heart Rate：bpm`,
 						fill: '#FFFFFF',
 						textAlign: 'left',
 						verticalAlign: 'top',
@@ -2288,9 +2234,9 @@
 							{
 								"id": "TO_heart_pan",
 								"set": [
-									{ "name": `${i18n.get('heart_rate')}`, "url": TO_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "TO_heart_pan.children[0].fill", "value": TO_heart_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('icon_color')}`, "url": "TO_heart_pan.children[1].fill", "value": TO_heart_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Heart Rate`, "url": TO_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_heart_pan.children[0].fill", "value": TO_heart_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_heart_pan.children[1].fill", "value": TO_heart_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2321,7 +2267,7 @@
 						resizeFontSize: true,
 						fontSize: 32,
 						fontWeight: 'black',
-						text: `${i18n.get('cadence')}：steps/min`,
+						text: `Cadence：steps/min`,
 						fill: '#FFFFFF',
 						textAlign: 'left',
 						verticalAlign: 'top',
@@ -2342,9 +2288,9 @@
 							{
 								"id": "TO_cadence_pan",
 								"set": [
-									{ "name": `${i18n.get('cadence')}`, "url": TO_cadence_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "TO_cadence_pan.children[0].fill", "value": TO_cadence_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('icon_color')}`, "url": "TO_cadence_pan.children[1].fill", "value": TO_cadence_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Cadence`, "url": TO_cadence_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_cadence_pan.children[0].fill", "value": TO_cadence_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_cadence_pan.children[1].fill", "value": TO_cadence_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2375,7 +2321,7 @@
 						resizeFontSize: true,
 						fontSize: 32,
 						fontWeight: 'black',
-						text: `${i18n.get('step_length')}：m`,
+						text: `Step：m`,
 						fill: '#FFFFFF',
 						textAlign: 'left',
 						verticalAlign: 'top',
@@ -2396,9 +2342,9 @@
 							{
 								"id": "TO_step_pan",
 								"set": [
-									{ "name": `${i18n.get('step_length')}`, "url": TO_step_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "TO_step_pan.children[0].fill", "value": TO_step_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('icon_color')}`, "url": "TO_step_pan.children[1].fill", "value": TO_step_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Step`, "url": TO_step_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_step_pan.children[0].fill", "value": TO_step_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_step_pan.children[1].fill", "value": TO_step_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2449,9 +2395,9 @@
 							{
 								"id": "TO_gps_pan",
 								"set": [
-									{ "name": `${i18n.get('location')}`, "url": TO_gps_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "TO_gps_pan.children[0].fill", "value": TO_gps_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('icon_color')}`, "url": "TO_gps_pan.children[1].fill", "value": TO_gps_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `location`, "url": TO_gps_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_gps_pan.children[0].fill", "value": TO_gps_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_gps_pan.children[1].fill", "value": TO_gps_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2491,8 +2437,8 @@
 							{
 								"id": "text_nowtime_pan",
 								"set": [
-									{ "name": `${i18n.get('Elapsedtime')}`, "url": text_nowtime_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "text_nowtime_pan.children[0].fill", "value": text_nowtime_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Elapsedtime`, "url": text_nowtime_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "text_nowtime_pan.children[0].fill", "value": text_nowtime_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2532,8 +2478,8 @@
 							{
 								"id": "text_time_pan",
 								"set": [
-									{ "name": `${i18n.get('nowtime')}`, "url": text_time_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "text_time_pan.children[0].fill", "value": text_time_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `NowTime`, "url": text_time_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "text_time_pan.children[0].fill", "value": text_time_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2573,8 +2519,8 @@
 							{
 								"id": "text_day_pan",
 								"set": [
-									{ "name": `${i18n.get('date')}`, "url": text_day_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "text_day_pan.children[0].fill", "value": text_day_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Date`, "url": text_day_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "text_day_pan.children[0].fill", "value": text_day_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2613,9 +2559,9 @@
 							{
 								"id": "text_str1_pan",
 								"set": [
-									{ "name": `${i18n.get('Custom_text')}`, "url": text_str1_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_content')}`, "url": "text_str1_pan.children[0].text", "value": text_str1_pan.children[0].text, "type": "text", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "text_str1_pan.children[0].fill", "value": text_str1_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Custom_text`, "url": text_str1_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_content`, "url": "text_str1_pan.children[0].text", "value": text_str1_pan.children[0].text, "type": "text", "tools": true },
+									{ "name": `Text_color`, "url": "text_str1_pan.children[0].fill", "value": text_str1_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2654,9 +2600,9 @@
 							{
 								"id": "text_str2_pan",
 								"set": [
-									{ "name": `${i18n.get('Custom_text')}`, "url": text_str2_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_content')}`, "url": "text_str2_pan.children[0].text", "value": text_str2_pan.children[0].text, "type": "text", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "text_str2_pan.children[0].fill", "value": text_str2_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Custom_text`, "url": text_str2_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_content`, "url": "text_str2_pan.children[0].text", "value": text_str2_pan.children[0].text, "type": "text", "tools": true },
+									{ "name": `Text_color`, "url": "text_str2_pan.children[0].fill", "value": text_str2_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2695,9 +2641,9 @@
 							{
 								"id": "text_str3_pan",
 								"set": [
-									{ "name": `${i18n.get('Custom_text')}`, "url": text_str3_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_content')}`, "url": "text_str3_pan.children[0].text", "value": text_str3_pan.children[0].text, "type": "text", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "text_str3_pan.children[0].fill", "value": text_str3_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Custom_text`, "url": text_str3_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_content`, "url": "text_str3_pan.children[0].text", "value": text_str3_pan.children[0].text, "type": "text", "tools": true },
+									{ "name": `Text_color`, "url": "text_str3_pan.children[0].fill", "value": text_str3_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2736,9 +2682,9 @@
 							{
 								"id": "text_str4_pan",
 								"set": [
-									{ "name": `${i18n.get('Custom_text')}`, "url": text_str4_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_content')}`, "url": "text_str4_pan.children[0].text", "value": text_str4_pan.children[0].text, "type": "text", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "text_str4_pan.children[0].fill", "value": text_str4_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Custom_text`, "url": text_str4_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_content`, "url": "text_str4_pan.children[0].text", "value": text_str4_pan.children[0].text, "type": "text", "tools": true },
+									{ "name": `Text_color`, "url": "text_str4_pan.children[0].fill", "value": text_str4_pan.children[0].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2817,11 +2763,11 @@
 							{
 								"id": "el_heart_pan",
 								"set": [
-									{ "name": `${i18n.get('heart_rate')}`, "url": el_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "el_heart_pan.children[0].fill", "value": el_heart_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Unit_color')}`, "url": "el_heart_pan.children[1].fill", "value": el_heart_pan.children[1].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Graphic_backgrounds')}`, "url": "el_heart_pan.children[2].stroke", "value": el_heart_pan.children[2].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Graphic_color')}`, "url": "el_heart_pan.children[3].stroke", "value": el_heart_pan.children[3].stroke, "type": "color", "tools": true },
+									{ "name": `Heart Rate`, "url": el_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "el_heart_pan.children[0].fill", "value": el_heart_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Unit_color`, "url": "el_heart_pan.children[1].fill", "value": el_heart_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Graphic_backgrounds`, "url": "el_heart_pan.children[2].stroke", "value": el_heart_pan.children[2].stroke, "type": "color", "tools": true },
+									{ "name": `Graphic_color`, "url": "el_heart_pan.children[3].stroke", "value": el_heart_pan.children[3].stroke, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2900,11 +2846,11 @@
 							{
 								"id": "el_pace_pan",
 								"set": [
-									{ "name": `${i18n.get('pace')}`, "url": el_pace_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "el_pace_pan.children[0].fill", "value": el_pace_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Unit_color')}`, "url": "el_pace_pan.children[1].fill", "value": el_pace_pan.children[1].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Graphic_backgrounds')}`, "url": "el_pace_pan.children[2].stroke", "value": el_pace_pan.children[2].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Graphic_color')}`, "url": "el_pace_pan.children[3].stroke", "value": el_pace_pan.children[3].stroke, "type": "color", "tools": true },
+									{ "name": `Pace`, "url": el_pace_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "el_pace_pan.children[0].fill", "value": el_pace_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Unit_color`, "url": "el_pace_pan.children[1].fill", "value": el_pace_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Graphic_backgrounds`, "url": "el_pace_pan.children[2].stroke", "value": el_pace_pan.children[2].stroke, "type": "color", "tools": true },
+									{ "name": `Graphic_color`, "url": "el_pace_pan.children[3].stroke", "value": el_pace_pan.children[3].stroke, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2983,11 +2929,11 @@
 							{
 								"id": "el_cadence_pan",
 								"set": [
-									{ "name": `${i18n.get('cadence')}`, "url": el_cadence_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "el_cadence_pan.children[0].fill", "value": el_cadence_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Unit_color')}`, "url": "el_cadence_pan.children[1].fill", "value": el_cadence_pan.children[1].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Graphic_backgrounds')}`, "url": "el_cadence_pan.children[2].stroke", "value": el_cadence_pan.children[2].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Graphic_color')}`, "url": "el_cadence_pan.children[3].stroke", "value": el_cadence_pan.children[3].stroke, "type": "color", "tools": true },
+									{ "name": `Cadence`, "url": el_cadence_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "el_cadence_pan.children[0].fill", "value": el_cadence_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Unit_color`, "url": "el_cadence_pan.children[1].fill", "value": el_cadence_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Graphic_backgrounds`, "url": "el_cadence_pan.children[2].stroke", "value": el_cadence_pan.children[2].stroke, "type": "color", "tools": true },
+									{ "name": `Graphic_color`, "url": "el_cadence_pan.children[3].stroke", "value": el_cadence_pan.children[3].stroke, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -3101,15 +3047,15 @@
 							{
 								"id": "l_distance_pan",
 								"set": [
-									{ "name": `${i18n.get('distancewide')}`, "url": l_distance_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Background_color')}`, "url": "l_distance_pan.children[0].fill", "value": l_distance_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('progress_color')}`, "url": "l_distance_pan.children[1].stroke", "value": l_distance_pan.children[1].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Ruler_color1')}`, "url": "l_distance_pan.children[2].stroke", "value": l_distance_pan.children[2].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Ruler_color2')}`, "url": "l_distance_pan.children[3].stroke", "value": l_distance_pan.children[3].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Start_color')}`, "url": "l_distance_pan.children[4].fill", "value": l_distance_pan.children[4].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('End_color')}`, "url": "l_distance_pan.children[5].fill", "value": l_distance_pan.children[5].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Locator_color')}`, "url": "l_distance_pan.children[6].fill", "value": l_distance_pan.children[6].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Current_value_color')}`, "url": "l_distance_pan.children[7].fill", "value": l_distance_pan.children[7].fill, "type": "color", "tools": true },
+									{ "name": `distancewide`, "url": l_distance_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Background_color`, "url": "l_distance_pan.children[0].fill", "value": l_distance_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `progress_color`, "url": "l_distance_pan.children[1].stroke", "value": l_distance_pan.children[1].stroke, "type": "color", "tools": true },
+									{ "name": `Ruler_color1`, "url": "l_distance_pan.children[2].stroke", "value": l_distance_pan.children[2].stroke, "type": "color", "tools": true },
+									{ "name": `Ruler_color2`, "url": "l_distance_pan.children[3].stroke", "value": l_distance_pan.children[3].stroke, "type": "color", "tools": true },
+									{ "name": `Start_color`, "url": "l_distance_pan.children[4].fill", "value": l_distance_pan.children[4].fill, "type": "color", "tools": true },
+									{ "name": `End_color`, "url": "l_distance_pan.children[5].fill", "value": l_distance_pan.children[5].fill, "type": "color", "tools": true },
+									{ "name": `Locator_color`, "url": "l_distance_pan.children[6].fill", "value": l_distance_pan.children[6].fill, "type": "color", "tools": true },
+									{ "name": `Current_value_color`, "url": "l_distance_pan.children[7].fill", "value": l_distance_pan.children[7].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -3238,17 +3184,17 @@
 							{
 								"id": "el_leida_pan",
 								"set": [
-									{ "name": `${i18n.get('leida')}`, "url": el_leida_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Background_color')}`, "url": "el_leida_pan.children[0].fill", "value": el_leida_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Background_color')}`, "url": "el_leida_pan.children[1].fill", "value": el_leida_pan.children[1].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Background_color')}`, "url": "el_leida_pan.children[2].fill", "value": el_leida_pan.children[2].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Background_color')}`, "url": "el_leida_pan.children[3].stroke", "value": el_leida_pan.children[3].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Background_color')}`, "url": "el_leida_pan.children[4].stroke", "value": el_leida_pan.children[4].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Background_color')}`, "url": "el_leida_pan.children[5].stroke", "value": el_leida_pan.children[5].stroke, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "el_leida_pan.children[6].fill", "value": el_leida_pan.children[6].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "el_leida_pan.children[7].fill", "value": el_leida_pan.children[7].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Text_color')}`, "url": "el_leida_pan.children[8].fill", "value": el_leida_pan.children[8].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('leida_color')}`, "url": "el_leida_pan.children[9].fill", "value": el_leida_pan.children[9].fill, "type": "color", "tools": true },
+									{ "name": `Radar`, "url": el_leida_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Background_color`, "url": "el_leida_pan.children[0].fill", "value": el_leida_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Background_color`, "url": "el_leida_pan.children[1].fill", "value": el_leida_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Background_color`, "url": "el_leida_pan.children[2].fill", "value": el_leida_pan.children[2].fill, "type": "color", "tools": true },
+									{ "name": `Background_color`, "url": "el_leida_pan.children[3].stroke", "value": el_leida_pan.children[3].stroke, "type": "color", "tools": true },
+									{ "name": `Background_color`, "url": "el_leida_pan.children[4].stroke", "value": el_leida_pan.children[4].stroke, "type": "color", "tools": true },
+									{ "name": `Background_color`, "url": "el_leida_pan.children[5].stroke", "value": el_leida_pan.children[5].stroke, "type": "color", "tools": true },
+									{ "name": `Text_color`, "url": "el_leida_pan.children[6].fill", "value": el_leida_pan.children[6].fill, "type": "color", "tools": true },
+									{ "name": `Text_color`, "url": "el_leida_pan.children[7].fill", "value": el_leida_pan.children[7].fill, "type": "color", "tools": true },
+									{ "name": `Text_color`, "url": "el_leida_pan.children[8].fill", "value": el_leida_pan.children[8].fill, "type": "color", "tools": true },
+									{ "name": `Radar_color`, "url": "el_leida_pan.children[9].fill", "value": el_leida_pan.children[9].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -3297,9 +3243,9 @@
 							{
 								"id": "el_slope_pan",
 								"set": [
-									{ "name": `${i18n.get('cadence')}`, "url": el_slope_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Text_color')}`, "url": "el_slope_pan.children[1].fill", "value": el_slope_pan.children[0].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Graphic_color')}`, "url": "el_slope_pan.children[0].fill", "value": el_slope_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Cadence`, "url": el_slope_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "el_slope_pan.children[1].fill", "value": el_slope_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Graphic_color`, "url": "el_slope_pan.children[0].fill", "value": el_slope_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -3386,17 +3332,17 @@
 							{
 								"id": "el_weather_pan",
 								"set": [
-									{ "name": `${i18n.get('weather')}`, "url": el_weather_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `${i18n.get('Graphic_backgrounds')}1`, "url": "el_weather_pan.children[0].fill.stops[0].color", "value": el_weather_pan.children[0].fill.stops[0].color, "type": "color2", "tools": true },
-									{ "name": `${i18n.get('Graphic_backgrounds')}2`, "url": "el_weather_pan.children[0].fill.stops[1].color", "value": el_weather_pan.children[0].fill.stops[1].color, "type": "color2", "tools": true },
-									{ "name": `${i18n.get('Text_content')}1`, "url": "el_weather_pan.children[1].text", "value": el_weather_pan.children[1].text, "type": "text", "tools": true },
-									{ "name": `${i18n.get('Text_color')}1`, "url": "el_weather_pan.children[1].fill", "value": el_weather_pan.children[1].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Text_content')}2`, "url": "el_weather_pan.children[2].text", "value": el_weather_pan.children[2].text, "type": "text", "tools": true },
-									{ "name": `${i18n.get('Text_color')}2`, "url": "el_weather_pan.children[2].fill", "value": el_weather_pan.children[2].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('Text_content')}3`, "url": "el_weather_pan.children[3].text", "value": el_weather_pan.children[3].text, "type": "text", "tools": true },
-									{ "name": `${i18n.get('Text_color')}3`, "url": "el_weather_pan.children[3].fill", "value": el_weather_pan.children[3].fill, "type": "color", "tools": true },
-									{ "name": `${i18n.get('weather_icon')}`, "url": "el_weather_pan.children[4].path", "value": el_weather_pan.children[4].path, "type": "weather", "tools": true },
-									{ "name": `${i18n.get('icon_color')}`, "url": "el_weather_pan.children[4].fill", "value": el_weather_pan.children[4].fill, "type": "color", "tools": true },
+									{ "name": `weather`, "url": el_weather_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Graphic_backgrounds1`, "url": "el_weather_pan.children[0].fill.stops[0].color", "value": el_weather_pan.children[0].fill.stops[0].color, "type": "color2", "tools": true },
+									{ "name": `Graphic_backgrounds2`, "url": "el_weather_pan.children[0].fill.stops[1].color", "value": el_weather_pan.children[0].fill.stops[1].color, "type": "color2", "tools": true },
+									{ "name": `Text_content1`, "url": "el_weather_pan.children[1].text", "value": el_weather_pan.children[1].text, "type": "text", "tools": true },
+									{ "name": `Text_color1`, "url": "el_weather_pan.children[1].fill", "value": el_weather_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Text_content2`, "url": "el_weather_pan.children[2].text", "value": el_weather_pan.children[2].text, "type": "text", "tools": true },
+									{ "name": `Text_color2`, "url": "el_weather_pan.children[2].fill", "value": el_weather_pan.children[2].fill, "type": "color", "tools": true },
+									{ "name": `Text_content3`, "url": "el_weather_pan.children[3].text", "value": el_weather_pan.children[3].text, "type": "text", "tools": true },
+									{ "name": `Text_color3`, "url": "el_weather_pan.children[3].fill", "value": el_weather_pan.children[3].fill, "type": "color", "tools": true },
+									{ "name": `weather_icon`, "url": "el_weather_pan.children[4].path", "value": el_weather_pan.children[4].path, "type": "weather", "tools": true },
+									{ "name": `Icon_color`, "url": "el_weather_pan.children[4].fill", "value": el_weather_pan.children[4].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -3575,7 +3521,7 @@
 							{
 								"id": "pl_heart_pan",
 								"set": [
-									{ "name": `${i18n.get('heart_rate')}`, "url": el_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Heart Rate`, "url": el_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
 									{ "name": `标尺颜色`, "url": "pl_heart_pan.children[0].stroke", "value": pl_heart_pan.children[0].stroke, "type": "color", "tools": true },
 									{ "name": `低心率值`, "url": "pl_heart_pan.children[1].text", "value": pl_heart_pan.children[1].text, "type": "heart_text", "tools": true },
 									{ "name": `高心率值`, "url": "pl_heart_pan.children[2].text", "value": pl_heart_pan.children[2].text, "type": "heart_text", "tools": true },
@@ -3625,155 +3571,203 @@
 
 		//添加默认模板
 		function set_d_style() {
-			frame.add(appv_nowtime_pan);
-			frame.add(appv_distance_pan);
-			frame.add(appv_map_pan);
 			frame.add(appv_date_pan);
 			frame.add(appv_metrics_pan);
+			frame.add(pt_heart_pan);
+			frame.add(pt_pace_pan);
 			frame.add(appv_ele_pan);
 			frame.add(appv_ele18_pan);
 			frame.add(appv_nowstatus_pan);
 			frame.add(appv_lap_pan);
-
+			frame.add(appv_nowtime_pan);
+			frame.add(appv_map_pan);
+			frame.add(appv_map_a_pan);
+			frame.add(web_map_pan);
+			frame.add(web_minimap_pan);
+			frame.add(appv_distance_pan);
 			frame.add(TO_pace_pan);
 			frame.add(TO_heart_pan);
 			frame.add(TO_cadence_pan);
 			frame.add(TO_step_pan);
 			frame.add(TO_gps_pan);
-
-			frame.add(text_time_pan);
 			frame.add(text_nowtime_pan);
+			frame.add(text_time_pan);
 			frame.add(text_day_pan);
-
-			frame.add(el_heart_pan);
-			frame.add(el_pace_pan);
-			frame.add(el_cadence_pan);
-
-			frame.add(l_distance_pan);
-
 			frame.add(text_str1_pan);
 			frame.add(text_str2_pan);
 			frame.add(text_str3_pan);
 			frame.add(text_str4_pan);
-
+			frame.add(el_heart_pan);
+			frame.add(el_pace_pan);
+			frame.add(el_cadence_pan);
+			frame.add(l_distance_pan);
 			frame.add(el_leida_pan);
-
-			frame.add(web_map_pan);
 			frame.add(el_slope_pan);
-
 			frame.add(el_weather_pan);
-
 			frame.add(pl_heart_pan);
+
 		}
 
 		//生成视频
 		function generate() {
-			// 假设bl是倍率变量
+			// bl是倍率变量
 			var bl = 2;
 			// 构造器，和音视频编码对象
-			var muxer = null;
-			var videoEncoder = null;
-			// 结束编码
-			const endEncoding = async () => {
-				await videoEncoder?.flush();
-				muxer.finalize();
-				let buffer = muxer.target?.buffer;
-				var blobUrl = URL.createObjectURL(new Blob([buffer]));
-				video.src = blobUrl;
-				download.href = blobUrl;
-				videoEncoder = null;
-				muxer = null;
-			};
+			if (videomode == 'mp4') {
+				var mp4Muxer = null;
+				var mp4VideoEncoder = null;
+				// 结束编码
+				var endEncoding = async () => {
+					await mp4VideoEncoder?.flush();
+					mp4Muxer.finalize();
+					let buffer = mp4Muxer.target?.buffer;
+					var blobUrl = URL.createObjectURL(new Blob([buffer]));
+					video.src = blobUrl;
+					download.href = blobUrl;
+					mp4VideoEncoder = null;
+					mp4Muxer = null;
+				};
+
+				// 构造包装器
+				mp4Muxer = new Mp4Muxer.Muxer({
+					target: new Mp4Muxer.ArrayBufferTarget(),
+					video: {
+						codec: 'avc',
+						width: canvWidth,
+						height: canvHeight
+					},
+					fastStart: 'in-memory',
+					firstTimestampBehavior: 'offset'
+				});
+				// 音视频编码器，这里使用的是WebCodese API
+				mp4VideoEncoder = new VideoEncoder({
+					output: (chunk, meta) => mp4Muxer.addVideoChunk(chunk, meta),
+					error: e => console.error(e)
+				});
+				mp4VideoEncoder.configure({
+					codec: 'avc1.42403e',//编码器级别
+					width: canvWidth,
+					height: canvHeight,
+					bitrate: 10e6//质量
+				});
+			}
+
+			if (videomode == 'webm') {
+				//移除背景
+				appv_bg_pan.remove();
+
+				var webmMuxer = null;
+				var webmVideoEncoder = null;
+
+				// 结束编码
+				var endEncoding = async () => {
+					await webmVideoEncoder?.flush();
+					webmMuxer.finalize();
+					let buffer = webmMuxer.target?.buffer;
+					var blobUrl = URL.createObjectURL(new Blob([buffer]));
+					video.src = blobUrl;
+					download.href = blobUrl;
+					webmVideoEncoder = null;
+					webmMuxer = null;
+				};
+
+				// 构造WebM封装器
+				webmMuxer = new WebMMuxer.Muxer({
+					target: new WebMMuxer.ArrayBufferTarget(),
+					video: {
+						codec: 'V_VP9',  // WebM常用VP9编码
+						width: canvWidth,
+						height: canvHeight,
+						alpha: true
+					},
+					fastStart: 'in-memory',  // 保持快速启动特性
+					firstTimestampBehavior: 'offset'
+				});
+
+				// 视频编码器配置
+				webmVideoEncoder = new VideoEncoder({
+					output: (chunk, meta) => webmMuxer.addVideoChunk(chunk, meta),
+					error: e => console.error(e)
+				});
+
+				webmVideoEncoder.configure({
+					codec: 'vp09.00.10.08',  // WebM标准VP9编码标识
+					width: canvWidth,
+					height: canvHeight,
+					bitrate: 10e6,
+				});
+			}
+
+
 
 
 			var canvas = document.getElementById('canv');
-			var ctx = canvas.getContext('2d');
+			var ctx = canvas.getContext('2d', { alpha: true });
 			// 清空整个canvas
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-			// 构造包装器
-			muxer = new Mp4Muxer.Muxer({
-				target: new Mp4Muxer.ArrayBufferTarget(),
-				video: {
-					codec: 'avc',
-					width: canvWidth,
-					height: canvHeight
-				},
-				fastStart: 'in-memory',
-				firstTimestampBehavior: 'offset'
-			});
-			// 音视频编码器，这里使用的是WebCodese API
-			videoEncoder = new VideoEncoder({
-				output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-				error: e => console.error(e)
-			});
-			videoEncoder.configure({
-				codec: 'avc1.42403e',//编码器级别
-				width: canvWidth,
-				height: canvHeight,
-				bitrate: 10e6//质量
-			});
+
+
+
+
 			var frameCounter = 0;//祯计数器
 			var currentFrame = startFrame;//开始点运动数据长度计数器
 			//currentFrame = maxFrame - 5;
 			//制作视频，插入帧
-			function updateFrame() {
-				//判断是否有地图
-				if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
-					var now_frame_delay = frame_delay * 1 + 0;
-				} else {
-					var now_frame_delay = frame_delay * 1;
-				}
-				//if (currentFrame < 1000) {maxFrame
-				//
+			// 改为用异步IIFE+循环结构
+			(async function updateFrame() {
+				while (currentFrame < endFrame) {
+					if (!upFrame(currentFrame)) break;
 
-				if (currentFrame < endFrame) {
+					// 确保绘制完成后再进行编码
+					await new Promise(r => setTimeout(r, 0)); // 微任务队列排空
 
-					if (upFrame(currentFrame)) {
-						frameTocanv();
-						let frame = new VideoFrame(canvas, {
-							timestamp: (trkpt_data[currentFrame].sec * 1e6),
+					let frame = new VideoFrame(canvas, {
+						timestamp: (trkpt_data[currentFrame].sec * 1e6),
+					});
 
-							//duration: (1e6 * 5) ,
-						});
-						//console.log('Timestamp:', trkpt_data[currentFrame].timestamp);
-						// if (currentFrame == 0) {
-						//     console.log('Timestamp:', frame); // 打印timestamp信息
-						// }
-						frameCounter++;
-						videoEncoder.encode(frame, {
+
+					if (videomode == 'mp4') {
+						mp4VideoEncoder.encode(frame, {
 							keyFrame: trkpt_data[currentFrame].sec % 5 === 0
 						});
-						frame.close();
-						currentFrame++;
-						//循环
-						timerId = setTimeout(updateFrame, now_frame_delay);//now_frame_delay延时
 					}
 
-				} else {
-					// 最后一帧
+					if (videomode == 'webm') {
+						webmVideoEncoder.encode(frame, {
+							keyFrame: trkpt_data[currentFrame].sec % 5 === 0
+						});
+					}
+
+					frame.close();
+
+					currentFrame++;
+
+					// 使用 rAF 进行节流
+					await new Promise(resolve => requestAnimationFrame(resolve));
+				}
+
+				// 处理最后一帧
+				if (currentFrame === endFrame) {
 					upFrame(endFrame - 1);
-					console.log(endFrame - 1);
 					frameTocanv();
 					let frame = new VideoFrame(canvas, {
 						timestamp: (trkpt_data[endFrame - 1].sec + 1) * 1e6
 					});
-					videoEncoder.encode(frame, {
-						keyFrame: true //整秒关键祯 true
-					});
-					//console.log('Timestamp1:', trkpt_data[maxFrame-1].timestamp);
+					if (videomode == 'mp4') {
+						mp4VideoEncoder.encode(frame, { keyFrame: true });
+					}
+					if (videomode == 'webm') {
+						webmVideoEncoder.encode(frame, { keyFrame: true });
+					}
 
 					frame.close();
-
-					//关闭录制
-					endEncoding();
-					clearTimeout(timerId);
-					$('#view_info').css('display', 'none');
-
 				}
-			}
-			// 启动定时更新
-			updateFrame();
+
+				// 关闭录制
+				await endEncoding();
+				$('#view_info').css('display', 'none');
+			})();
 		}
 
 
@@ -3803,10 +3797,10 @@
 							title.textContent = item.value;
 							inputDiv.appendChild(title);
 						}
-						if (item.name != `${i18n.get('Canvas_settings')}`) {
+						if (item.name != `Canvas Settings`) {
 							// 添加移除按钮
 							const removeButton = document.createElement('button');
-							removeButton.textContent = `${i18n.get('remove')}`;
+							removeButton.textContent = `ReMove`;
 							removeButton.className = 'layui-btn layui-btn-danger layui-btn-sm';
 							removeButton.onclick = function () {
 								// 执行移除操作
@@ -4037,7 +4031,7 @@
 						};
 						inputDiv.appendChild(heart_line_textInput);
 						break;
-						//高级心率表背景线
+					//高级心率表背景线
 					case 'pace_color_line':
 						const pace_color_lineInput = document.createElement('input');
 						pace_color_lineInput.type = 'color';
@@ -4074,103 +4068,139 @@
 
 		//将画布更新到容器
 		function frameTocanv() {
-			frame.export('canvas').then(result => {
-				const leaferCanvas = result.data;
-				const canvas = leaferCanvas.view;
-				const context = leaferCanvas.context;
-				// 获取目标canvas元素
-				const targetCanvas = document.getElementById('canv');
-				// 设置目标canvas的宽高
-				targetCanvas.width = appvWidth;
-				targetCanvas.height = appvHeight;
-				// 获取目标canvas的2d上下文
-				const targetContext = targetCanvas.getContext('2d');
-				// 将图像绘制到目标canvas上
-				targetContext.drawImage(canvas, 0, 0, targetCanvas.width, targetCanvas.height);
-			});
+			return new Promise((resolve) => {
+				frame.export('canvas').then(result => {
+					const leaferCanvas = result.data;
+					const { view: canvas, context } = leaferCanvas;
 
+					const targetCanvas = document.getElementById('canv');
+					targetCanvas.width = appvWidth;
+					targetCanvas.height = appvHeight;
+
+					const targetCtx = targetCanvas.getContext('2d', { alpha: true });
+					// 确保绘制完成后再resolve
+					targetCtx.drawImage(canvas, 0, 0, targetCanvas.width, targetCanvas.height);
+					resolve(); // 关键：标记绘制完成
+				});
+			});
 		}
 
 		//更新画布
-		function upFrame(currentFrame) {
+		async function upFrame(currentFrame) {
 
 			// 给view_info的文本赋值，转换进度
 			$('#view_info').html(currentFrame.toString() + '/' + endFrame.toString() + ' MAX:' + maxFrame.toString());
 
-			//开始填充
-			// 获取trkpt_data数组中最后一个元素的distance属性值，除以1000后进行四舍五入保留两位小数
+			//长度条
+			var elem1, elem2;
+			elem1 = appview.findOne('#appv_distance_pan');
+			elem2 = appview.findOne('#l_distance_pan');
+			if (elem1 || elem2) {
+				//开始填充
+				// 获取trkpt_data数组中最后一个元素的distance属性值，除以1000后进行四舍五入保留两位小数
+				//zcd.text = max_distance_in_km + `Km`;//总长度
+				let distance_in_km = Math.round(trkpt_data[currentFrame].distance / 1000 * 100) / 100;
+				//console.log(currentFrame, distance_in_km);
+				appv_distance_pan.children[2].text = distance_in_km + `Km`;//行进长度
 
-			//zcd.text = max_distance_in_km + `Km`;//总长度
-			let distance_in_km = Math.round(trkpt_data[currentFrame].distance / 1000 * 100) / 100;
-			//console.log(currentFrame, distance_in_km);
-			appv_distance_pan.children[2].text = distance_in_km + `Km`;//行进长度
+				var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * appv_distance_pan.children[3].width;//计算实时长度
+				appv_distance_pan.children[4].width = jdtcd;
+				//长进度条l_distance_pan
+				l_distance_pan.children[7].text = distance_in_km + `Km`;//行进长度
 
-			var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * appv_distance_pan.children[3].width;//计算实时长度
-			appv_distance_pan.children[4].width = jdtcd;
-			//长进度条l_distance_pan
-			l_distance_pan.children[7].text = distance_in_km + `Km`;//行进长度
-
-			//距离条
-			var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * l_distance_pan.children[2].width;//计算实时长度
-			l_distance_pan.children[1].width = jdtcd;
-			l_distance_pan.children[6].x = jdtcd + 80;
-			l_distance_pan.children[7].x = jdtcd + 90;
-
-			//设置高程图型坐标
-			let offsetXY = appv_ele18_pan.children[1].width / 2;
-			appv_ele18_pan.children[1].x = ele18_points[2 * currentFrame] - offsetXY;
-			appv_ele18_pan.children[1].y = ele18_points[2 * currentFrame + 1] - offsetXY;
-
-			appv_ele_pan.children[1].x = ele_points[2 * currentFrame];
-
-			// 获取高程，若不存在则设为0
-			//let altitude = trkpt_data[currentFrame] && trkpt_data[currentFram].step_length ? trkpt_data[currentFrame].altitude : 0;
-
-			//当前进行时间 var now_time_str = secondsToHHMMSS(trkpt_data[currentFrame].sec);
-			appv_nowtime_pan.children[0].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
-			text_nowtime_pan.children[0].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
-
-
-
-
-
-			//画地图
-			var now_points = [];
-			for (let index = 0; index <= currentFrame; index++) {
-				//画经过路线
-				now_points.push(map_points[index * 2]);   // 第一个数值乘以2
-				now_points.push(map_points[index * 2 + 1]); // 第二个数值乘以2
+				//距离条
+				var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * l_distance_pan.children[2].width;//计算实时长度
+				l_distance_pan.children[1].width = jdtcd;
+				l_distance_pan.children[6].x = jdtcd + 80;
+				l_distance_pan.children[7].x = jdtcd + 90;
 
 			}
-			appv_map_pan.children[1].points = now_points;
-			appv_map_a_pan.children[1].points = now_points;
+
+			//高程
+			var elem1, elem2;
+			elem1 = appview.findOne('#appv_ele18_pan');
+			elem2 = appview.findOne('#appv_ele_pan');
+			if (elem1 || elem2) {
+				//设置高程图型坐标
+				//let offsetXY = appv_ele18_pan.children[1].width / 2;
+				appv_ele18_pan.children[1].x = ele18_points[2 * currentFrame];
+				appv_ele18_pan.children[1].y = ele18_points[2 * currentFrame + 1];
+
+				appv_ele_pan.children[1].x = ele_points[2 * currentFrame];
+			}
+
+
+			//当前行进时间
+			var elem1, elem2;
+			elem1 = appview.findOne('#appv_nowtime_pan');
+			elem2 = appview.findOne('#text_nowtime_pan');
+
+			if (elem1 || elem2) {
+				//当前进行时间 var now_time_str = secondsToHHMMSS(trkpt_data[currentFrame].sec);
+				appv_nowtime_pan.children[0].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
+				text_nowtime_pan.children[0].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
+			}
+
+			//画地图轨迹
+			var elem1, elem2;
+			elem1 = appview.findOne('#appv_map_pan');
+			elem2 = appview.findOne('#appv_map_a_pan');
+			if (elem1 || elem2) {
+				//画地图
+				var now_points = [];
+				for (let index = 0; index <= currentFrame; index++) {
+					//画经过路线
+					now_points.push(map_points[index * 2]);   // 第一个数值乘以2
+					now_points.push(map_points[index * 2 + 1]); // 第二个数值乘以2
+
+				}
+				if (elem1) {
+					appv_map_pan.children[1].points = now_points;
+					//画当前点
+					appv_map_pan.children[2].x = map_points[currentFrame * 2];
+					appv_map_pan.children[2].y = map_points[currentFrame * 2 + 1];
+				}
+				if (elem2) {
+					appv_map_a_pan.children[1].points = now_points;
+					//画当前点
+					appv_map_a_pan.children[2].x = map_points[currentFrame * 2];
+					appv_map_a_pan.children[2].y = map_points[currentFrame * 2 + 1];
+					appv_map_a_pan.children[2].rotation = trkpt_data[currentFrame].azimuth;
+				}
+
+			}
 
 
 
 			//画web地图
-			if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
-				daohang(currentFrame);
-				if (frame.find('#web_map_pan').length > 0) {
-					const mapCanvas = document.querySelector("#leafletmap > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
-					web_map_pan.children[0].context.drawImage(mapCanvas, 0, 0, web_map_pan.children[0].width, web_map_pan.children[0].height);
-					web_map_pan.children[0].paint()
-				}
-				if (frame.find('#web_minimap_pan').length > 0) {
-					const minimapCanvas = document.querySelector("#leafletmap_mini > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
-					web_minimap_pan.children[0].context.drawImage(minimapCanvas, 0, 0, web_minimap_pan.children[0].width, web_minimap_pan.children[0].height);
-					web_minimap_pan.children[0].paint()
+			var elem1, elem2;
+			elem1 = appview.findOne('#web_map_pan');
+			elem2 = appview.findOne('#web_minimap_pan');
+			if (elem1 || elem2) {
+				if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
+					daohang(currentFrame);
+					if (frame.find('#web_map_pan').length > 0) {
+						const mapCanvas = document.querySelector("#leafletmap > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
+						web_map_pan.children[0].context.drawImage(mapCanvas, 0, 0, web_map_pan.children[0].width, web_map_pan.children[0].height);
+						web_map_pan.children[0].paint()
+					}
+					if (frame.find('#web_minimap_pan').length > 0) {
+						const minimapCanvas = document.querySelector("#leafletmap_mini > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
+						web_minimap_pan.children[0].context.drawImage(minimapCanvas, 0, 0, web_minimap_pan.children[0].width, web_minimap_pan.children[0].height);
+						web_minimap_pan.children[0].paint()
+					}
 				}
 			}
 
-			//画当前点
-			appv_map_pan.children[2].x = map_points[currentFrame * 2];
-			appv_map_pan.children[2].y = map_points[currentFrame * 2 + 1];
-			appv_map_a_pan.children[2].x = map_points[currentFrame * 2];
-			appv_map_a_pan.children[2].y = map_points[currentFrame * 2 + 1];
-			appv_map_a_pan.children[2].rotation = trkpt_data[currentFrame].azimuth;
+
 
 			//当前经纬度
-			TO_gps_pan.children[0].text = `${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_lat)}\n${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_long)}`;
+			var elem1;
+			elem1 = appview.findOne('#TO_gps_pan');
+			if (elem1) {
+				TO_gps_pan.children[0].text = `${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_lat)}\n${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_long)}`;
+			}
+
 
 
 
@@ -4188,7 +4218,7 @@
 			}
 
 			// 获取心率，若不存在则设为0
-			let count = trkpt_data[currentFrame] && trkpt_data[currentFrame].heart_rate ? trkpt_data[currentFrame].heart_rate : 0;
+			let heart_rate = trkpt_data[currentFrame] && trkpt_data[currentFrame].heart_rate ? trkpt_data[currentFrame].heart_rate : 0;
 			// 获取步频，若不存在则设为0
 			let cadence = trkpt_data[currentFrame] && trkpt_data[currentFrame].cadence ? trkpt_data[currentFrame].cadence : 0;
 			// 获取步幅，若不存在则设为0
@@ -4200,186 +4230,267 @@
 
 
 			//雷达图
-			let flatPoints = to_leida_xy(count, speed, cadence);
-			el_leida_pan.children[9].points = flatPoints;
+			var elem1;
+			elem1 = appview.findOne('#el_leida_pan');
+			if (elem1) {
+				let flatPoints = to_leida_xy(heart_rate, speed, cadence);
+				el_leida_pan.children[9].points = flatPoints;
+			}
+
 
 			//综合
-			appv_nowstatus_pan.children[0].text = `${i18n.get('speed')}：${speed.toFixed(2)} km/h\n${i18n.get('pace')}：${pace} min/km\n${i18n.get('heart_rate')}：${count} bpm\n${i18n.get('cadence')}：${cadence} steps/min\n${i18n.get('step_length')}：${step_length} m`;
-			//to仪表盘
-			TO_pace_pan.children[0].text = `${pace} min/km`;
-			TO_heart_pan.children[0].text = `${count} bpm`;
-			TO_cadence_pan.children[0].text = `${cadence} steps/min`;
-			TO_step_pan.children[0].text = `${step_length} m`;
-
-
-
-			// 根据奇偶性设置心率图标缩放比例
-			if (currentFrame % 2 === 0) {
-				TO_heart_pan.children[1].scale = 0.038; // 偶数帧缩放值
-			} else {
-				TO_heart_pan.children[1].scale = 0.04;  // 奇数帧缩放值
+			var elem1;
+			elem1 = appview.findOne('#appv_nowstatus_pan');
+			if (elem1) {
+				appv_nowstatus_pan.children[0].text = `Speed：${speed.toFixed(2)} km/h\nPace：${pace} min/km\nHeart Rate：${heart_rate} bpm\nCadence：${cadence} steps/min\nStep：${step_length} m`;
 			}
+
+			//to仪表盘
+			var elem1;
+			elem1 = appview.findOne('#TO_pace_pan');
+			if (elem1) {
+				TO_pace_pan.children[0].text = `${pace} min/km`;
+			}
+			//to仪表盘
+			var elem1;
+			elem1 = appview.findOne('#TO_heart_pan');
+			if (elem1) {
+				TO_heart_pan.children[0].text = `${heart_rate} bpm`;
+				// 根据奇偶性设置心率图标缩放比例
+				if (currentFrame % 2 === 0) {
+					TO_heart_pan.children[1].scale = 0.038; // 偶数帧缩放值
+				} else {
+					TO_heart_pan.children[1].scale = 0.04;  // 奇数帧缩放值
+				}
+			}
+			//to仪表盘
+			var elem1;
+			elem1 = appview.findOne('#TO_cadence_pan');
+			if (elem1) {
+				TO_cadence_pan.children[0].text = `${cadence} steps/min`;
+			}
+			//to仪表盘
+			var elem1;
+			elem1 = appview.findOne('#TO_step_pan');
+			if (elem1) {
+				TO_step_pan.children[0].text = `${step_length} m`;
+			}
+
 
 			//心率仪表盘
-			el_heart_pan.children[0].text = `${count}`;
-			//max220,min40，系数1.33
-			if (count < 40) {
-				count = 40;
+			var elem1;
+			elem1 = appview.findOne('#el_heart_pan');
+			if (elem1) {
+				el_heart_pan.children[0].text = `${heart_rate}`;
+				//max220,min40，系数1.33
+				if (heart_rate < 40) {
+					heart_rate = 40;
+				}
+				el_heart_pan.children[3].endAngle = -210 + (heart_rate - 40) * 1.33;
 			}
-			el_heart_pan.children[3].endAngle = -210 + (count - 40) * 1.33;
+
 
 			//高级心率仪表盘
-			// 获取原始数值并转换为整数
-			var min = parseInt(pl_heart_pan.children[1].text);
-			var max = parseInt(pl_heart_pan.children[2].text);
-			// 计算区间参数
-			var interval = max - min;
+			var elem1;
+			elem1 = appview.findOne('#pl_heart_pan');
+			if (elem1) {
+				// 获取原始数值并转换为整数
+				var min = parseInt(pl_heart_pan.children[1].text);
+				var max = parseInt(pl_heart_pan.children[2].text);
+				// 计算区间参数
+				var interval = max - min;
 
-			pl_heart_pan.children[6].text = `${count}`;
-			pl_heart_pan.children[11].endAngle = -210 + (count - min) * 240 / interval;
-			//计算心率区间
-			if (count - min > interval * 0.95) {
-				pl_heart_pan.children[11].stroke = "#FF0000";
-			} else if (count - min > interval * 0.88) {
-				pl_heart_pan.children[11].stroke = "#FF8800";
-			} else if (count - min > interval * 0.84) {
-				pl_heart_pan.children[11].stroke = "#FFD700";
-			} else if (count - min > interval * 0.74) {
-				pl_heart_pan.children[11].stroke = "#3CB371";
-			} else {
-				pl_heart_pan.children[11].stroke = "#7FFFD4";
-			}
-			// 获取最近10条心率数据（含当前帧）
-			const heartRates = [];
-			for (let i = 0; i < 10; i++) {
-				const frameIndex = currentFrame - i;
-				// 确保数据有效性，越界或无效数据返回0
-				heartRates.push(frameIndex >= 0 && trkpt_data[frameIndex] ? trkpt_data[frameIndex].heart_rate : 0);
-			}
-
-			// 计算折线点坐标
-			const zheart_points = [];
-			const xStep = 150 / (10 - 1); // X轴间隔计算（保持10个点平均分布）
-
-			for (let i = 0; i < 10; i++) {
-				// X坐标计算：从右向左排列（最新数据在最右侧）
-				const x = 150 - i * xStep;
-
-				// Y坐标计算（关键修改部分）：
-				// 1. 将0-80的心率映射到0-10的显示范围（因40px高度/4px/unit=10units）
-				// 2. 计算垂直偏移量（每个单位对应4像素）
-				// 3. 坐标系转换：画布底部为150，向上递减
-				const heartRate = heartRates[i];
-				const displayValue = heartRates[i] - heartRates[i + 1]; // 80→10
-				var y = 40 - (displayValue * 6);
-				// 边界约束（重要补充）
-				if (y < 0 ) {
-					y = 0;
-				}else if (y > 80 ) {
-					y = 80;
+				pl_heart_pan.children[6].text = `${heart_rate}`;
+				pl_heart_pan.children[11].endAngle = -210 + (heart_rate - min) * 240 / interval;
+				//计算心率区间
+				if (heart_rate - min > interval * 0.95) {
+					pl_heart_pan.children[11].stroke = "#FF0000";
+				} else if (heart_rate - min > interval * 0.88) {
+					pl_heart_pan.children[11].stroke = "#FF8800";
+				} else if (heart_rate - min > interval * 0.84) {
+					pl_heart_pan.children[11].stroke = "#FFD700";
+				} else if (heart_rate - min > interval * 0.74) {
+					pl_heart_pan.children[11].stroke = "#3CB371";
+				} else {
+					pl_heart_pan.children[11].stroke = "#7FFFD4";
 				}
-				zheart_points.push(x, y);
+				// 获取最近10条心率数据（含当前帧）
+				const heartRates = [];
+				for (let i = 0; i < 10; i++) {
+					const frameIndex = currentFrame - i;
+					// 确保数据有效性，越界或无效数据返回0
+					heartRates.push(frameIndex >= 0 && trkpt_data[frameIndex] ? trkpt_data[frameIndex].heart_rate : 0);
+				}
+
+				// 计算折线点坐标
+				const zheart_points = [];
+				const xStep = 150 / (10 - 1); // X轴间隔计算（保持10个点平均分布）
+
+				for (let i = 0; i < 10; i++) {
+					// X坐标计算：从右向左排列（最新数据在最右侧）
+					const x = 150 - i * xStep;
+
+					// Y坐标计算（关键修改部分）：
+					// 1. 将0-80的心率映射到0-10的显示范围（因40px高度/4px/unit=10units）
+					// 2. 计算垂直偏移量（每个单位对应4像素）
+					// 3. 坐标系转换：画布底部为150，向上递减
+					const heartRate = heartRates[i];
+					const displayValue = heartRates[i] - heartRates[i + 1]; // 80→10
+					var y = 40 - (displayValue * 6);
+					// 边界约束（重要补充）
+					if (y < 0) {
+						y = 0;
+					} else if (y > 80) {
+						y = 80;
+					}
+					zheart_points.push(x, y);
+				}
+
+				// 更新路径数据
+				pl_heart_pan.children[12].points = zheart_points;
 			}
 
-			// 更新路径数据
-			pl_heart_pan.children[12].points = zheart_points;
 
 			//配速仪表盘
-			el_pace_pan.children[0].text = `${pace}`;
-			//max22，min0，系数10.9
-			el_pace_pan.children[3].endAngle = -210 + speed * 10.9;
-
-			//步频仪表盘
-			el_cadence_pan.children[0].text = `${cadence}`;
-
-
-
-
-
-
-			//max240，min0，系数1
-			el_cadence_pan.children[3].endAngle = -210 + cadence * 1;
-
-			//圈速
-			let segment_info = "";
-			let lap = "";
-			// 计算已经完成的整公里数
-			let completed_km = Math.floor(trkpt_data[currentFrame].distance / 1000);
-			for (let km = 1; km <= completed_km; km++) {
-				if (km % 5 === 0 && km > 0) {
-					// 如果是10的倍数（大于0），按照每5km一条的规则来展示
-					let startKm = km - 4;
-					let endKm = km;
-					let totalTimeInSeconds = 0;
-					for (let i = startKm - 1; i < endKm; i++) {
-						if (i < json_data.lap_standard.length) {
-							totalTimeInSeconds += json_data.lap_standard[i].total_timer_time;
-						}
-					}
-					let minutes = Math.floor(totalTimeInSeconds / 60);
-					let seconds = Math.floor(totalTimeInSeconds % 60);
-
-					lap += `${startKm}-${endKm}km${i18n.get('nowtime')}：${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}\n`;
-					segment_info = lap;
-				} else {
-					let time_in_seconds = km - 1 < json_data.lap_standard.length ? json_data.lap_standard[km - 1].total_timer_time : 0;
-					let minutes = Math.floor(time_in_seconds / 60);
-					let seconds = Math.floor(time_in_seconds % 60);
-					segment_info += `${km}km${i18n.get('nowtime')}：${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}\n`;
-				}
+			var elem1;
+			elem1 = appview.findOne('#el_pace_pan');
+			if (elem1) {
+				el_pace_pan.children[0].text = `${pace}`;
+				//max22，min0，系数10.9
+				el_pace_pan.children[3].endAngle = -210 + speed * 10.9;
 			}
 
-			// 圈速
-			appv_lap_pan.children[0].text = segment_info;
+
+			//步频仪表盘
+			var elem1;
+			elem1 = appview.findOne('#el_pace_pan');
+			if (elem1) {
+				el_cadence_pan.children[0].text = `${cadence}`;
+				//max240，min0，系数1
+				el_cadence_pan.children[3].endAngle = -210 + cadence * 1;
+			}
+
+
+			//圈速
+			var elem1;
+			elem1 = appview.findOne('#appv_lap_pan');
+			if (elem1) {
+				let segment_info = "";
+				let lap = "";
+				// 计算已经完成的整公里数
+				let completed_km = Math.floor(trkpt_data[currentFrame].distance / 1000);
+				for (let km = 1; km <= completed_km; km++) {
+					if (km % 5 === 0 && km > 0) {
+						// 如果是10的倍数（大于0），按照每5km一条的规则来展示
+						let startKm = km - 4;
+						let endKm = km;
+						let totalTimeInSeconds = 0;
+						for (let i = startKm - 1; i < endKm; i++) {
+							if (i < json_data.lap_standard.length) {
+								totalTimeInSeconds += json_data.lap_standard[i].total_timer_time;
+							}
+						}
+						let minutes = Math.floor(totalTimeInSeconds / 60);
+						let seconds = Math.floor(totalTimeInSeconds % 60);
+
+						lap += `${startKm}-${endKm}km：${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}\n`;
+						segment_info = lap;
+					} else {
+						let time_in_seconds = km - 1 < json_data.lap_standard.length ? json_data.lap_standard[km - 1].total_timer_time : 0;
+						let minutes = Math.floor(time_in_seconds / 60);
+						let seconds = Math.floor(time_in_seconds % 60);
+						segment_info += `${km}km：${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}\n`;
+					}
+				}
+
+				// 圈速
+				appv_lap_pan.children[0].text = segment_info;
+			}
+
 
 			//综合图表画进度 metrics
-			appv_metrics_pan.children[3].x = appv_metrics_pan.width / maxFrame * currentFrame;
+			var elem1;
+			elem1 = appview.findOne('#appv_metrics_pan');
+			if (elem1) {
+				appv_metrics_pan.children[3].x = appv_metrics_pan.width / maxFrame * currentFrame;
+			}
+
 			//带标尺的心率
-			pt_heart_pan.children[7].x = pt_heart_pan.width / maxFrame * currentFrame;
-			pt_heart_pan.children[9].x = pt_heart_pan.width / maxFrame * currentFrame + 5;
-			pt_heart_pan.children[10].x = pt_heart_pan.width / maxFrame * currentFrame;
-			pt_heart_pan.children[10].y = pt_heart_points[currentFrame * 2 + 1];
-			pt_heart_pan.children[9].text = count;
+			var elem1;
+			elem1 = appview.findOne('#pt_heart_pan');
+			if (elem1) {
+				pt_heart_pan.children[7].x = pt_heart_pan.width / maxFrame * currentFrame;
+				pt_heart_pan.children[9].x = pt_heart_pan.width / maxFrame * currentFrame + 5;
+				pt_heart_pan.children[10].x = pt_heart_pan.width / maxFrame * currentFrame;
+				pt_heart_pan.children[10].y = pt_heart_points[currentFrame * 2 + 1];
+				pt_heart_pan.children[9].text = heart_rate;
+			}
+
 
 			//带标尺的配速
-			pt_pace_pan.children[7].x = pt_pace_pan.width / maxFrame * currentFrame;
-			pt_pace_pan.children[9].x = pt_pace_pan.width / maxFrame * currentFrame + 5;
-			pt_pace_pan.children[10].x = pt_pace_pan.width / maxFrame * currentFrame;
-			pt_pace_pan.children[10].y = pt_paces_points[currentFrame * 2 + 1];
-			pt_pace_pan.children[9].text = pace;
+			var elem1;
+			elem1 = appview.findOne('#pt_pace_pan');
+			if (elem1) {
+				pt_pace_pan.children[7].x = pt_pace_pan.width / maxFrame * currentFrame;
+				pt_pace_pan.children[9].x = pt_pace_pan.width / maxFrame * currentFrame + 5;
+				pt_pace_pan.children[10].x = pt_pace_pan.width / maxFrame * currentFrame;
+				pt_pace_pan.children[10].y = pt_paces_points[currentFrame * 2 + 1];
+				pt_pace_pan.children[9].text = pace;
+			}
+
 
 
 			//当前日期时间
-			appv_date_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp);
+			var elem1;
+			elem1 = appview.findOne('#appv_date_pan');
+			if (elem1) {
+				appv_date_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp);
+			}
+
 
 			//当前时间
-			text_time_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp, 0);
+			var elem1;
+			elem1 = appview.findOne('#text_time_pan');
+			if (elem1) {
+				text_time_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp, 0);
+			}
+
 
 			//当前日期
-			text_day_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp, 1);
+			var elem1;
+			elem1 = appview.findOne('#text_day_pan');
+			if (elem1) {
+				text_day_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp, 1);
+			}
+
 
 			//画坡度
-			//const slope_points = [0, 60, 0, 70, 100, 70, 100, 60, 100, 60];
-			var slope_points = el_slope_pan.children[0].points;
-			slope_points[1] = slope_points[7];
-			slope_points[9] = slope_points[7];
-			const slopeValue = parseFloat(trkpt_data[currentFrame].slope) * slope_points[6];
-			const slopeValuestr = parseFloat(trkpt_data[currentFrame].slope) * 100;
-			// 创建副本以避免修改原始数组
-			const newSlopePoints = slope_points.slice();
-			// 根据坡度调整坐标
-			if (slopeValue > 0) {
-				// 修改第8位（索引7）的y值：向下移动
-				newSlopePoints[9] -= slopeValue;
-			} else if (slopeValue < 0) {
-				// 修改第2位（索引1）的y值：向上移动
-				newSlopePoints[1] += slopeValue;
+			var elem1;
+			elem1 = appview.findOne('#el_slope_pan');
+			if (elem1) {
+				//const slope_points = [0, 60, 0, 70, 100, 70, 100, 60, 100, 60];
+				var slope_points = el_slope_pan.children[0].points;
+				slope_points[1] = slope_points[7];
+				slope_points[9] = slope_points[7];
+				const slopeValue = parseFloat(trkpt_data[currentFrame].slope) * slope_points[6];
+				const slopeValuestr = parseFloat(trkpt_data[currentFrame].slope) * 100;
+				// 创建副本以避免修改原始数组
+				const newSlopePoints = slope_points.slice();
+				// 根据坡度调整坐标
+				if (slopeValue > 0) {
+					// 修改第8位（索引7）的y值：向下移动
+					newSlopePoints[9] -= slopeValue;
+				} else if (slopeValue < 0) {
+					// 修改第2位（索引1）的y值：向上移动
+					newSlopePoints[1] += slopeValue;
+				}
+				//更新points 属性
+				el_slope_pan.children[1].text = slopeValuestr.toFixed(0) + "°";
+				el_slope_pan.children[0].points = newSlopePoints;
 			}
-			//更新points 属性
-			el_slope_pan.children[1].text = slopeValuestr.toFixed(0) + "°";
-			el_slope_pan.children[0].points = newSlopePoints;
 
-
+			// 返回一个包含绘制完成的Promise
+			await frameTocanv(); // 等待绘制完成
 			return true;
 		}
 
@@ -5027,13 +5138,7 @@
 			return flatPoints;
 		}
 
-		// 更新frame_delay变量的值
-		function updateFrameDelay(value) {
-			// 更新frame_delay变量的值
-			frame_delay = parseInt(value);
-			// 可以在这里添加其他需要执行的代码，例如更新页面显示或调用其他函数
-			console.log("frame_delay updated to: " + frame_delay);
-		}
+
 
 		//插值到1秒
 		function interpolationPoints(data) {
@@ -5140,7 +5245,7 @@
 					upFrame(parseInt(maxFrame * 0.7));
 
 				} else {
-					alert(`${i18n.get('Object_already_exists')}`);
+					alert(`Object Already Exists`);
 				}
 			});
 
@@ -5227,15 +5332,15 @@
 					layer.open({
 						type: 1,
 						area: ['720px', '860px'], // 宽高
-						title: `${i18n.get('Preview')}`,
+						title: `Preview`,
 						content: `
                             <div class="view">
                                 <div class="view_info" id="view_info"></div>
                                 <video id="video" width="720px" height="720px" controls autoplay></video>
                                 <div class="download_button" style="width: 380px;">
-                                    ${i18n.get('download_movie')}
-                                    <a id="download" download="movie.mp4">
-                                    <button type="button" class="layui-btn layui-bg-blue layui-btn-fluid">download </button></a>
+                                    Download Movie
+                                    <a id="download" download="movie.${videomode}">
+                                    <button type="button" class="layui-btn layui-bg-blue layui-btn-fluid">download</button></a>
                                 </div>
                             </div>
                         `
@@ -5246,18 +5351,11 @@
 					layer.open({
 						type: 1,
 						area: ['420px', '400px'], // 增加高度
-						title: `${i18n.get('Setup')}`,
+						title: `Setup`,
 						content: `
 							<div style="padding: 11px;">
-								<!-- 原有数字选择器 -->
-								${i18n.get('Setup-ps')}<br>
-								<label for="frameDelayInput">${i18n.get('Setup-label-ps')}</label>
-								<input type="number" id="frameDelayInput" name="frameDelay"
-									min="15" max="200" step="5" value="20"
-									onchange="updateFrameDelay(this.value)">
-
 								<!-- 新增说明区域 -->
-								<div style="margin-bottom: 15px;margin-top: 15px;">${i18n.get('generate_setup_ps')}</div>
+								<div style="margin-bottom: 15px;margin-top: 15px;">分段渲染：<br>在下方选择start、end时间帧，渲染需要的部分。较长的视频，间隔5000帧是较为安全的选择。如果您的PC性能强大，也可以直接渲染全部。<br>Segmented Rendering:<br>Below, select the start and end timeframes to render the desired sections. For longer videos, a recommended interval of 5000 frames is safer. If your PC has strong performance, you can also render the entire video directly.</div>
 								<!-- 新增帧数控制区域 -->
 								<div style="margin-top: 15px;">
 									<div class="frame-control">
@@ -5282,26 +5380,32 @@
 										<span id="maxFrameDisplay_time">、 Total Time:${secondsToHHMMSS(maxFrame)}</span>
 									</div>
 								</div>
+								<!-- 新增视频格式选择 -->
+								<div style="margin: 15px 0; display: flex; gap: 10px;">
+									<div>
+										Video Format:
+										<input type="radio" id="mp4Format" name="videoFormat" value="mp4" checked
+											onchange="videomode=this.value">
+										<label for="mp4Format">mp4</label>
+									</div>
+									<div>
+										<input type="radio" id="webmFormat" name="videoFormat" value="webm"
+											onchange="videomode=this.value">
+										<label for="webmFormat">webm</label>
+									</div>
+								</div>
 								<div style="margin-bottom: 15px;margin-top: 15px;">
-									<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="onmp4-page" i18n="generate" onclick="generate()">${i18n.get('generate')}</button>
+									<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="onmp4-page" onclick="generate()">Generate Video</button>
 								</div>
 							</div>
 						`,
-						success: function (layero, index) {
-							// 初始化输入框
-							frameDelayInput.value = frame_delay;
-							updateFrameMax();
-						}
+
 					});
 				},
 			})
 		});
 
-		// 更新帧延迟处理
-		function updateFrameDelay(value) {
-			frame_delay = parseInt(value);
-			// 这里可以添加其他相关逻辑
-		}
+
 
 		// 帧数验证逻辑
 		function validateFrames() {
@@ -5488,7 +5592,6 @@
 		minimap.fitExtent(mini_polyline.getExtent(), 16);
 		minimap.setPitch(40);
 
-
 		function set_leafletmap_latlngs(rqjson) {
 			// 清空现有的latlngs数组
 			latlngs.length = 0;
@@ -5511,7 +5614,6 @@
 			minimap.setCenterAndZoom(latlngs[0], 16)
 			//minimap.fitExtent(mini_polyline.getExtent());
 		}
-
 
 		function daohang(index) {
 			// 检查下标是否在latlngs数组的有效范围内
@@ -5756,9 +5858,6 @@
 			// 简单判断是否为时间戳格式（如 "2023-10-05 14:30:00"）
 			return /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(title);
 		}
-
-		//
-
 
 
 	</script>
