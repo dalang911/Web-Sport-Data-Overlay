@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>黑幕叠加视频 Blackout Sports Data Overlay</title>
+	<title>黑幕叠加视频 Screen Sports Data Overlay</title>
 	<link rel="stylesheet" href="./css/layui.css">
 	<script src="./js/layui.js"></script>
 	<script src="./js/web.min.js"></script>
@@ -328,11 +328,11 @@
 <body>
 	<div class="layui-nav">
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 22px;">
-			Blackout Sports Data Overlay
+			Xscreen Sports Data Overlay
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.41 .更新：心率、配速折线图，更新视频生成方式，其他...
+			Beta 0.42 .更新：骑行仪表盘，时速、转速。
 		</li>
 		<li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
 		<div class="ws-header-menu">
@@ -385,6 +385,9 @@
 						</div>
 						<div class="tab layui-btn-primary"><i class="layui-icon layui-icon-fonts-strong iconcc"></i>
 							<div class="docs-icon-name">Text</div>
+						</div>
+						<div class="tab layui-btn-primary"><i class="layui-icon layui-icon-engine iconcc"></i>
+							<div class="docs-icon-name">Cycling</div>
 						</div>
 					</div>
 
@@ -539,6 +542,22 @@
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_str4_pan"><img src="./images/s3.png"></div>
 								<div>Custom 4</div>
+							</div>
+						</div>
+						<div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="TO_speed_pan"><img src="./images/z9.png">
+								</div>
+								<div>Speed</div>
+							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="el_speed_pan"><img src="./images/z11.png">
+								</div>
+								<div>Speed</div>
+							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="TO_rpm_pan"><img src="./images/z10.png"></div>
+								<div>Rpm</div>
 							</div>
 						</div>
 					</div>
@@ -2137,7 +2156,61 @@
 				},
 			})
 
-			//速度
+			//时速
+			TO_speed_pan = new Box({
+				id: 'TO_speed_pan',
+				x: 330,//左上角位置
+				y: 340,//左上角位置
+				width: 350,
+				height: 50,
+				lockRatio: true,
+				editable: true,
+				//fill: '#CCEEFF',
+				cornerRadius: 4,//圆角
+				hitBox: true,
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Text',
+						y: 1,
+						x: 55,
+						width: 300,
+						resizeFontSize: true,
+						fontSize: 32,
+						fontWeight: 'black',
+						text: `Speed：km/h`,
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Rect',
+						width: 30,
+						height: 30,
+						scale: 0.045,
+						path: speed_icon,
+						fill: '#FF8C00'
+					}
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "TO_speed_pan",
+								"set": [
+									{ "name": `Pace`, "url": TO_speed_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_speed_pan.children[0].fill", "value": TO_speed_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_speed_pan.children[1].fill", "value": TO_speed_pan.children[1].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
+			//配速
 			TO_pace_pan = new Box({
 				id: 'TO_pace_pan',
 				x: 330,//左上角位置
@@ -2237,6 +2310,60 @@
 									{ "name": `Heart Rate`, "url": TO_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
 									{ "name": `Text_color`, "url": "TO_heart_pan.children[0].fill", "value": TO_heart_pan.children[0].fill, "type": "color", "tools": true },
 									{ "name": `Icon_color`, "url": "TO_heart_pan.children[1].fill", "value": TO_heart_pan.children[1].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
+			//踏频
+			TO_rpm_pan = new Box({
+				id: 'TO_rpm_pan',
+				x: 330,//左上角位置
+				y: 440,//左上角位置
+				width: 350,
+				height: 50,
+				lockRatio: true,
+				editable: true,
+				//fill: '#CCEEFF',
+				cornerRadius: 4,//圆角
+				hitBox: true,
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Text',
+						y: 1,
+						x: 55,
+						width: 300,
+						resizeFontSize: true,
+						fontSize: 32,
+						fontWeight: 'black',
+						text: `Rpm：`,
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Rect',
+						x: 3,
+						y: 2,
+						scale: 0.04,
+						path: rpm_icon,
+						fill: '#FF8C00'
+					}
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "TO_rpm_pan",
+								"set": [
+									{ "name": `Cadence`, "url": TO_rpm_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_rpm_pan.children[0].fill", "value": TO_rpm_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_rpm_pan.children[1].fill", "value": TO_rpm_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2768,6 +2895,89 @@
 									{ "name": `Unit_color`, "url": "el_heart_pan.children[1].fill", "value": el_heart_pan.children[1].fill, "type": "color", "tools": true },
 									{ "name": `Graphic_backgrounds`, "url": "el_heart_pan.children[2].stroke", "value": el_heart_pan.children[2].stroke, "type": "color", "tools": true },
 									{ "name": `Graphic_color`, "url": "el_heart_pan.children[3].stroke", "value": el_heart_pan.children[3].stroke, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
+			//配速
+			el_speed_pan = new Box({
+				id: 'el_speed_pan',
+				x: 400,
+				y: 800,
+				width: 200,
+				height: 200,
+				lockRatio: true,
+				editable: true,
+				//fill: '#CCEEFF',
+				cornerRadius: 4,//圆角
+				hitBox: true,
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Text',
+						y: 56,
+						x: 100,
+						resizeFontSize: true,
+						fontSize: 54,
+						fontWeight: 'black',
+						text: `--:--`,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Text',
+						y: 150,
+						x: 100,
+						resizeFontSize: true,
+						fontSize: 32,
+						fontWeight: 'black',
+						text: `km/h`,
+						fill: '#FFFFFF',
+						textAlign: 'center',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Ellipse',
+						width: 200,
+						height: 200,
+						startAngle: -210,
+						endAngle: 30,
+						innerRadius: 1,
+						stroke: "#CCCCCC",
+						strokeWidth: 24,
+						strokeAlign: 'center',
+						strokeCap: 'round',
+					},
+					{
+						tag: 'Ellipse',
+						width: 200,
+						height: 200,
+						startAngle: -210,
+						endAngle: 30,
+						innerRadius: 1,
+						stroke: "#FF8C00",
+						strokeWidth: 24,
+						strokeAlign: 'center',
+						strokeCap: 'round',
+					}
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "el_speed_pan",
+								"set": [
+									{ "name": `Pace`, "url": el_speed_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "el_speed_pan.children[0].fill", "value": el_speed_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Unit_color`, "url": "el_speed_pan.children[1].fill", "value": el_speed_pan.children[1].fill, "type": "color", "tools": true },
+									{ "name": `Graphic_backgrounds`, "url": "el_speed_pan.children[2].stroke", "value": el_speed_pan.children[2].stroke, "type": "color", "tools": true },
+									{ "name": `Graphic_color`, "url": "el_speed_pan.children[3].stroke", "value": el_speed_pan.children[3].stroke, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -3606,6 +3816,10 @@
 			frame.add(el_weather_pan);
 			frame.add(pl_heart_pan);
 
+			frame.add(TO_speed_pan);
+			frame.add(TO_rpm_pan);
+			frame.add(el_speed_pan);
+
 		}
 
 		//生成视频
@@ -4251,6 +4465,14 @@
 			if (elem1) {
 				TO_pace_pan.children[0].text = `${pace} min/km`;
 			}
+
+			//to仪表盘
+			var elem1;
+			elem1 = appview.findOne('#TO_speed_pan');
+			if (elem1) {
+				TO_speed_pan.children[0].text = `${speed} km/h`;
+			}
+
 			//to仪表盘
 			var elem1;
 			elem1 = appview.findOne('#TO_heart_pan');
@@ -4269,6 +4491,14 @@
 			if (elem1) {
 				TO_cadence_pan.children[0].text = `${cadence} steps/min`;
 			}
+
+			//to仪表盘
+			var elem1;
+			elem1 = appview.findOne('#TO_rpm_pan');
+			if (elem1) {
+				TO_rpm_pan.children[0].text = `${(cadence / 2) | 0} Rpm`;
+			}
+
 			//to仪表盘
 			var elem1;
 			elem1 = appview.findOne('#TO_step_pan');
@@ -4360,6 +4590,14 @@
 				el_pace_pan.children[3].endAngle = -210 + speed * 10.9;
 			}
 
+			//配速仪表盘
+			var elem1;
+			elem1 = appview.findOne('#el_speed_pan');
+			if (elem1) {
+				el_speed_pan.children[0].text = `${speed}`;
+				//max60，min0，系数3.5
+				el_speed_pan.children[3].endAngle = -210 + speed * 3.5;
+			}
 
 			//步频仪表盘
 			var elem1;
@@ -4936,6 +5174,7 @@
 
 			//第一个时间
 			var firstPointTime = new Date(fit.records[0].timestamp).getTime();
+
 			//var firstPointTime = new Date(fit.metadata.time).getTime();
 			// 初始化变量来存储步频的总和和计数
 			let cadenceSum = 0;
@@ -4943,7 +5182,7 @@
 			let total_ascent = 0;
 			let total_descent = 0;
 
-
+			//循环转换数据
 			for (let i = 0; i < fit.records.length; i++) {
 				var currentPoint = fit.records[i];
 				var sec = currentPoint.elapsed_time;
@@ -5355,7 +5594,7 @@
 						content: `
 							<div style="padding: 11px;">
 								<!-- 新增说明区域 -->
-								<div style="margin-bottom: 15px;margin-top: 15px;">分段渲染：<br>在下方选择start、end时间帧，渲染需要的部分。较长的视频，间隔5000帧是较为安全的选择。如果您的PC性能强大，也可以直接渲染全部。<br>Segmented Rendering:<br>Below, select the start and end timeframes to render the desired sections. For longer videos, a recommended interval of 5000 frames is safer. If your PC has strong performance, you can also render the entire video directly.</div>
+								<div style="margin-bottom: 15px;margin-top: 15px;">分段渲染：<br>在下方选择start、end时间帧，渲染需要的部分。较长的视频，间隔5000帧是较为安全的选择。如果您的PC性能强大，也可以直接渲染全部。<br>Segmented Rendering:<br>Select the start and end frame numbers below to render the part you need.For longer videos,setting an interval of 5,000 frames is a relatively safe choice.If your computer has powerful performance,you can also render all frames directly.</div>
 								<!-- 新增帧数控制区域 -->
 								<div style="margin-top: 15px;">
 									<div class="frame-control">
