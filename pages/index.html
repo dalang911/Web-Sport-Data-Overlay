@@ -332,7 +332,7 @@
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.42 .更新：骑行仪表盘，时速、转速。
+			Beta 0.43 .更新：图形、速度优化，去除web地图的webgl渲染，web地图降速较为严重，建议按需渲染。
 		</li>
 		<li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
 		<div class="ws-header-menu">
@@ -340,11 +340,13 @@
 				<button class="layui-btn layui-btn-xs layui-btn-normal" lay-on="setup">Generate Video</button>
 			</li>
 			<li class="layui-nav-item" style="position: absolute;right: 50px;top: 0px;color: #000;text-align: center;">
-				<a href="https://www.bilibili.com/video/BV1m9fEYRE6u/" target="_blank"><i class="layui-icon layui-icon-read" style="font-size: 18px; color: #000000;"></i></a>
+				<a href="https://www.bilibili.com/video/BV1m9fEYRE6u/" target="_blank"><i
+						class="layui-icon layui-icon-read" style="font-size: 18px; color: #000000;"></i></a>
 
 			</li>
 			<li class="layui-nav-item" style="position: absolute;right: 10px;top: 0px;color: #000;text-align: center;">
-				<a href="https://github.com/dalang911/Web-Sport-Data-Overlay" target="_blank"><i class="layui-icon layui-icon-github" style="font-size: 18px; color: #000000;"></i></a>
+				<a href="https://github.com/dalang911/Web-Sport-Data-Overlay" target="_blank"><i
+						class="layui-icon layui-icon-github" style="font-size: 18px; color: #000000;"></i></a>
 			</li>
 		</div>
 	</div>
@@ -366,7 +368,8 @@
 				<div class="tt">
 
 					<div class="demo-tab-header layui-btn-container layui-col-md3 grid-demo-bg1" id="tabHeader">
-						<div class="layui-col-md12" style="text-align: center;margin-top: 5px;margin-bottom: 5px;">DashB</div>
+						<div class="layui-col-md12" style="text-align: center;margin-top: 5px;margin-bottom: 5px;">DashB
+						</div>
 						<div class="tab layui-btn-primary layui-this">
 							<i class="layui-icon layui-icon-log iconcc"></i>
 							<div class="docs-icon-name">Time</div>
@@ -453,11 +456,11 @@
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="web_map_pan"><img src="./images/w3.png"></div>
-								<div>WebRoute</div>
+								<div>WebRoute(long time)</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="web_minimap_pan"><img src="./images/w4.png"></div>
-								<div>WebRoute</div>
+								<div>WebRoute(long time)</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="TO_gps_pan"><img src="./images/w2.png"></div>
@@ -1099,6 +1102,15 @@
 				}
 
 				huitu();//开始绘制
+
+				//监听添加事件
+				frame.on(ChildEvent.ADD, function (e) {
+					updateElementCache()
+				})
+
+				frame.on(ChildEvent.REMOVE, function (e) {
+					updateElementCache()
+				})
 			} else {
 				console.log(data.error);
 			}
@@ -1111,7 +1123,7 @@
 
 
 		// 全局变量 LeaferUI
-		const { App, Leafer, Line, Rect, Ellipse, Polygon, Box, Text, PointerButton, PointerEvent, Frame, ZoomEvent, LeafHelper } = LeaferUI;
+		const { App, Leafer, Line, Rect, Ellipse, Polygon, Box, Text, PointerButton, PointerEvent, Frame, ZoomEvent, LeafHelper, ChildEvent, LeaferEvent } = LeaferUI;
 		const { HTMLText } = LeaferIN.html;
 
 		document.head.insertAdjacentHTML('beforeend', `
@@ -1434,14 +1446,14 @@
 							{
 								"id": "pt_heart_pan",
 								"set": [
-									{ "name": `心率`, "url": "", "value": "", "type": "title", "tools": false },
-									{ "name": `标尺颜色`, "url": "pt_heart_pan.children[0].stroke", "value": pt_heart_pan.children[0].stroke, "type": "heart_color_line", "tools": true },
-									{ "name": `标尺文字颜色`, "url": "pt_heart_pan.children[3].fill", "value": pt_heart_pan.children[3].fill, "type": "heart_line_text", "tools": true },
-									{ "name": `Heart_line_thickness`, "url": "pt_heart_pan.children[6].strokeWidth", "value": pt_heart_pan.children[6].strokeWidth, "type": "number", "tools": true },
-									{ "name": `Heart_color`, "url": "pt_heart_pan.children[6].stroke", "value": pt_heart_pan.children[6].stroke, "type": "color", "tools": true },
-									{ "name": `进度线粗细`, "url": "pt_heart_pan.children[7].strokeWidth", "value": pt_heart_pan.children[7].strokeWidth, "type": "number", "tools": true },
-									{ "name": `进度线颜色`, "url": "pt_heart_pan.children[7].stroke", "value": pt_heart_pan.children[7].stroke, "type": "color", "tools": true },
-									{ "name": `进度点颜色`, "url": "pt_heart_pan.children[10].fill", "value": pt_heart_pan.children[10].fill, "type": "color", "tools": true },
+									{ "name": `heart`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `ruler color`, "url": "pt_heart_pan.children[0].stroke", "value": pt_heart_pan.children[0].stroke, "type": "heart color line", "tools": true },
+									{ "name": `ruler text color`, "url": "pt_heart_pan.children[3].fill", "value": pt_heart_pan.children[3].fill, "type": "heart line text", "tools": true },
+									{ "name": `Heart line thickness`, "url": "pt_heart_pan.children[6].strokeWidth", "value": pt_heart_pan.children[6].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Heart color`, "url": "pt_heart_pan.children[6].stroke", "value": pt_heart_pan.children[6].stroke, "type": "color", "tools": true },
+									{ "name": `Progress line thickness`, "url": "pt_heart_pan.children[7].strokeWidth", "value": pt_heart_pan.children[7].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Progress line color`, "url": "pt_heart_pan.children[7].stroke", "value": pt_heart_pan.children[7].stroke, "type": "color", "tools": true },
+									{ "name": `Progress dot color`, "url": "pt_heart_pan.children[10].fill", "value": pt_heart_pan.children[10].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -1587,13 +1599,13 @@
 								"id": "pt_pace_pan",
 								"set": [
 									{ "name": `配速`, "url": "", "value": "", "type": "title", "tools": false },
-									{ "name": `标尺颜色`, "url": "pt_pace_pan.children[0].stroke", "value": pt_pace_pan.children[0].stroke, "type": "pace_color_line", "tools": true },
-									{ "name": `标尺文字颜色`, "url": "pt_pace_pan.children[3].fill", "value": pt_pace_pan.children[3].fill, "type": "pace_line_text", "tools": true },
-									{ "name": `配速线条粗细`, "url": "pt_pace_pan.children[6].strokeWidth", "value": pt_pace_pan.children[6].strokeWidth, "type": "number", "tools": true },
-									{ "name": `配速线条颜色`, "url": "pt_pace_pan.children[6].stroke", "value": pt_pace_pan.children[6].stroke, "type": "color", "tools": true },
-									{ "name": `进度线粗细`, "url": "pt_pace_pan.children[7].strokeWidth", "value": pt_pace_pan.children[7].strokeWidth, "type": "number", "tools": true },
-									{ "name": `进度线颜色`, "url": "pt_pace_pan.children[7].stroke", "value": pt_pace_pan.children[7].stroke, "type": "color", "tools": true },
-									{ "name": `进度点颜色`, "url": "pt_pace_pan.children[10].fill", "value": pt_pace_pan.children[10].fill, "type": "color", "tools": true },
+									{ "name": `ruler color`, "url": "pt_pace_pan.children[0].stroke", "value": pt_pace_pan.children[0].stroke, "type": "pace_color_line", "tools": true },
+									{ "name": `ruler text color`, "url": "pt_pace_pan.children[3].fill", "value": pt_pace_pan.children[3].fill, "type": "pace_line_text", "tools": true },
+									{ "name": `pace line thickness`, "url": "pt_pace_pan.children[6].strokeWidth", "value": pt_pace_pan.children[6].strokeWidth, "type": "number", "tools": true },
+									{ "name": `pace line color`, "url": "pt_pace_pan.children[6].stroke", "value": pt_pace_pan.children[6].stroke, "type": "color", "tools": true },
+									{ "name": `Progress line thickness`, "url": "pt_pace_pan.children[7].strokeWidth", "value": pt_pace_pan.children[7].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Progress line color`, "url": "pt_pace_pan.children[7].stroke", "value": pt_pace_pan.children[7].stroke, "type": "color", "tools": true },
+									{ "name": `Progress dot color`, "url": "pt_pace_pan.children[10].fill", "value": pt_pace_pan.children[10].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -2001,12 +2013,12 @@
 							{
 								"id": "web_map_pan",
 								"set": [
-									{ "name": `webroute`, "url": web_map_pan.id, "value": "", "type": "title", "tools": false },
+									{ "name": `webroute (long time)`, "url": web_map_pan.id, "value": "", "type": "title", "tools": false },
 									{ "name": `border_color`, "url": "web_map_pan.stroke", "value": web_map_pan.stroke, "type": "color", "tools": true },
 									{ "name": `Background_route_color`, "url": "polyline.updateSymbol({'lineColor': value})", "value": polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
 									{ "name": `progress_route_color`, "url": "new_polyline.updateSymbol({'lineColor': value})", "value": new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
 									{ "name": `Current_position_color`, "url": "marker.updateSymbol({'markerFill': value})", "value": marker._symbol.markerFill, "type": "funcolor", "tools": true },
-									{ "name": `Map_Pitch`, "url": "map.setPitch(value);", "value": map.getPitch(), "type": "funnumber", "tools": true },
+
 								]
 							}
 							tosettable(json);
@@ -2046,12 +2058,12 @@
 							{
 								"id": "web_minimap_pan",
 								"set": [
-									{ "name": `webroute`, "url": web_minimap_pan.id, "value": "", "type": "title", "tools": false },
+									{ "name": `webroute (long time)`, "url": web_minimap_pan.id, "value": "", "type": "title", "tools": false },
 									{ "name": `border_color`, "url": "web_minimap_pan.stroke", "value": web_minimap_pan.stroke, "type": "color", "tools": true },
 									{ "name": `Background_route_color`, "url": "mini_polyline.updateSymbol({'lineColor': value})", "value": mini_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
 									{ "name": `progress_route_color`, "url": "mini_new_polyline.updateSymbol({'lineColor': value})", "value": mini_new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
 									{ "name": `Current_position_color`, "url": "mini_marker.updateSymbol({'markerFill': value})", "value": mini_marker._symbol.markerFill, "type": "funcolor", "tools": true },
-									{ "name": `Map_Pitch`, "url": "minimap.setPitch(value);", "value": minimap.getPitch(), "type": "funnumber", "tools": true },
+
 								]
 							}
 							tosettable(json);
@@ -3732,10 +3744,10 @@
 								"id": "pl_heart_pan",
 								"set": [
 									{ "name": `Heart Rate`, "url": el_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
-									{ "name": `标尺颜色`, "url": "pl_heart_pan.children[0].stroke", "value": pl_heart_pan.children[0].stroke, "type": "color", "tools": true },
-									{ "name": `低心率值`, "url": "pl_heart_pan.children[1].text", "value": pl_heart_pan.children[1].text, "type": "heart_text", "tools": true },
-									{ "name": `高心率值`, "url": "pl_heart_pan.children[2].text", "value": pl_heart_pan.children[2].text, "type": "heart_text", "tools": true },
-									{ "name": `标尺文字颜色`, "url": "pl_heart_pan.children[1].fill", "value": pl_heart_pan.children[1].fill, "type": "heart_color", "tools": true },
+									{ "name": `ruler color`, "url": "pl_heart_pan.children[0].stroke", "value": pl_heart_pan.children[0].stroke, "type": "color", "tools": true },
+									{ "name": `Heart Rate low`, "url": "pl_heart_pan.children[1].text", "value": pl_heart_pan.children[1].text, "type": "heart_text", "tools": true },
+									{ "name": `Heart Rate high`, "url": "pl_heart_pan.children[2].text", "value": pl_heart_pan.children[2].text, "type": "heart_text", "tools": true },
+									{ "name": `ruler text color`, "url": "pl_heart_pan.children[1].fill", "value": pl_heart_pan.children[1].fill, "type": "heart_color", "tools": true },
 
 
 								]
@@ -3926,20 +3938,27 @@
 
 			var frameCounter = 0;//祯计数器
 			var currentFrame = startFrame;//开始点运动数据长度计数器
+			const runtimestart = Date.now();//运行时间计时器
+
+			// 在upFrame开始时确保缓存最新
+			updateElementCache();
+
 			//currentFrame = maxFrame - 5;
 			//制作视频，插入帧
 			// 改为用异步IIFE+循环结构
 			(async function updateFrame() {
 				while (currentFrame < endFrame) {
+					//console.log(trkpt_data[currentFrame]);
+					//console.log("upFrameS:",Date.now() - runtimestart);
 					if (!upFrame(currentFrame)) break;
 
 					// 确保绘制完成后再进行编码
 					await new Promise(r => setTimeout(r, 0)); // 微任务队列排空
+					//console.log("upFrameE:",Date.now() - runtimestart);
 
 					let frame = new VideoFrame(canvas, {
 						timestamp: (trkpt_data[currentFrame].sec * 1e6),
 					});
-
 
 					if (videomode == 'mp4') {
 						mp4VideoEncoder.encode(frame, {
@@ -3955,16 +3974,19 @@
 
 					frame.close();
 
+					//console.log("FrameC:",Date.now() - runtimestart);
 					currentFrame++;
 
 					// 使用 rAF 进行节流
 					await new Promise(resolve => requestAnimationFrame(resolve));
+
 				}
 
 				// 处理最后一帧
 				if (currentFrame === endFrame) {
 					upFrame(endFrame - 1);
 					frameTocanv();
+
 					let frame = new VideoFrame(canvas, {
 						timestamp: (trkpt_data[endFrame - 1].sec + 1) * 1e6
 					});
@@ -3974,17 +3996,23 @@
 					if (videomode == 'webm') {
 						webmVideoEncoder.encode(frame, { keyFrame: true });
 					}
-
+					//console.log("FrameCE:",Date.now() - runtimestart);
 					frame.close();
 				}
 
+
 				// 关闭录制
 				await endEncoding();
+				// 计算执行时间
+				const runtime = Date.now() - runtimestart;
+
 				$('#view_info').css('display', 'none');
+
+				console.log("end:", Date.now() - runtimestart);
+				// 显示结果到页面
+				document.getElementById('runtime').textContent = runtime + "ms";
 			})();
 		}
-
-
 
 		// 更新编辑事件，json部件点击事件
 		function tosettable(json) {
@@ -4299,6 +4327,26 @@
 			});
 		}
 
+		// 全局缓存变量（假设在合适的作用域定义）
+		let elementCache = {}; // 缓存元素对象 { id: element }
+		let validElementIds = []; // 存储所有有效元素ID
+
+
+		// 初始化时或元素变化时更新缓存（需在合适时机调用）
+		function updateElementCache() {
+			elementCache = {};
+			validElementIds = [];
+
+			// 遍历 frame 的子元素，收集有效ID
+			frame.children.forEach(child => {
+				const id = child.id;
+				if (id) {
+					elementCache[id] = child; // 缓存元素对象
+					validElementIds.push(id); // 记录有效ID
+				}
+			});
+		}
+
 		//更新画布
 		async function upFrame(currentFrame) {
 
@@ -4306,10 +4354,7 @@
 			$('#view_info').html(currentFrame.toString() + '/' + endFrame.toString() + ' MAX:' + maxFrame.toString());
 
 			//长度条
-			var elem1, elem2;
-			elem1 = appview.findOne('#appv_distance_pan');
-			elem2 = appview.findOne('#l_distance_pan');
-			if (elem1 || elem2) {
+			if (validElementIds.includes('appv_distance_pan') || validElementIds.includes('l_distance_pan')) {
 				//开始填充
 				// 获取trkpt_data数组中最后一个元素的distance属性值，除以1000后进行四舍五入保留两位小数
 				//zcd.text = max_distance_in_km + `Km`;//总长度
@@ -4331,10 +4376,7 @@
 			}
 
 			//高程
-			var elem1, elem2;
-			elem1 = appview.findOne('#appv_ele18_pan');
-			elem2 = appview.findOne('#appv_ele_pan');
-			if (elem1 || elem2) {
+			if (validElementIds.includes('appv_ele18_pan') || validElementIds.includes('appv_ele_pan')) {
 				//设置高程图型坐标
 				//let offsetXY = appv_ele18_pan.children[1].width / 2;
 				appv_ele18_pan.children[1].x = ele18_points[2 * currentFrame];
@@ -4345,21 +4387,14 @@
 
 
 			//当前行进时间
-			var elem1, elem2;
-			elem1 = appview.findOne('#appv_nowtime_pan');
-			elem2 = appview.findOne('#text_nowtime_pan');
-
-			if (elem1 || elem2) {
+			if (validElementIds.includes('appv_nowtime_pan') || validElementIds.includes('text_nowtime_pan')) {
 				//当前进行时间 var now_time_str = secondsToHHMMSS(trkpt_data[currentFrame].sec);
 				appv_nowtime_pan.children[0].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
 				text_nowtime_pan.children[0].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
 			}
 
 			//画地图轨迹
-			var elem1, elem2;
-			elem1 = appview.findOne('#appv_map_pan');
-			elem2 = appview.findOne('#appv_map_a_pan');
-			if (elem1 || elem2) {
+			if (validElementIds.includes('appv_map_pan') || validElementIds.includes('appv_map_a_pan')) {
 				//画地图
 				var now_points = [];
 				for (let index = 0; index <= currentFrame; index++) {
@@ -4368,13 +4403,13 @@
 					now_points.push(map_points[index * 2 + 1]); // 第二个数值乘以2
 
 				}
-				if (elem1) {
+				if (validElementIds.includes('appv_map_pan')) {
 					appv_map_pan.children[1].points = now_points;
 					//画当前点
 					appv_map_pan.children[2].x = map_points[currentFrame * 2];
 					appv_map_pan.children[2].y = map_points[currentFrame * 2 + 1];
 				}
-				if (elem2) {
+				if (validElementIds.includes('appv_map_a_pan')) {
 					appv_map_a_pan.children[1].points = now_points;
 					//画当前点
 					appv_map_a_pan.children[2].x = map_points[currentFrame * 2];
@@ -4387,31 +4422,26 @@
 
 
 			//画web地图
-			var elem1, elem2;
-			elem1 = appview.findOne('#web_map_pan');
-			elem2 = appview.findOne('#web_minimap_pan');
-			if (elem1 || elem2) {
-				if (frame.find('#web_map_pan').length > 0 || frame.find('#web_minimap_pan').length > 0) {
-					daohang(currentFrame);
-					if (frame.find('#web_map_pan').length > 0) {
-						const mapCanvas = document.querySelector("#leafletmap > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
-						web_map_pan.children[0].context.drawImage(mapCanvas, 0, 0, web_map_pan.children[0].width, web_map_pan.children[0].height);
-						web_map_pan.children[0].paint()
-					}
-					if (frame.find('#web_minimap_pan').length > 0) {
-						const minimapCanvas = document.querySelector("#leafletmap_mini > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
-						web_minimap_pan.children[0].context.drawImage(minimapCanvas, 0, 0, web_minimap_pan.children[0].width, web_minimap_pan.children[0].height);
-						web_minimap_pan.children[0].paint()
-					}
+			if (validElementIds.includes('web_map_pan') || validElementIds.includes('web_minimap_pan')) {
+
+				daohang(currentFrame);
+				if (validElementIds.includes('web_map_pan')) {
+					const mapCanvas = document.querySelector("#leafletmap > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
+					web_map_pan.children[0].context.drawImage(mapCanvas, 0, 0, web_map_pan.children[0].width, web_map_pan.children[0].height);
+					web_map_pan.children[0].paint()
 				}
+				if (validElementIds.includes('web_minimap_pan')) {
+					const minimapCanvas = document.querySelector("#leafletmap_mini > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
+					web_minimap_pan.children[0].context.drawImage(minimapCanvas, 0, 0, web_minimap_pan.children[0].width, web_minimap_pan.children[0].height);
+					web_minimap_pan.children[0].paint()
+				}
+
 			}
 
 
 
 			//当前经纬度
-			var elem1;
-			elem1 = appview.findOne('#TO_gps_pan');
-			if (elem1) {
+			if (validElementIds.includes('TO_gps_pan')) {
 				TO_gps_pan.children[0].text = `${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_lat)}\n${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_long)}`;
 			}
 
@@ -4438,45 +4468,30 @@
 			// 获取步幅，若不存在则设为0
 			let step_length = trkpt_data[currentFrame] && trkpt_data[currentFrame].step_length ? trkpt_data[currentFrame].step_length : 0;
 
-
-
-
-
-
 			//雷达图
-			var elem1;
-			elem1 = appview.findOne('#el_leida_pan');
-			if (elem1) {
+			if (validElementIds.includes('el_leida_pan')) {
 				let flatPoints = to_leida_xy(heart_rate, speed, cadence);
 				el_leida_pan.children[9].points = flatPoints;
 			}
 
 
 			//综合
-			var elem1;
-			elem1 = appview.findOne('#appv_nowstatus_pan');
-			if (elem1) {
+			if (validElementIds.includes('appv_nowstatus_pan')) {
 				appv_nowstatus_pan.children[0].text = `Speed：${speed.toFixed(2)} km/h\nPace：${pace} min/km\nHeart Rate：${heart_rate} bpm\nCadence：${cadence} steps/min\nStep：${step_length} m`;
 			}
 
 			//to仪表盘
-			var elem1;
-			elem1 = appview.findOne('#TO_pace_pan');
-			if (elem1) {
+			if (validElementIds.includes('TO_pace_pan')) {
 				TO_pace_pan.children[0].text = `${pace} min/km`;
 			}
 
 			//to仪表盘
-			var elem1;
-			elem1 = appview.findOne('#TO_speed_pan');
-			if (elem1) {
+			if (validElementIds.includes('TO_speed_pan')) {
 				TO_speed_pan.children[0].text = `${speed} km/h`;
 			}
 
 			//to仪表盘
-			var elem1;
-			elem1 = appview.findOne('#TO_heart_pan');
-			if (elem1) {
+			if (validElementIds.includes('TO_heart_pan')) {
 				TO_heart_pan.children[0].text = `${heart_rate} bpm`;
 				// 根据奇偶性设置心率图标缩放比例
 				if (currentFrame % 2 === 0) {
@@ -4486,31 +4501,23 @@
 				}
 			}
 			//to仪表盘
-			var elem1;
-			elem1 = appview.findOne('#TO_cadence_pan');
-			if (elem1) {
+			if (validElementIds.includes('TO_cadence_pan')) {
 				TO_cadence_pan.children[0].text = `${cadence} steps/min`;
 			}
 
 			//to仪表盘
-			var elem1;
-			elem1 = appview.findOne('#TO_rpm_pan');
-			if (elem1) {
+			if (validElementIds.includes('TO_rpm_pan')) {
 				TO_rpm_pan.children[0].text = `${(cadence / 2) | 0} Rpm`;
 			}
 
 			//to仪表盘
-			var elem1;
-			elem1 = appview.findOne('#TO_step_pan');
-			if (elem1) {
+			if (validElementIds.includes('TO_step_pan')) {
 				TO_step_pan.children[0].text = `${step_length} m`;
 			}
 
 
 			//心率仪表盘
-			var elem1;
-			elem1 = appview.findOne('#el_heart_pan');
-			if (elem1) {
+			if (validElementIds.includes('el_heart_pan')) {
 				el_heart_pan.children[0].text = `${heart_rate}`;
 				//max220,min40，系数1.33
 				if (heart_rate < 40) {
@@ -4521,9 +4528,7 @@
 
 
 			//高级心率仪表盘
-			var elem1;
-			elem1 = appview.findOne('#pl_heart_pan');
-			if (elem1) {
+			if (validElementIds.includes('pl_heart_pan')) {
 				// 获取原始数值并转换为整数
 				var min = parseInt(pl_heart_pan.children[1].text);
 				var max = parseInt(pl_heart_pan.children[2].text);
@@ -4554,11 +4559,14 @@
 
 				// 计算折线点坐标
 				const zheart_points = [];
-				const xStep = 150 / (10 - 1); // X轴间隔计算（保持10个点平均分布）
+				const pl_heart_pan_width = pl_heart_pan.width * 0.75;
+				const pl_heart_pan_40 = pl_heart_pan_width * 0.2;
+				const pl_heart_pan_80 = pl_heart_pan_width * 0.4;
+				const xStep = pl_heart_pan_width / (10 - 1); // X轴间隔计算（保持10个点平均分布）
 
 				for (let i = 0; i < 10; i++) {
 					// X坐标计算：从右向左排列（最新数据在最右侧）
-					const x = 150 - i * xStep;
+					const x = pl_heart_pan_width - i * xStep;
 
 					// Y坐标计算（关键修改部分）：
 					// 1. 将0-80的心率映射到0-10的显示范围（因40px高度/4px/unit=10units）
@@ -4566,12 +4574,12 @@
 					// 3. 坐标系转换：画布底部为150，向上递减
 					const heartRate = heartRates[i];
 					const displayValue = heartRates[i] - heartRates[i + 1]; // 80→10
-					var y = 40 - (displayValue * 6);
+					var y = pl_heart_pan_40 - (displayValue * 6);
 					// 边界约束（重要补充）
 					if (y < 0) {
 						y = 0;
-					} else if (y > 80) {
-						y = 80;
+					} else if (y > pl_heart_pan_80) {
+						y = pl_heart_pan_80;
 					}
 					zheart_points.push(x, y);
 				}
@@ -4582,27 +4590,21 @@
 
 
 			//配速仪表盘
-			var elem1;
-			elem1 = appview.findOne('#el_pace_pan');
-			if (elem1) {
+			if (validElementIds.includes('el_pace_pan')) {
 				el_pace_pan.children[0].text = `${pace}`;
 				//max22，min0，系数10.9
 				el_pace_pan.children[3].endAngle = -210 + speed * 10.9;
 			}
 
 			//配速仪表盘
-			var elem1;
-			elem1 = appview.findOne('#el_speed_pan');
-			if (elem1) {
+			if (validElementIds.includes('el_speed_pan')) {
 				el_speed_pan.children[0].text = `${speed}`;
 				//max60，min0，系数3.5
 				el_speed_pan.children[3].endAngle = -210 + speed * 3.5;
 			}
 
 			//步频仪表盘
-			var elem1;
-			elem1 = appview.findOne('#el_pace_pan');
-			if (elem1) {
+			if (validElementIds.includes('el_pace_pan')) {
 				el_cadence_pan.children[0].text = `${cadence}`;
 				//max240，min0，系数1
 				el_cadence_pan.children[3].endAngle = -210 + cadence * 1;
@@ -4610,9 +4612,7 @@
 
 
 			//圈速
-			var elem1;
-			elem1 = appview.findOne('#appv_lap_pan');
-			if (elem1) {
+			if (validElementIds.includes('appv_lap_pan')) {
 				let segment_info = "";
 				let lap = "";
 				// 计算已经完成的整公里数
@@ -4647,16 +4647,12 @@
 
 
 			//综合图表画进度 metrics
-			var elem1;
-			elem1 = appview.findOne('#appv_metrics_pan');
-			if (elem1) {
+			if (validElementIds.includes('appv_metrics_pan')) {
 				appv_metrics_pan.children[3].x = appv_metrics_pan.width / maxFrame * currentFrame;
 			}
 
 			//带标尺的心率
-			var elem1;
-			elem1 = appview.findOne('#pt_heart_pan');
-			if (elem1) {
+			if (validElementIds.includes('pt_heart_pan')) {
 				pt_heart_pan.children[7].x = pt_heart_pan.width / maxFrame * currentFrame;
 				pt_heart_pan.children[9].x = pt_heart_pan.width / maxFrame * currentFrame + 5;
 				pt_heart_pan.children[10].x = pt_heart_pan.width / maxFrame * currentFrame;
@@ -4666,9 +4662,7 @@
 
 
 			//带标尺的配速
-			var elem1;
-			elem1 = appview.findOne('#pt_pace_pan');
-			if (elem1) {
+			if (validElementIds.includes('pt_pace_pan')) {
 				pt_pace_pan.children[7].x = pt_pace_pan.width / maxFrame * currentFrame;
 				pt_pace_pan.children[9].x = pt_pace_pan.width / maxFrame * currentFrame + 5;
 				pt_pace_pan.children[10].x = pt_pace_pan.width / maxFrame * currentFrame;
@@ -4679,33 +4673,25 @@
 
 
 			//当前日期时间
-			var elem1;
-			elem1 = appview.findOne('#appv_date_pan');
-			if (elem1) {
+			if (validElementIds.includes('appv_date_pan')) {
 				appv_date_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp);
 			}
 
 
 			//当前时间
-			var elem1;
-			elem1 = appview.findOne('#text_time_pan');
-			if (elem1) {
+			if (validElementIds.includes('text_time_pan')) {
 				text_time_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp, 0);
 			}
 
 
 			//当前日期
-			var elem1;
-			elem1 = appview.findOne('#text_day_pan');
-			if (elem1) {
+			if (validElementIds.includes('text_day_pan')) {
 				text_day_pan.children[0].text = timestampToDateString(trkpt_data[currentFrame].timestamp, 1);
 			}
 
 
 			//画坡度
-			var elem1;
-			elem1 = appview.findOne('#el_slope_pan');
-			if (elem1) {
+			if (validElementIds.includes('el_slope_pan')) {
 				//const slope_points = [0, 60, 0, 70, 100, 70, 100, 60, 100, 60];
 				var slope_points = el_slope_pan.children[0].points;
 				slope_points[1] = slope_points[7];
@@ -5325,14 +5311,19 @@
 			var progressBar = document.getElementById('progressBar');
 			progressBar.value = value;
 			upFrame(value);
-			daohang(value);
+			if (validElementIds.includes('web_map_pan') || validElementIds.includes('web_minimap_pan')) {
+				new_maptalks();
+				daohang(value);
+			}
 		}
 
 		// 监听进度条变化事件
 		document.getElementById('progressBar').addEventListener('input', function () {
 			var currentValue = this.value;
 			upFrame(currentValue);
-			daohang(currentValue);
+			if (validElementIds.includes('web_map_pan') || validElementIds.includes('web_minimap_pan')) {
+				daohang(currentValue);
+			}
 		});
 
 		//获取当前进度条的值，并调用 upFrame 和 daohang
@@ -5340,7 +5331,9 @@
 			var progressBar = document.getElementById('progressBar');
 			var currentValue = progressBar.value;
 			upFrame(currentValue);
-			daohang(currentValue);
+			if (validElementIds.includes('web_map_pan') || validElementIds.includes('web_minimap_pan')) {
+				daohang(currentValue);
+			}
 		}
 
 
@@ -5481,6 +5474,9 @@
 					frame.add(window[layActiveValue]);
 
 					$('#progressBar').val(parseInt(maxFrame * 0.7));
+					if(layActiveValue == "appv_map_pan" || layActiveValue == "appv_map_a_pan") {
+						new_maptalks();
+					}
 					upFrame(parseInt(maxFrame * 0.7));
 
 				} else {
@@ -5577,7 +5573,7 @@
                                 <div class="view_info" id="view_info"></div>
                                 <video id="video" width="720px" height="720px" controls autoplay></video>
                                 <div class="download_button" style="width: 380px;">
-                                    Download Movie
+                                    Download Movie runtime:<span id="runtime"></span>
                                     <a id="download" download="movie.${videomode}">
                                     <button type="button" class="layui-btn layui-bg-blue layui-btn-fluid">download</button></a>
                                 </div>
@@ -5719,117 +5715,143 @@
 
 	</script>
 	<script>
-		// maptalks地图
-		var map = new maptalks.Map('leafletmap', {
-			center: [118.9, 33.8], // 初始中心点
-			zoom: 15, // 初始缩放级别
-			baseLayer: new maptalks.TileLayer('base', {
-				urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-				subdomains: ['a', 'b', 'c'],
-				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
-			})
-			// baseLayer: new maptalks.TileLayer('base', {
-			//     urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-			//     subdomains: ['a', 'b', 'c', 'd'],
-			//     attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
-			// })
-		});
-
-		var minimap = new maptalks.Map('leafletmap_mini', {
-			center: [118.9, 33.8], // 初始中心点
-			zoom: 17, // 初始缩放级别
-			baseLayer: new maptalks.TileLayer('base', {
-				urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-				subdomains: ['a', 'b', 'c'],
-				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
-			})
-		});
-
-		var latlngs = [
+		//经纬度数组
+		latlngs = [
 			[119.1, 33.1],
 			[119.2, 33.2],
 			[119.1, 33.5]
 		];
+		function new_maptalks() {
+			// 使用 typeof 避免变量未声明时报错
+			if (typeof globalThis.myMap === 'undefined' || !(globalThis.myMap instanceof Map)) {
+				// maptalks地图
+				map = new maptalks.Map('leafletmap', {
+					center: [118.9, 33.8], // 初始中心点
+					zoom: 15, // 初始缩放级别
+					baseLayer: new maptalks.TileLayer('base', {
+						renderer : 'canvas',//可选 webgl，去除行即可
+						crossOrigin : 'anonymous',
+						urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+						subdomains: ['a', 'b', 'c'],
+						attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
+					})
+					// baseLayer: new maptalks.TileLayer('base', {
+					//     urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+					//     subdomains: ['a', 'b', 'c', 'd'],
+					//     attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
+					// })
+				});
 
-		// 创建折线实例
-		var polyline = new maptalks.LineString(latlngs, {
-			symbol: {
-				'lineColor': '#FFFF00',
-				'lineWidth': 5,
-				'lineOpacity': 0.9
+				minimap = new maptalks.Map('leafletmap_mini', {
+					center: [118.9, 33.8], // 初始中心点
+					zoom: 17, // 初始缩放级别
+					baseLayer: new maptalks.TileLayer('base', {
+						renderer: 'canvas',//可选 webgl，去除行即可
+						crossOrigin: 'anonymous',
+						urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+						subdomains: ['a', 'b', 'c'],
+						attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
+					})
+				});
+
+
+
+				// 创建折线实例
+				polyline = new maptalks.LineString(latlngs, {
+					symbol: {
+						'lineColor': '#FFFF00',
+						'lineWidth': 5,
+						'lineOpacity': 0.9
+					}
+				});
+
+				// 创建折线实例
+				mini_polyline = new maptalks.LineString(latlngs, {
+					symbol: {
+						'lineColor': '#FFFF00',
+						'lineWidth': 5,
+						'lineOpacity': 0.9
+					}
+				});
+
+				// 创建折线实例
+				new_polyline = new maptalks.LineString([], {
+					symbol: {
+						'lineColor': '#FF8C00',
+						'lineWidth': 5,
+						'lineOpacity': 0.9
+					}
+				});
+				// 创建折线实例
+				mini_new_polyline = new maptalks.LineString([], {
+					symbol: {
+						'lineColor': '#FF8C00',
+						'lineWidth': 5,
+						'lineOpacity': 0.9
+					}
+				});
+
+
+
+
+				// red circle
+				marker = new maptalks.Marker(latlngs[0], {
+					symbol:
+					{
+						'markerType': 'ellipse',
+						'markerFill': '#FF6347',
+						'markerFillOpacity': 0.9,
+						'markerLineWidth': 0,
+						'markerWidth': 15,
+						'markerHeight': 15
+					}
+
+				});
+
+				mini_marker = new maptalks.Marker(latlngs[0], {
+					symbol:
+					{
+						'markerType': 'ellipse',
+						'markerFill': '#FF6347',
+						'markerFillOpacity': 0.9,
+						'markerLineWidth': 0,
+						'markerWidth': 15,
+						'markerHeight': 15
+					}
+
+				});
+
+
+
+
+
+				layer = new maptalks.VectorLayer('vector').addTo(map);
+				minilayer = new maptalks.VectorLayer('vector').addTo(minimap);
+
+				// 将折线添加到地图上
+				layer.addGeometry(polyline, new_polyline, marker);
+				minilayer.addGeometry(mini_polyline, mini_new_polyline, mini_marker);
+				// 调整视野到折线范围
+				map.fitExtent(polyline.getExtent(), -0.125);
+				minimap.fitExtent(mini_polyline.getExtent(), 16);
+				//minimap.setPitch(40);
+
+				// 更新折线
+				polyline.setCoordinates(latlngs);
+				mini_polyline.setCoordinates(latlngs);
+				// 重新调整视野到折线范围
+				map.fitExtent(polyline.getExtent(), -0.125);
+				minimap.setCenterAndZoom(latlngs[0], 16)
+				//minimap.fitExtent(mini_polyline.getExtent());
+
+			} else {
+				// 已存在 → 退出
+				console.log('使用全局 Map:', globalThis.myMap);
+				return;
 			}
-		});
 
-		// 创建折线实例
-		var mini_polyline = new maptalks.LineString(latlngs, {
-			symbol: {
-				'lineColor': '#FFFF00',
-				'lineWidth': 5,
-				'lineOpacity': 0.9
-			}
-		});
+		}
 
-		// 创建折线实例
-		var new_polyline = new maptalks.LineString([], {
-			symbol: {
-				'lineColor': '#FF8C00',
-				'lineWidth': 5,
-				'lineOpacity': 0.9
-			}
-		});
-		// 创建折线实例
-		var mini_new_polyline = new maptalks.LineString([], {
-			symbol: {
-				'lineColor': '#FF8C00',
-				'lineWidth': 5,
-				'lineOpacity': 0.9
-			}
-		});
-
-
-
-
-		// red circle
-		var marker = new maptalks.Marker(latlngs[0], {
-			symbol:
-			{
-				'markerType': 'ellipse',
-				'markerFill': '#FF6347',
-				'markerFillOpacity': 0.9,
-				'markerLineWidth': 0,
-				'markerWidth': 15,
-				'markerHeight': 15
-			}
-
-		});
-
-		var mini_marker = new maptalks.Marker(latlngs[0], {
-			symbol:
-			{
-				'markerType': 'ellipse',
-				'markerFill': '#FF6347',
-				'markerFillOpacity': 0.9,
-				'markerLineWidth': 0,
-				'markerWidth': 15,
-				'markerHeight': 15
-			}
-
-		});
-
-
-
-
-
-		var layer = new maptalks.VectorLayer('vector').addTo(map);
-		var minilayer = new maptalks.VectorLayer('vector').addTo(minimap);
-
-		// 将折线添加到地图上
-		layer.addGeometry(polyline, new_polyline, marker);
-		minilayer.addGeometry(mini_polyline, mini_new_polyline, mini_marker);
-		// 调整视野到折线范围
-		map.fitExtent(polyline.getExtent(), -0.125);
-		minimap.fitExtent(mini_polyline.getExtent(), 16);
-		minimap.setPitch(40);
 
 		function set_leafletmap_latlngs(rqjson) {
 			// 清空现有的latlngs数组
@@ -5845,13 +5867,7 @@
 				latlngs.push([lng, lat]);
 			}
 
-			// 更新折线
-			polyline.setCoordinates(latlngs);
-			mini_polyline.setCoordinates(latlngs);
-			// 重新调整视野到折线范围
-			map.fitExtent(polyline.getExtent(), -0.125);
-			minimap.setCenterAndZoom(latlngs[0], 16)
-			//minimap.fitExtent(mini_polyline.getExtent());
+
 		}
 
 		function daohang(index) {
