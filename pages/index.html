@@ -787,69 +787,8 @@
 								console.log("data['data']['trkpt']不存在");
 							}
 
-							//修补数据
-							if (data['data'] && data['data']['trkpt']) {
-								const trkpt = data['data']['trkpt'];
-								// 检查trkpt[0].sec是否为10，如果是则进行修补
-								if (trkpt.length > 0 && trkpt[0].sec === 10) {
-									// 创建两个新的数据对象
-									const firstPatch = {
-										timestamp: trkpt[0].timestamp - 10,
-										sec: 0,
-										position_lat: data['data']['map']['start_position_lat'],
-										position_long: data['data']['map']['start_position_long'],
-										altitude: trkpt[0].altitude,
-										is_pause: trkpt[0].is_pause,
-										speed: 0, // 初始速度为0
-										distance: 0, // 初始距离为0
-										heart_rate: trkpt[0].heart_rate,
-										cadence: trkpt[0].cadence,
-										step_length: 0 // 初始步幅为0
-									};
 
-									const secondPatch = {
-										timestamp: trkpt[0].timestamp - 5,
-										sec: 5,
-										position_lat: data['data']['map']['start_position_lat'],
-										position_long: data['data']['map']['start_position_long'],
-										altitude: trkpt[0].altitude,
-										is_pause: trkpt[0].is_pause,
-										speed: (trkpt[0].speed + 0) / 2, // 取中间速度
-										distance: (trkpt[0].distance - 0) / 2, // 取中间距离
-										heart_rate: trkpt[0].heart_rate,
-										cadence: trkpt[0].cadence,
-										step_length: trkpt[0].step_length / 2 // 取中间步幅
-									};
-
-									// 将新的数据对象插入到trkpt数组的开始位置
-									trkpt.unshift(firstPatch, secondPatch);
-								}
-
-								if (trkpt.length > 0 && trkpt[0].sec === 5) {
-									// 创建两个新的数据对象
-
-									const firstPatch = {
-										timestamp: trkpt[0].timestamp - 5,
-										sec: 0,
-										position_lat: data['data']['map']['start_position_lat'],
-										position_long: data['data']['map']['start_position_long'],
-										altitude: trkpt[0].altitude,
-										is_pause: trkpt[0].is_pause,
-										speed: 0, // 初始速度为0
-										distance: 0, // 初始距离为0
-										heart_rate: trkpt[0].heart_rate,
-										cadence: trkpt[0].cadence,
-										step_length: 0 // 初始步幅为0
-									};
-
-									// 将新的数据对象插入到trkpt数组的开始位置
-									trkpt.unshift(firstPatch);
-								}
-								$('#b169').click();
-
-							} else {
-								console.log("data['data']['trkpt']不存在");
-							}
+							$('#b169').click();
 
 						} else {
 							console.error('JSON文件status状态错误');
@@ -5171,6 +5110,29 @@
 			//循环转换数据
 			for (let i = 0; i < fit.records.length; i++) {
 				var currentPoint = fit.records[i];
+
+				// 如果 position_lat 或 position_long 不存在，跳过当前循环,可能有问题？？？？？
+				if (currentPoint.position_lat == null || currentPoint.position_long == null) {
+					continue;
+				}
+
+				//fit修正，防止第一个和最后一个gps打点为空，高驰
+				let position_lat;
+				let position_long;
+
+				if (i === fit.records.length - 1) {
+					// 如果是最后一个元素，则取前一个
+					position_lat = currentPoint.position_lat ?? fit.records[i - 1].position_lat ?? 0;
+					position_long = currentPoint.position_long ?? fit.records[i - 1].position_long ?? 0;
+				} else {
+					// 否则，取后一个
+					position_lat = currentPoint.position_lat ?? fit.records[i + 1].position_lat ?? 0;
+					position_long = currentPoint.position_long ?? fit.records[i + 1].position_long ?? 0;
+				}
+
+
+
+
 				var sec = currentPoint.elapsed_time;
 				//console.log(sec);
 				var timeCurrent = new Date(currentPoint.timestamp).getTime() / 1000;
@@ -5221,19 +5183,7 @@
 					total_descent += previousAltitude - currentAltitude;
 				}
 
-				//fit修正，防止第一个和最后一个gps打点为空，高驰
-				let position_lat;
-				let position_long;
 
-				if (i === fit.records.length - 1) {
-					// 如果是最后一个元素，则取前一个
-					position_lat = currentPoint.position_lat ?? fit.records[i - 1].position_lat ?? 0;
-					position_long = currentPoint.position_long ?? fit.records[i - 1].position_long ?? 0;
-				} else {
-					// 否则，取后一个
-					position_lat = currentPoint.position_lat ?? fit.records[i + 1].position_lat ?? 0;
-					position_long = currentPoint.position_long ?? fit.records[i + 1].position_long ?? 0;
-				}
 
 
 				//赋值
