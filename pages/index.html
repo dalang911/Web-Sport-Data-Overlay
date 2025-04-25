@@ -3783,15 +3783,75 @@
 				var mp4VideoEncoder = null;
 				// 结束编码
 				var endEncoding = async () => {
-					await mp4VideoEncoder?.flush();
-					mp4Muxer.finalize();
-					let buffer = mp4Muxer.target?.buffer;
-					var blobUrl = URL.createObjectURL(new Blob([buffer]));
-					video.src = blobUrl;
-					download.href = blobUrl;
-					mp4VideoEncoder = null;
-					mp4Muxer = null;
-				};
+    // 初始化性能监控对象
+    const perf = {
+        flushStart: performance.now(),
+        flushEnd: 0,
+        finalizeStart: 0,
+        bufferStart: 0,
+        blobStart: 0,
+        totalStart: performance.now()
+    };
+
+    try {
+        // 阶段1: 刷新编码器数据
+        console.log("⌛ 开始刷新MP4视频编码器", `(全程已耗时 ${performance.now() - perf.totalStart}ms)`);
+
+        await mp4VideoEncoder?.flush();
+        perf.flushEnd = performance.now();
+
+        console.log(`✅ 编码器刷新完成 耗时 ${perf.flushEnd - perf.flushStart}ms`);
+
+        // 阶段2: 最终化混合器
+        perf.finalizeStart = performance.now();
+        mp4Muxer.finalize();
+        console.log(`📦 混合器最终化完成 耗时 ${performance.now() - perf.finalizeStart}ms`);
+
+        // 阶段3: 获取二进制缓冲区
+        perf.bufferStart = performance.now();
+        let buffer = mp4Muxer.target?.buffer;
+        console.log(`💾 缓冲区获取 耗时 ${performance.now() - perf.bufferStart}ms`,
+                   `数据大小: ${(buffer?.byteLength / 1024 / 1024).toFixed(2)}MB`);
+
+        // 阶段4: 生成可播放URL
+        perf.blobStart = performance.now();
+        if (buffer) {
+            const blob = new Blob([buffer], { type: 'video/mp4' });
+            const blobUrl = URL.createObjectURL(blob);
+            console.log(`🔗 Blob URL 生成 耗时 ${performance.now() - perf.blobStart}ms`);
+
+            // 更新媒体元素
+            video.src = blobUrl;
+            download.href = blobUrl;
+
+            // 内存监控
+            const memUsage = performance.memory ?
+                `(内存: ${(performance.memory.usedJSHeapSize / 1048576).toFixed(1)}MB)` : '';
+            console.log(`🎥 视频资源已更新 ${memUsage}`);
+        }
+
+    } catch (error) {
+        console.error("⚠ 编码流程异常:", error);
+        throw error;
+    } finally {
+        // 阶段5: 资源清理
+        const cleanupStart = performance.now();
+        mp4VideoEncoder = null;
+        mp4Muxer = null;
+        console.log(`♻ 资源清理完成 耗时 ${performance.now() - cleanupStart}ms`);
+
+        // 最终性能报告
+        const totalTime = performance.now() - perf.totalStart;
+        console.log(`🏁 全部流程完成 总耗时 ${totalTime}ms`);
+        console.table({
+            '编码刷新': `${perf.flushEnd - perf.flushStart}ms`,
+            '混合器处理': `${performance.now() - perf.finalizeStart}ms`,
+            '数据序列化': `${performance.now() - perf.bufferStart}ms`,
+            '媒体生成': `${performance.now() - perf.blobStart}ms`,
+            '总耗时': `${totalTime}ms`
+        });
+    }
+};
 
 				// 构造包装器
 				mp4Muxer = new Mp4Muxer.Muxer({
@@ -3801,6 +3861,15 @@
 						width: canvWidth,
 						height: canvHeight
 					},
+					/**
+					 * 快速启动配置（必填）
+					 * - false: 禁用快速启动
+					 * - 'in-memory': 在内存中预构建元数据（适合小文件）
+					 * - 'fragmented': 使用分片模式（适合大文件）
+					 * - 对象配置: 通过预期分块数优化内存分配
+					 *   - expectedVideoChunks: 预计的视频数据块数量
+					 *   - expectedAudioChunks: 预计的音频数据块数量
+					 */
 					fastStart: 'in-memory',
 					firstTimestampBehavior: 'offset'
 				});
@@ -3935,13 +4004,15 @@
 					if (videomode == 'webm') {
 						webmVideoEncoder.encode(frame, { keyFrame: true });
 					}
-					//console.log("FrameCE:",Date.now() - runtimestart);
+					console.log("FrameCE:",Date.now() - runtimestart);
 					frame.close();
 				}
 
-
+				console.log("准备关闭压制",Date.now() - runtimestart);
+				$('#view_info').html("等待编码器刷新");
 				// 关闭录制
 				await endEncoding();
+				console.log("关闭压制",Date.now() - runtimestart);
 				// 计算执行时间
 				const runtime = Date.now() - runtimestart;
 
