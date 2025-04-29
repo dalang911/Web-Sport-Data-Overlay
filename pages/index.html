@@ -433,10 +433,6 @@
 								<div>Distance</div>
 							</div>
 							<div class="layui-col-sm12">
-								<div class="layui-anim" lay-active="appv_ele_pan"><img src="./images/l3.png"></div>
-								<div>Elevation</div>
-							</div>
-							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_ele18_pan"><img src="./images/l4.png"></div>
 								<div>Elevation</div>
 							</div>
@@ -483,6 +479,10 @@
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="pt_pace_pan"><img src="./images/t4.png"></div>
 								<div>Pace</div>
+							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="pt_ele_pan"><img src="./images/t5.png"></div>
+								<div>Elevation</div>
 							</div>
 						</div>
 						<div>
@@ -824,6 +824,7 @@
 			pt_paces_points = [];//配速数据
 			ele_points = [];//高程数据
 			ele18_points = [];//高程变量1:8
+			pt_ele_points = [];//高程数据
 			slopes_points = [];//坡度数据
 
 			if (data.status === 0) {
@@ -966,8 +967,8 @@
 				paceMin = Infinity;
 				paceMax = -Infinity;
 				// 计算高程数据的最大值和最小值，用于后续y轴范围映射
-				let eleMin = Infinity;
-				let eleMax = -Infinity;
+				eleMin = Infinity;
+				eleMax = -Infinity;
 
 
 				for (let i = 0; i < trkpt_data.length; i++) {
@@ -1031,6 +1032,10 @@
 					let eleY = mapToRange(trkpt_data[i].altitude, eleMin - 5, eleMax + 5, 0, 200);
 					ele_points.push(jdtcd);
 					ele_points.push(200 - eleY);
+
+					eleY = mapToRange(trkpt_data[i].altitude, eleMin, eleMax, 0, 200);
+					pt_ele_points.push(i * xScale);
+					pt_ele_points.push(200 - eleY);
 
 					// 处理高程数据1:8，将y轴值映射到0 - 200范围
 					//let xScale800 = 800 / (trkpt_data.length - 1);
@@ -1344,7 +1349,7 @@
 						rotation: 90,
 						fill: "blue",
 						strokeWidth: 4,
-						stroke: '#00b8a9',
+						stroke: '#c6f1e7',
 						strokeCap: 'round'
 					},
 					{
@@ -1401,8 +1406,7 @@
 				},
 			})
 
-
-			//配速图标
+			//配速图表
 			pt_pace_pan = new Box({
 				id: 'pt_pace_pan',
 				x: 80,//左上角位置
@@ -1552,6 +1556,158 @@
 					],
 				},
 			});
+
+			//配速图表
+			pt_ele_pan = new Box({
+				id: 'pt_ele_pan',
+				x: 550,//左上角位置
+				y: 850,//左上角位置
+				width: 400,
+				height: 200,
+				lockRatio: true,
+				editable: true,
+				hitBox: true,
+				cornerRadius: 8,//圆角
+				//overflow: 'hide',	//越界隐藏
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Line',
+						lockRatio: true,
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10]
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: [0, 100, 400, 100],
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10],
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: [0, 200, 400, 200],
+						width: 400,
+						strokeWidth: 5,
+						stroke: '#f8f3d4',
+						dashPattern: [10, 10],
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x: -6,
+						y: 0,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: (eleMax),
+						fill: '#FFFFFF',
+						textAlign: 'right',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x: -6,
+						y: 100,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: ((eleMax + eleMin) / 2),
+						fill: '#FFFFFF',
+						textAlign: 'right',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x: -6,
+						y: 200,
+						fontSize: 20,
+						fontWeight: 'black',
+						text: (eleMin),
+						fill: '#FFFFFF',
+						textAlign: 'right',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Line',
+						lockRatio: true,
+						points: pt_ele_points,  // [x,y, x,y ...]
+						curve: true,
+						strokeWidth: 3,
+						stroke: '#ECB336',
+						strokeCap: 'round'
+					},
+					{
+						name: 'metrics',
+						tag: 'Line',
+						lockRatio: true,
+						x: 50,
+						width: 200,
+						rotation: 90,
+						fill: "blue",
+						strokeWidth: 4,
+						stroke: '#c6f1e7',
+						strokeCap: 'round'
+					},
+					{
+						tag: 'Rect',
+						x: 360,
+						y: 160,
+						scale: 0.04,
+						path: mountain_icon,
+						fill: '#ECB336'
+					},
+					{
+						tag: 'Text',
+						resizeFontSize: true,
+						x: 55,
+						y: 180,
+						fontSize: 24,
+						fontWeight: 'black',
+						text: '180',
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'middle',
+					},
+					{
+						tag: 'Ellipse',
+						lockRatio: true,
+						around: 'center',
+						x: 50,
+						y: 100,
+						width: 13,
+						height: 13,
+						fill: "#ffde7d"
+					},
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "pt_ele_pan",
+								"set": [
+									{ "name": `配速`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `ruler color`, "url": "pt_ele_pan.children[0].stroke", "value": pt_ele_pan.children[0].stroke, "type": "pace_color_line", "tools": true },
+									{ "name": `ruler text color`, "url": "pt_ele_pan.children[3].fill", "value": pt_ele_pan.children[3].fill, "type": "pace_line_text", "tools": true },
+									{ "name": `pace line thickness`, "url": "pt_ele_pan.children[6].strokeWidth", "value": pt_ele_pan.children[6].strokeWidth, "type": "number", "tools": true },
+									{ "name": `pace line color`, "url": "pt_ele_pan.children[6].stroke", "value": pt_ele_pan.children[6].stroke, "type": "color", "tools": true },
+									{ "name": `Progress line thickness`, "url": "pt_ele_pan.children[7].strokeWidth", "value": pt_ele_pan.children[7].strokeWidth, "type": "number", "tools": true },
+									{ "name": `Progress line color`, "url": "pt_ele_pan.children[7].stroke", "value": pt_ele_pan.children[7].stroke, "type": "color", "tools": true },
+									{ "name": `Progress dot color`, "url": "pt_ele_pan.children[10].fill", "value": pt_ele_pan.children[10].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			});
+
 
 			//高程
 			appv_ele_pan = new Box({
@@ -3736,6 +3892,7 @@
 			frame.add(appv_metrics_pan);
 			frame.add(pt_heart_pan);
 			frame.add(pt_pace_pan);
+			frame.add(pt_ele_pan);
 			frame.add(appv_ele_pan);
 			frame.add(appv_ele18_pan);
 			frame.add(appv_nowstatus_pan);
@@ -4477,6 +4634,8 @@
 			let cadence = trkpt_data[currentFrame] && trkpt_data[currentFrame].cadence ? trkpt_data[currentFrame].cadence : 0;
 			// 获取步幅，若不存在则设为0
 			let step_length = trkpt_data[currentFrame] && trkpt_data[currentFrame].step_length ? trkpt_data[currentFrame].step_length : 0;
+			// 获取高程，若不存在则设为0
+			let altitude = trkpt_data[currentFrame] && trkpt_data[currentFrame].altitude ? trkpt_data[currentFrame].altitude : 0;
 
 			//雷达图
 			if (validElementIds.includes('el_leida_pan')) {
@@ -4678,6 +4837,15 @@
 				pt_pace_pan.children[10].x = pt_pace_pan.width / maxFrame * currentFrame;
 				pt_pace_pan.children[10].y = pt_paces_points[currentFrame * 2 + 1];
 				pt_pace_pan.children[9].text = pace;
+			}
+
+			//带标尺的高程
+			if (validElementIds.includes('pt_ele_pan')) {
+				pt_ele_pan.children[7].x = pt_ele_pan.width / maxFrame * currentFrame;
+				pt_ele_pan.children[9].x = pt_ele_pan.width / maxFrame * currentFrame + 5;
+				pt_ele_pan.children[10].x = pt_ele_pan.width / maxFrame * currentFrame;
+				pt_ele_pan.children[10].y = pt_ele_points[currentFrame * 2 + 1];
+				pt_ele_pan.children[9].text = altitude;
 			}
 
 
