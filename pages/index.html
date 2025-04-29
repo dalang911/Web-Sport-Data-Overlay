@@ -1541,7 +1541,7 @@
 							{
 								"id": "pt_pace_pan",
 								"set": [
-									{ "name": `配速`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `Pace`, "url": "", "value": "", "type": "title", "tools": false },
 									{ "name": `ruler color`, "url": "pt_pace_pan.children[0].stroke", "value": pt_pace_pan.children[0].stroke, "type": "pace_color_line", "tools": true },
 									{ "name": `ruler text color`, "url": "pt_pace_pan.children[3].fill", "value": pt_pace_pan.children[3].fill, "type": "pace_line_text", "tools": true },
 									{ "name": `pace line thickness`, "url": "pt_pace_pan.children[6].strokeWidth", "value": pt_pace_pan.children[6].strokeWidth, "type": "number", "tools": true },
@@ -1692,11 +1692,11 @@
 							{
 								"id": "pt_ele_pan",
 								"set": [
-									{ "name": `配速`, "url": "", "value": "", "type": "title", "tools": false },
-									{ "name": `ruler color`, "url": "pt_ele_pan.children[0].stroke", "value": pt_ele_pan.children[0].stroke, "type": "pace_color_line", "tools": true },
-									{ "name": `ruler text color`, "url": "pt_ele_pan.children[3].fill", "value": pt_ele_pan.children[3].fill, "type": "pace_line_text", "tools": true },
-									{ "name": `pace line thickness`, "url": "pt_ele_pan.children[6].strokeWidth", "value": pt_ele_pan.children[6].strokeWidth, "type": "number", "tools": true },
-									{ "name": `pace line color`, "url": "pt_ele_pan.children[6].stroke", "value": pt_ele_pan.children[6].stroke, "type": "color", "tools": true },
+									{ "name": `Elevation`, "url": "", "value": "", "type": "title", "tools": false },
+									{ "name": `ruler color`, "url": "pt_ele_pan.children[0].stroke", "value": pt_ele_pan.children[0].stroke, "type": "ele_color_line", "tools": true },
+									{ "name": `ruler text color`, "url": "pt_ele_pan.children[3].fill", "value": pt_ele_pan.children[3].fill, "type": "ele_line_text", "tools": true },
+									{ "name": `ele line thickness`, "url": "pt_ele_pan.children[6].strokeWidth", "value": pt_ele_pan.children[6].strokeWidth, "type": "number", "tools": true },
+									{ "name": `ele line color`, "url": "pt_ele_pan.children[6].stroke", "value": pt_ele_pan.children[6].stroke, "type": "color", "tools": true },
 									{ "name": `Progress line thickness`, "url": "pt_ele_pan.children[7].strokeWidth", "value": pt_ele_pan.children[7].strokeWidth, "type": "number", "tools": true },
 									{ "name": `Progress line color`, "url": "pt_ele_pan.children[7].stroke", "value": pt_ele_pan.children[7].stroke, "type": "color", "tools": true },
 									{ "name": `Progress dot color`, "url": "pt_ele_pan.children[10].fill", "value": pt_ele_pan.children[10].fill, "type": "color", "tools": true },
@@ -4440,7 +4440,7 @@
 						};
 						inputDiv.appendChild(heart_line_textInput);
 						break;
-					//高级心率表背景线
+					//高级配速表背景线
 					case 'pace_color_line':
 						const pace_color_lineInput = document.createElement('input');
 						pace_color_lineInput.type = 'color';
@@ -4467,7 +4467,33 @@
 						};
 						inputDiv.appendChild(pace_line_textInput);
 						break;
+					//高级高程表背景线
+					case 'ele_color_line':
+						const ele_color_lineInput = document.createElement('input');
+						ele_color_lineInput.type = 'color';
+						ele_color_lineInput.value = item.value;
+						ele_color_lineInput.className = 'layui-input';
+						ele_color_lineInput.onchange = function () {
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							pt_ele_pan.children[1].stroke = pt_ele_pan.children[0].stroke;
+							pt_ele_pan.children[2].stroke = pt_ele_pan.children[0].stroke;
+						};
+						inputDiv.appendChild(ele_color_lineInput);
+						break;
 
+					case 'ele_line_text':
+					const ele_line_textInput = document.createElement('input'); // 创建文本输入框
+						ele_line_textInput.type = 'color'; // 设置类型为文本
+						ele_line_textInput.value = item.value; // 同样修正了拼写错误
+						ele_line_textInput.className = 'layui-input';
+						ele_line_textInput.onchange = function () {
+							//pl_heart_pan.children[1].text
+							new Function('value', 'window.' + item.url + ' = value;')(this.value);
+							pt_ele_pan.children[4].fill = pt_ele_pan.children[3].fill;
+							pt_ele_pan.children[5].fill = pt_ele_pan.children[3].fill;
+						};
+						inputDiv.appendChild(ele_line_textInput);
+						break;
 				}
 
 				div.appendChild(inputDiv);
