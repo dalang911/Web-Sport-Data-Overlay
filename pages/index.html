@@ -1391,8 +1391,8 @@
 								"id": "pt_heart_pan",
 								"set": [
 									{ "name": `heart`, "url": "", "value": "", "type": "title", "tools": false },
-									{ "name": `ruler color`, "url": "pt_heart_pan.children[0].stroke", "value": pt_heart_pan.children[0].stroke, "type": "heart color line", "tools": true },
-									{ "name": `ruler text color`, "url": "pt_heart_pan.children[3].fill", "value": pt_heart_pan.children[3].fill, "type": "heart line text", "tools": true },
+									{ "name": `ruler color`, "url": "pt_heart_pan.children[0].stroke", "value": pt_heart_pan.children[0].stroke, "type": "heart_color_line", "tools": true },
+									{ "name": `ruler text color`, "url": "pt_heart_pan.children[3].fill", "value": pt_heart_pan.children[3].fill, "type": "heart_line_text", "tools": true },
 									{ "name": `Heart line thickness`, "url": "pt_heart_pan.children[6].strokeWidth", "value": pt_heart_pan.children[6].strokeWidth, "type": "number", "tools": true },
 									{ "name": `Heart color`, "url": "pt_heart_pan.children[6].stroke", "value": pt_heart_pan.children[6].stroke, "type": "color", "tools": true },
 									{ "name": `Progress line thickness`, "url": "pt_heart_pan.children[7].strokeWidth", "value": pt_heart_pan.children[7].strokeWidth, "type": "number", "tools": true },
@@ -3838,7 +3838,7 @@
 							{
 								"id": "pl_heart_pan",
 								"set": [
-									{ "name": `Heart Rate`, "url": el_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Heart Rate`, "url": pl_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
 									{ "name": `ruler color`, "url": "pl_heart_pan.children[0].stroke", "value": pl_heart_pan.children[0].stroke, "type": "color", "tools": true },
 									{ "name": `Heart Rate low`, "url": "pl_heart_pan.children[1].text", "value": pl_heart_pan.children[1].text, "type": "heart_text", "tools": true },
 									{ "name": `Heart Rate high`, "url": "pl_heart_pan.children[2].text", "value": pl_heart_pan.children[2].text, "type": "heart_text", "tools": true },
@@ -3940,75 +3940,75 @@
 				var mp4VideoEncoder = null;
 				// 结束编码
 				var endEncoding = async () => {
-    // 初始化性能监控对象
-    const perf = {
-        flushStart: performance.now(),
-        flushEnd: 0,
-        finalizeStart: 0,
-        bufferStart: 0,
-        blobStart: 0,
-        totalStart: performance.now()
-    };
+					// 初始化性能监控对象
+					const perf = {
+						flushStart: performance.now(),
+						flushEnd: 0,
+						finalizeStart: 0,
+						bufferStart: 0,
+						blobStart: 0,
+						totalStart: performance.now()
+					};
 
-    try {
-        // 阶段1: 刷新编码器数据
-        console.log("⌛ 开始刷新MP4视频编码器", `(全程已耗时 ${performance.now() - perf.totalStart}ms)`);
+					try {
+						// 阶段1: 刷新编码器数据
+						console.log("⌛ 开始刷新MP4视频编码器", `(全程已耗时 ${performance.now() - perf.totalStart}ms)`);
 
-        await mp4VideoEncoder?.flush();
-        perf.flushEnd = performance.now();
+						await mp4VideoEncoder?.flush();
+						perf.flushEnd = performance.now();
 
-        console.log(`✅ 编码器刷新完成 耗时 ${perf.flushEnd - perf.flushStart}ms`);
+						console.log(`✅ 编码器刷新完成 耗时 ${perf.flushEnd - perf.flushStart}ms`);
 
-        // 阶段2: 最终化混合器
-        perf.finalizeStart = performance.now();
-        mp4Muxer.finalize();
-        console.log(`📦 混合器最终化完成 耗时 ${performance.now() - perf.finalizeStart}ms`);
+						// 阶段2: 最终化混合器
+						perf.finalizeStart = performance.now();
+						mp4Muxer.finalize();
+						console.log(`📦 混合器最终化完成 耗时 ${performance.now() - perf.finalizeStart}ms`);
 
-        // 阶段3: 获取二进制缓冲区
-        perf.bufferStart = performance.now();
-        let buffer = mp4Muxer.target?.buffer;
-        console.log(`💾 缓冲区获取 耗时 ${performance.now() - perf.bufferStart}ms`,
-                   `数据大小: ${(buffer?.byteLength / 1024 / 1024).toFixed(2)}MB`);
+						// 阶段3: 获取二进制缓冲区
+						perf.bufferStart = performance.now();
+						let buffer = mp4Muxer.target?.buffer;
+						console.log(`💾 缓冲区获取 耗时 ${performance.now() - perf.bufferStart}ms`,
+							`数据大小: ${(buffer?.byteLength / 1024 / 1024).toFixed(2)}MB`);
 
-        // 阶段4: 生成可播放URL
-        perf.blobStart = performance.now();
-        if (buffer) {
-            const blob = new Blob([buffer], { type: 'video/mp4' });
-            const blobUrl = URL.createObjectURL(blob);
-            console.log(`🔗 Blob URL 生成 耗时 ${performance.now() - perf.blobStart}ms`);
+						// 阶段4: 生成可播放URL
+						perf.blobStart = performance.now();
+						if (buffer) {
+							const blob = new Blob([buffer], { type: 'video/mp4' });
+							const blobUrl = URL.createObjectURL(blob);
+							console.log(`🔗 Blob URL 生成 耗时 ${performance.now() - perf.blobStart}ms`);
 
-            // 更新媒体元素
-            video.src = blobUrl;
-            download.href = blobUrl;
+							// 更新媒体元素
+							video.src = blobUrl;
+							download.href = blobUrl;
 
-            // 内存监控
-            const memUsage = performance.memory ?
-                `(内存: ${(performance.memory.usedJSHeapSize / 1048576).toFixed(1)}MB)` : '';
-            console.log(`🎥 视频资源已更新 ${memUsage}`);
-        }
+							// 内存监控
+							const memUsage = performance.memory ?
+								`(内存: ${(performance.memory.usedJSHeapSize / 1048576).toFixed(1)}MB)` : '';
+							console.log(`🎥 视频资源已更新 ${memUsage}`);
+						}
 
-    } catch (error) {
-        console.error("⚠ 编码流程异常:", error);
-        throw error;
-    } finally {
-        // 阶段5: 资源清理
-        const cleanupStart = performance.now();
-        mp4VideoEncoder = null;
-        mp4Muxer = null;
-        console.log(`♻ 资源清理完成 耗时 ${performance.now() - cleanupStart}ms`);
+					} catch (error) {
+						console.error("⚠ 编码流程异常:", error);
+						throw error;
+					} finally {
+						// 阶段5: 资源清理
+						const cleanupStart = performance.now();
+						mp4VideoEncoder = null;
+						mp4Muxer = null;
+						console.log(`♻ 资源清理完成 耗时 ${performance.now() - cleanupStart}ms`);
 
-        // 最终性能报告
-        const totalTime = performance.now() - perf.totalStart;
-        console.log(`🏁 全部流程完成 总耗时 ${totalTime}ms`);
-        console.table({
-            '编码刷新': `${perf.flushEnd - perf.flushStart}ms`,
-            '混合器处理': `${performance.now() - perf.finalizeStart}ms`,
-            '数据序列化': `${performance.now() - perf.bufferStart}ms`,
-            '媒体生成': `${performance.now() - perf.blobStart}ms`,
-            '总耗时': `${totalTime}ms`
-        });
-    }
-};
+						// 最终性能报告
+						const totalTime = performance.now() - perf.totalStart;
+						console.log(`🏁 全部流程完成 总耗时 ${totalTime}ms`);
+						console.table({
+							'编码刷新': `${perf.flushEnd - perf.flushStart}ms`,
+							'混合器处理': `${performance.now() - perf.finalizeStart}ms`,
+							'数据序列化': `${performance.now() - perf.bufferStart}ms`,
+							'媒体生成': `${performance.now() - perf.blobStart}ms`,
+							'总耗时': `${totalTime}ms`
+						});
+					}
+				};
 
 				// 构造包装器
 				mp4Muxer = new Mp4Muxer.Muxer({
@@ -4161,15 +4161,15 @@
 					if (videomode == 'webm') {
 						webmVideoEncoder.encode(frame, { keyFrame: true });
 					}
-					console.log("FrameCE:",Date.now() - runtimestart);
+					console.log("FrameCE:", Date.now() - runtimestart);
 					frame.close();
 				}
 
-				console.log("准备关闭压制",Date.now() - runtimestart);
+				console.log("准备关闭压制", Date.now() - runtimestart);
 				//$('#view_info').html("等待编码器刷新");
 				// 关闭录制
 				await endEncoding();
-				console.log("关闭压制",Date.now() - runtimestart);
+				console.log("关闭压制", Date.now() - runtimestart);
 				// 计算执行时间
 				const runtime = Date.now() - runtimestart;
 
@@ -4212,13 +4212,14 @@
 							removeButton.textContent = `ReMove`;
 							removeButton.className = 'layui-btn layui-btn-danger layui-btn-sm';
 							removeButton.onclick = function () {
-								// 执行移除操作
 								new Function(json.id + '.remove();')();
 								interaction.pointerDown({ x: 0, y: 0 });
 								interaction.pointerUp();
-								settableDiv.innerHTML = ''; // 清空现有内容
+								settableDiv.innerHTML = '';
 							};
 							inputDiv.appendChild(removeButton);
+
+
 						}
 						break;
 					case 'number':
@@ -4482,7 +4483,7 @@
 						break;
 
 					case 'ele_line_text':
-					const ele_line_textInput = document.createElement('input'); // 创建文本输入框
+						const ele_line_textInput = document.createElement('input'); // 创建文本输入框
 						ele_line_textInput.type = 'color'; // 设置类型为文本
 						ele_line_textInput.value = item.value; // 同样修正了拼写错误
 						ele_line_textInput.className = 'layui-input';
@@ -4498,6 +4499,74 @@
 
 				div.appendChild(inputDiv);
 				settableDiv.appendChild(div);
+
+				if (item.type == 'title' && item.name != `Canvas Settings`) {
+					// 获取目标对象
+					const targetObj = window[json.id]; // 假设对象存储在全局作用域
+
+					// 创建属性输入容器
+					const attrContainer = document.createElement('div');
+					attrContainer.className = 'layui-form layui-form-pane';
+
+					// 创建两行两列布局
+					const createInputRow = (prop1, prop2, label1, label2) => {
+						const row = document.createElement('div');
+						row.className = 'layui-row';
+
+						// 从目标对象获取当前值
+						const val1 = targetObj[prop1];
+						const val2 = targetObj[prop2];
+						// 第一列
+						const col1 = document.createElement('div');
+						col1.className = 'layui-col-md6';
+						col1.innerHTML = `
+							<div class="layui-form-item">
+								<label class="layui-form-label" style="width: 30px;padding: 8px 5px;">${label1}</label>
+								<div class="layui-input-block" style="margin-left: 30px;">
+									<input type="number" class="layui-input" step="any" value="${val1}">
+								</div>
+							</div>
+						`;
+
+						// 第二列
+						const col2 = document.createElement('div');
+						col2.className = 'layui-col-md6';
+						col2.innerHTML = `
+							<div class="layui-form-item">
+								<label class="layui-form-label" style="width: 30px;padding: 8px 5px;">${label2}</label>
+								<div class="layui-input-block" style="margin-left: 30px;">
+									<input type="number" class="layui-input" step="any" value="${val2}">
+								</div>
+							</div>
+						`;
+
+						// 事件监听（使用动态对象引用）
+						col1.querySelector('input').onchange = function () {
+							const value = parseFloat(this.value);
+							if (!isNaN(value)) new Function(json.id + '.' + prop1 + ' = ' + value)();
+						};
+
+						col2.querySelector('input').onchange = function () {
+							const value = parseFloat(this.value);
+							if (!isNaN(value)) new Function(json.id + '.' + prop2 + ' = ' + value)();
+						};
+
+						row.append(col1, col2);
+						return row;
+					};
+
+					// 添加坐标行
+					attrContainer.appendChild(
+						createInputRow('x', 'y', 'X', 'Y')
+					);
+
+					// 添加尺寸行
+					attrContainer.appendChild(
+						createInputRow('width', 'height', 'W', 'H')
+					);
+					div.appendChild(attrContainer);
+				}
+
 			});
 		}
 
@@ -5689,7 +5758,7 @@
 					frame.add(window[layActiveValue]);
 
 					$('#progressBar').val(parseInt(maxFrame * 0.7));
-					if(layActiveValue == "appv_map_pan" || layActiveValue == "appv_map_a_pan") {
+					if (layActiveValue == "appv_map_pan" || layActiveValue == "appv_map_a_pan") {
 						new_maptalks();
 					}
 					upFrame(parseInt(maxFrame * 0.7));
@@ -5944,8 +6013,8 @@
 					center: [118.9, 33.8], // 初始中心点
 					zoom: 15, // 初始缩放级别
 					baseLayer: new maptalks.TileLayer('base', {
-						renderer : 'canvas',//可选 webgl，去除行即可
-						crossOrigin : 'anonymous',
+						renderer: 'canvas',//可选 webgl，去除行即可
+						crossOrigin: 'anonymous',
 						urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
 						subdomains: ['a', 'b', 'c'],
 						attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
