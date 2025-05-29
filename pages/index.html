@@ -332,7 +332,7 @@
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.43 .更新：图形、速度优化，去除web地图的webgl渲染，web地图降速较为严重，建议按需渲染。
+			Beta 0.44 .更新：功率power，需要.fit文件支持。修复：web地图显示问题、中途关闭生成问题。
 		</li>
 		<li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
 		<div class="ws-header-menu">
@@ -503,6 +503,10 @@
 								<div>Step</div>
 							</div>
 							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="TO_power_pan"><img src="./images/z12.png"></div>
+								<div>Power(.fit)</div>
+							</div>
+							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="el_heart_pan"><img src="./images/z5.png"></div>
 								<div>Cadence</div>
 							</div>
@@ -561,6 +565,10 @@
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="TO_rpm_pan"><img src="./images/z10.png"></div>
 								<div>Rpm</div>
+							</div>
+							<div class="layui-col-sm12">
+								<div class="layui-anim" lay-active="TO_power_pan"><img src="./images/z12.png"></div>
+								<div>Power(.fit)</div>
 							</div>
 						</div>
 					</div>
@@ -2267,7 +2275,7 @@
 			TO_speed_pan = new Box({
 				id: 'TO_speed_pan',
 				x: 330,//左上角位置
-				y: 340,//左上角位置
+				y: 290,//左上角位置
 				width: 350,
 				height: 50,
 				lockRatio: true,
@@ -2429,7 +2437,7 @@
 			TO_rpm_pan = new Box({
 				id: 'TO_rpm_pan',
 				x: 330,//左上角位置
-				y: 440,//左上角位置
+				y: 540,//左上角位置
 				width: 350,
 				height: 50,
 				lockRatio: true,
@@ -2579,6 +2587,60 @@
 									{ "name": `Step`, "url": TO_step_pan.children[0].id, "value": "", "type": "title", "tools": false },
 									{ "name": `Text_color`, "url": "TO_step_pan.children[0].fill", "value": TO_step_pan.children[0].fill, "type": "color", "tools": true },
 									{ "name": `Icon_color`, "url": "TO_step_pan.children[1].fill", "value": TO_step_pan.children[1].fill, "type": "color", "tools": true },
+								]
+							}
+							tosettable(json);
+						}
+					],
+				},
+			})
+
+			//功率
+			TO_power_pan = new Box({
+				id: 'TO_power_pan',
+				x: 330,//左上角位置
+				y: 590,//左上角位置
+				width: 350,
+				height: 50,
+				lockRatio: true,
+				editable: true,
+				//fill: '#CCEEFF',
+				cornerRadius: 4,//圆角
+				hitBox: true,
+				resizeChildren: true,//子元素是否跟随 resize
+				children: [
+					{
+						tag: 'Text',
+						y: 1,
+						x: 55,
+						width: 300,
+						resizeFontSize: true,
+						fontSize: 32,
+						fontWeight: 'black',
+						text: `Power：watt`,
+						fill: '#FFFFFF',
+						textAlign: 'left',
+						verticalAlign: 'top',
+					},
+					{
+						tag: 'Rect',
+						x: 3,
+						y: 2,
+						scale: 0.04,
+						path: power_icon,
+						fill: '#FF8C00'
+					}
+				],
+				event: {
+					[PointerEvent.DOWN]: [
+						function () {
+							var json =
+							{
+								"id": "TO_power_pan",
+								"set": [
+									{ "name": `Power`, "url": TO_power_pan.children[0].id, "value": "", "type": "title", "tools": false },
+									{ "name": `Text_color`, "url": "TO_power_pan.children[0].fill", "value": TO_power_pan.children[0].fill, "type": "color", "tools": true },
+									{ "name": `Icon_color`, "url": "TO_power_pan.children[1].fill", "value": TO_power_pan.children[1].fill, "type": "color", "tools": true },
 								]
 							}
 							tosettable(json);
@@ -3864,6 +3926,9 @@
 			})
 
 
+
+
+
 			//默认画布容器
 			frame = new Frame({
 				width: appvWidth,
@@ -3926,7 +3991,9 @@
 
 			frame.add(TO_speed_pan);
 			frame.add(TO_rpm_pan);
+			frame.add(TO_power_pan);
 			frame.add(el_speed_pan);
+			frame.add(zh_hf_pan);
 
 		}
 
@@ -4104,6 +4171,7 @@
 			var frameCounter = 0;//祯计数器
 			var currentFrame = startFrame;//开始点运动数据长度计数器
 			const runtimestart = Date.now();//运行时间计时器
+			maxendFrame = endFrame;
 
 			// 在upFrame开始时确保缓存最新
 			updateElementCache();
@@ -4112,7 +4180,7 @@
 			//制作视频，插入帧
 			// 改为用异步IIFE+循环结构
 			(async function updateFrame() {
-				while (currentFrame < endFrame) {
+				while (currentFrame < maxendFrame) {
 					//console.log(trkpt_data[currentFrame]);
 					//console.log("upFrameS:",Date.now() - runtimestart);
 					if (!upFrame(currentFrame)) break;
@@ -4731,6 +4799,8 @@
 			let step_length = trkpt_data[currentFrame] && trkpt_data[currentFrame].step_length ? trkpt_data[currentFrame].step_length : 0;
 			// 获取高程，若不存在则设为0
 			let altitude = trkpt_data[currentFrame] && trkpt_data[currentFrame].altitude ? trkpt_data[currentFrame].altitude : 0;
+			// 获取功率，若不存在则设为0
+			let power = trkpt_data[currentFrame] && trkpt_data[currentFrame].power ? trkpt_data[currentFrame].power : 0;
 
 			//雷达图
 			if (validElementIds.includes('el_leida_pan')) {
@@ -4779,6 +4849,10 @@
 				TO_step_pan.children[0].text = `${step_length} m`;
 			}
 
+			//to仪表盘
+			if (validElementIds.includes('TO_power_pan')) {
+				TO_power_pan.children[0].text = `${(power) | 0} Watt`;
+			}
 
 			//心率仪表盘
 			if (validElementIds.includes('el_heart_pan')) {
@@ -5427,7 +5501,7 @@
 				}
 
 			});
-			//console.log(fit);
+			console.log(fit);
 			//debugger;
 
 
@@ -5474,6 +5548,7 @@
 				var distanceCurrent = currentPoint.distance * 1000;
 
 				var speed = currentPoint?.enhanced_speed ?? currentPoint?.speed ?? 0;
+				var power = currentPoint?.power ?? 0;
 				//console.log(speed);
 
 
@@ -5537,7 +5612,8 @@
 					distance: parseFloat(distanceCurrent.toFixed(2)),
 					heart_rate: currentPoint.heart_rate ?? 0,
 					cadence: cadenceCorrected,
-					step_length: parseFloat(stepLength.toFixed(2))
+					step_length: parseFloat(stepLength.toFixed(2)),
+					power: power
 				};
 				rq.data.trkpt.push(newPoint);//分段数据
 
@@ -5758,7 +5834,8 @@
 					frame.add(window[layActiveValue]);
 
 					$('#progressBar').val(parseInt(maxFrame * 0.7));
-					if (layActiveValue == "appv_map_pan" || layActiveValue == "appv_map_a_pan") {
+					if (layActiveValue == "web_map_pan" || layActiveValue == "web_map_a_pan") {
+						console.log("webmap");
 						new_maptalks();
 					}
 					upFrame(parseInt(maxFrame * 0.7));
@@ -5862,7 +5939,13 @@
                                     <button type="button" class="layui-btn layui-bg-blue layui-btn-fluid">download</button></a>
                                 </div>
                             </div>
-                        `
+                        `,
+						end: function(){
+							// 当弹窗关闭时执行的代码
+							console.log('生成窗口已关闭');
+							maxendFrame = 0;
+
+						}
 					});
 				},
 				'setup': function () {

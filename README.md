@@ -24,7 +24,7 @@ https://overlay.data4u.vip/
 
 ## Supported Components
 
-![Example image](./doc/20250319110350.png)
+![Example image](./doc/20250529101756.png)
 
 ## Usage
 
@@ -32,6 +32,7 @@ Copy the ./pages directory to your server directory and access index.html.
 The server requires HTTPS support.
 
 ## AI Support
+- [腾讯元宝](https://yuanbao.tencent.com/)
 - [智谱清言](https://github.com/THUDM)
 
 ## Referenced Support Libraries
