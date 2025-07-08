@@ -199,6 +199,10 @@ gpxParser.prototype.parse = function (gpxstring) {
             // 获取 hr 和 cad 的值
             let extensions = trkpt.querySelector('extensions');
             if (extensions) {
+                // 尝试获得功率值
+                let powerElement = extensions.querySelector('power');
+                pt.power = powerElement && powerElement.textContent ? parseFloat(powerElement.textContent) : 0;
+
                 // 尝试不同的命名空间前缀
                 let trackPointExtension = extensions.querySelector('ns3\\:TrackPointExtension, gpxtpx\\:TrackPointExtension, TrackPointExtension');
                 if (trackPointExtension) {
