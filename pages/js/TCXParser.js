@@ -1,6 +1,6 @@
 /**
  * tcx file parser
- * 
+ *
  * @constructor
  */
 let tcxParser = function () {
@@ -15,7 +15,7 @@ let tcxParser = function () {
  * Parse a tcx formatted string to a tcxParser Object
  * 将tcx格式的字符串解析为tcxParser对象
  * @param {string} tcxstring - A tcx formatted String tcx格式的字符串
- * 
+ *
  * @return {tcxParser} A tcxParser object 一个tcxParser对象
  *
  */
@@ -24,7 +24,7 @@ tcxParser.prototype.parse = function (tcxstring) {
 
     let domParser = new window.DOMParser();
     this.xmlSource = domParser.parseFromString(tcxstring, 'text/xml');
-   
+
 
     // var trks = [].slice.call(this.xmlSource.querySelectorAll('Lap'));
 
@@ -113,15 +113,15 @@ tcxParser.prototype.parse = function (tcxstring) {
         track.points = trackpoints;//经纬度组
 
         keepThis.tracks.push(track);
-    
+
 };
 
 /**
  * Get value from a XML DOM element 从XML DOM元素中获取值
- * 
+ *
  * @param  {Element} parent - Parent DOM Element 父DOM元素
  * @param  {string} needle - Name of the searched element 要查找的元素名称
- * 
+ *
  * @return {} The element value 元素的值
  */
 tcxParser.prototype.getElementValue = function (parent, needle) {
@@ -135,11 +135,11 @@ tcxParser.prototype.getElementValue = function (parent, needle) {
 
 /**
  * Search the value of a direct child XML DOM element 查找直接子XML DOM元素的值
- * 
+ *
  * @param  {Element} parent - Parent DOM Element 父DOM元素
  * @param  {string} needle - Name of the searched element 要搜索的元素名称
- * 
- * @return {} The element value 子元素的值 
+ *
+ * @return {} The element value 子元素的值
  */
 tcxParser.prototype.queryDirectSelector = function (parent, needle) {
 
@@ -162,9 +162,9 @@ tcxParser.prototype.queryDirectSelector = function (parent, needle) {
 
 /**
  * Calcul the Distance Object from an array of points 根据点数组计算距离对象
- * 
+ *
  * @param  {} points - An array of points with lat and lon properties 包含纬度和经度属性的点数组
- * 
+ *
  * @return {DistanceObject} An object with total distance and Cumulative distances 包含总距离和累积距离的对象
  */
 tcxParser.prototype.calculDistance = function (points) {
@@ -202,7 +202,7 @@ tcxParser.prototype.calculDistance = function (points) {
  * 计算两个具有纬度和经度属性的地理点之间的距离
  * @param  {} wpt1 - A geographic point with lat and lon properties 具有纬度和经度属性的地理点1
  * @param  {} wpt2 - A geographic point with lat and lon properties 具有纬度和经度属性的地理点2
- * 
+ *
  * @returns {float} The distance between the two points 两个点之间的距离
  */
 tcxParser.prototype.calcDistanceBetween = function (wpt1, wpt2) {
@@ -226,7 +226,7 @@ tcxParser.prototype.calcDistanceBetween = function (wpt1, wpt2) {
  * Generate Elevation Object from an array of points
  * 从点数组生成海拔对象
  * @param  {} points - An array of points with ele property 具有ele属性的点数组
- * 
+ *
  * @returns {ElevationObject} An object with negative and positive height difference and average, max and min altitude data 一个包含正负高度差和平均、最大、最小海拔数据的对象
  */
 tcxParser.prototype.calcElevation = function (points) {
@@ -272,11 +272,11 @@ tcxParser.prototype.calcElevation = function (points) {
 };
 
 /**
- * Generate slopes Object from an array of Points and an array of Cumulative distance 
+ * Generate slopes Object from an array of Points and an array of Cumulative distance
  * 从点数组和累积距离数组生成坡度对象
  * @param  {} points - An array of points with ele property 具有ele属性的点数组
  * @param  {} cumul - An array of cumulative distance 累积距离数组
- * 
+ *
  * @returns {SlopeObject} An array of slopes 坡度数组
  */
 tcxParser.prototype.calculSlope = function (points, cumul) {
