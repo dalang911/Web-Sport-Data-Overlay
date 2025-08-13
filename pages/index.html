@@ -5408,6 +5408,7 @@
 					distance: parseFloat(distanceCurrent.toFixed(2)),
 					heart_rate: normalValue(currentPoint.hr),
 					cadence: normalValue(cadenceCorrected),
+					power: normalValue(currentPoint.power),
 					step_length: parseFloat(stepLength.toFixed(2))
 				};
 				rq.data.trkpt.push(newPoint);//分段数据
