@@ -330,7 +330,7 @@
 		</li>
 
 		<li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-			Beta 0.45 .更新：用户仪表自带的计圈数据，需要.fit文件支持，非标准数据，可能不支持。
+			Beta 0.46 .更新：针对华米或其他导出的fit文件，缺失距离信息的修补。一些界面调整。
 		</li>
 		<li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
 		<div class="ws-header-menu">
@@ -534,7 +534,7 @@
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="appv_lap_user_pan"><img src="./images/s2.png"></div>
-								<div>Lap (user)</div>
+								<div>User Lap (.fit)</div>
 							</div>
 							<div class="layui-col-sm12">
 								<div class="layui-anim" lay-active="text_str1_pan"><img src="./images/s3.png"></div>
@@ -1567,7 +1567,7 @@
 				},
 			});
 
-			//配速图表
+			//高程图表
 			pt_ele_pan = new Box({
 				id: 'pt_ele_pan',
 				x: 550,//左上角位置
@@ -1614,7 +1614,7 @@
 						y: 0,
 						fontSize: 20,
 						fontWeight: 'black',
-						text: (eleMax),
+						text: (eleMax).toFixed(2),
 						fill: '#FFFFFF',
 						textAlign: 'right',
 						verticalAlign: 'middle',
@@ -1626,7 +1626,7 @@
 						y: 100,
 						fontSize: 20,
 						fontWeight: 'black',
-						text: ((eleMax + eleMin) / 2),
+						text: ((eleMax + eleMin) / 2).toFixed(2),
 						fill: '#FFFFFF',
 						textAlign: 'right',
 						verticalAlign: 'middle',
@@ -1638,7 +1638,7 @@
 						y: 200,
 						fontSize: 20,
 						fontWeight: 'black',
-						text: (eleMin),
+						text: (eleMin).toFixed(2),
 						fill: '#FFFFFF',
 						textAlign: 'right',
 						verticalAlign: 'middle',
@@ -5671,8 +5671,8 @@
 			for (let i = 0; i < fit.records.length; i++) {
 				var currentPoint = fit.records[i];
 
-				// 如果 position_lat 或 position_long 不存在，跳过当前循环,可能有问题？？？？？
-				if (currentPoint.position_lat == null || currentPoint.position_long == null) {
+				// 如果经纬度都不存在，跳过当前循环（无法计算距离）
+				if (currentPoint.position_lat == null && currentPoint.position_long == null) {
 					continue;
 				}
 
@@ -5681,17 +5681,39 @@
 				let position_long;
 
 				if (i === fit.records.length - 1) {
-					// 如果是最后一个元素，则取前一个
-					position_lat = currentPoint.position_lat ?? fit.records[i - 1].position_lat ?? 0;
-					position_long = currentPoint.position_long ?? fit.records[i - 1].position_long ?? 0;
+					// 最后一个元素，取前一个的经纬度作为备用
+					position_lat = currentPoint.position_lat ?? fit.records[i - 1]?.position_lat ?? 0;
+					position_long = currentPoint.position_long ?? fit.records[i - 1]?.position_long ?? 0;
 				} else {
-					// 否则，取后一个
-					position_lat = currentPoint.position_lat ?? fit.records[i + 1].position_lat ?? 0;
-					position_long = currentPoint.position_long ?? fit.records[i + 1].position_long ?? 0;
+					// 非最后一个元素，取后一个的经纬度作为备用
+					position_lat = currentPoint.position_lat ?? fit.records[i + 1]?.position_lat ?? 0;
+					position_long = currentPoint.position_long ?? fit.records[i + 1]?.position_long ?? 0;
 				}
 
+				// 处理distance字段（新增逻辑）针对ZEEP或其他没有携带distance字段的处理。
+				if (i === 0) {
+					// 第一个点距离固定为0
+					currentPoint.distance = currentPoint.distance ?? 0;
+				} else {
+					// 从第二个点开始处理
+					const prevPoint = fit.records[i - 1];
+					// 确保前一个点有有效距离和经纬度（防止异常）
+					if (prevPoint.distance == null || prevPoint.position_lat == null || prevPoint.position_long == null) {
+						currentPoint.distance = currentPoint.distance ?? 0;
+					} else if (currentPoint.distance == null) {
+						// 计算当前点与前一个点的距离（米）
+						const pointDistance = calculateDistance(
+							prevPoint.position_lat,
+							prevPoint.position_long,
+							position_lat,
+							position_long
+						);
+						// 转换为公里（与原有distance单位保持一致）并累加
+						currentPoint.distance = prevPoint.distance + (pointDistance / 1000);
+					}
+				}
 
-
+				//主线
 
 				var sec = currentPoint.elapsed_time;
 				//console.log(sec);
@@ -5879,7 +5901,21 @@
 			}
 		}
 
+		// 计算两点经纬度之间的距离（单位：米），使用Haversine公式
+		function calculateDistance(lat1, lon1, lat2, lon2) {
+			const R = 6371000; // 地球半径（米）
+			const φ1 = lat1 * Math.PI / 180;
+			const φ2 = lat2 * Math.PI / 180;
+			const Δφ = (lat2 - lat1) * Math.PI / 180;
+			const Δλ = (lon2 - lon1) * Math.PI / 180;
 
+			const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+					Math.cos(φ1) * Math.cos(φ2) *
+					Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+			return R * c; // 返回两点间距离（米）
+		}
 
 		//雷达图
 		function to_leida_xy(count, speed, cadence) {
