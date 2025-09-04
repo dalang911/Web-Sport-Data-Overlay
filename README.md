@@ -20,11 +20,11 @@ https://overlay.data4u.vip/
 
 ## Web Interface
 
-![Example image](./doc/20250124095403.png)
+![Example image](./doc/20250904170239.png)
 
 ## Supported Components
 
-![Example image](./doc/20250529101756.png)
+![Example image](./doc/20250904171158.png)
 
 ## Usage
 
@@ -32,14 +32,13 @@ Copy the ./pages directory to your server directory and access index.html.
 The server requires HTTPS support.
 
 ## AI Support
+- [豆包](https://www.doubao.com/chat/)
 - [腾讯元宝](https://yuanbao.tencent.com/)
-- [智谱清言](https://github.com/THUDM)
 
 ## Referenced Support Libraries
-
-- [mp4-muxer](https://github.com/Vanilagy/mp4-muxer)
-- [layui](https://github.com/layui/layui)
 - [leafer-ui](https://github.com/leaferjs/leafer-ui)
+- [mediabunny](https://github.com/Vanilagy/mediabunny)
+- [layui](https://github.com/layui/layui)
 - [jQuery](https://github.com/jquery/jquery)
 - [GPXParser.js](https://github.com/Luuka/GPXParser.js)
 - [BackFitClientSide](https://github.com/gfmoore/BackFitClientSide)
