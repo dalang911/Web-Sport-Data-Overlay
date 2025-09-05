@@ -3163,7 +3163,7 @@
                                         subVariable.fontSize = subChild.fontSize;
                                     }
                                     //如果是text,跳过赋值
-                                    if (subVariable.textAlign !== "center") {
+                                    if (subVariable.textAlign !== "left" && subVariable.textAlign !== "center" && subVariable.textAlign !== "right") {
                                         if (subChild.width !== undefined) {
                                             subVariable.width = subChild.width;
                                         }
