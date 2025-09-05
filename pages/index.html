@@ -3158,20 +3158,24 @@
                                     if (subChild.stroke !== undefined) {
                                         subVariable.stroke = subChild.stroke;
                                     }
-                                    if (subChild.width !== undefined) {
-                                        subVariable.width = subChild.width;
-                                    }
-                                    if (subChild.height !== undefined) {
-                                        subVariable.height = subChild.height;
-                                    }
-                                    if (subChild.offsetX !== undefined) {
-                                        subVariable.offsetX = subChild.offsetX;
-                                    }
-                                    if (subChild.offsetY !== undefined) {
-                                        subVariable.offsetY = subChild.offsetY;
-                                    }
+
                                     if (subChild.fontSize !== undefined) {
                                         subVariable.fontSize = subChild.fontSize;
+                                    }
+                                    //如果是text,跳过赋值
+                                    if (subVariable.textAlign !== "center") {
+                                        if (subChild.width !== undefined) {
+                                            subVariable.width = subChild.width;
+                                        }
+                                        if (subChild.height !== undefined) {
+                                            subVariable.height = subChild.height;
+                                        }
+                                        if (subChild.offsetX !== undefined) {
+                                            subVariable.offsetX = subChild.offsetX;
+                                        }
+                                        if (subChild.offsetY !== undefined) {
+                                            subVariable.offsetY = subChild.offsetY;
+                                        }
                                     }
 
 
