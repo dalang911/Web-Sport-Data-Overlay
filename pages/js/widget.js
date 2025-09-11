@@ -1,4 +1,4 @@
-window.huitu = function() {
+window.huitu = function () {
     appview.tree.clear();
     textshadow = {
         x: 2,
@@ -86,84 +86,6 @@ window.huitu = function() {
 
     })
 
-    //图表
-    appv_metrics_pan = new Box({
-        id: 'appv_metrics_pan',
-        x: 20,//左上角位置
-        y: 100,//左上角位置
-        width: 400,
-        height: 200,
-        lockRatio: true,
-        editable: true,
-        hitBox: true,
-        cornerRadius: 8,//圆角
-        overflow: 'hide',
-        resizeChildren: true,//子元素是否跟随 resize
-        children: [
-            {
-                tag: 'Line',
-                lockRatio: true,
-                points: heart_points,  // [x,y, x,y ...]
-                cornerRadius: 1,
-                strokeWidth: 1,
-                stroke: '#FF0000',
-                strokeCap: 'round'
-            },
-            {
-                tag: 'Line',
-                lockRatio: true,
-                points: cadences_points,  // [x,y, x,y ...]
-                cornerRadius: 1,
-                strokeWidth: 1,
-                stroke: '#FFA500',
-                strokeCap: 'round'
-            },
-            {
-                tag: 'Line',
-                lockRatio: true,
-                points: paces_points,  // [x,y, x,y ...]
-                cornerRadius: 1,
-                strokeWidth: 1,
-                stroke: '#00FF00',
-                strokeCap: 'round'
-            },
-            {
-                name: 'metrics',
-                tag: 'Line',
-                lockRatio: true,
-                x: 50,
-                width: 200,
-                rotation: 90,
-                fill: "blue",
-                strokeWidth: 4,
-                stroke: '#CCCCCC',
-                strokeCap: 'round'
-            },
-        ],
-        event: {
-            [PointerEvent.DOWN]: [
-                function () {
-                    var json =
-                    {
-                        "id": "appv_metrics_pan",
-                        "set": [
-                            { "name": `Heart pace cadence`, "url": "", "value": "", "type": "title", "tools": false },
-                            { "name": `Heart line thickness`, "url": "appv_metrics_pan.children[0].strokeWidth", "value": appv_metrics_pan.children[0].strokeWidth, "type": "number", "tools": true },
-                            { "name": `Heart color`, "url": "appv_metrics_pan.children[0].stroke", "value": appv_metrics_pan.children[0].stroke, "type": "color", "tools": true },
-                            { "name": `cadence line thickness`, "url": "appv_metrics_pan.children[1].strokeWidth", "value": appv_metrics_pan.children[1].strokeWidth, "type": "number", "tools": true },
-                            { "name": `cadence color`, "url": "appv_metrics_pan.children[1].stroke", "value": appv_metrics_pan.children[1].stroke, "type": "color", "tools": true },
-                            { "name": `pace line thickness`, "url": "appv_metrics_pan.children[2].strokeWidth", "value": appv_metrics_pan.children[2].strokeWidth, "type": "number", "tools": true },
-                            { "name": `pace color`, "url": "appv_metrics_pan.children[2].stroke", "value": appv_metrics_pan.children[2].stroke, "type": "color", "tools": true },
-                            { "name": `progress color`, "url": "appv_metrics_pan.children[3].strokeWidth", "value": appv_metrics_pan.children[3].strokeWidth, "type": "number", "tools": true },
-                            { "name": `line thickness`, "url": "appv_metrics_pan.children[3].stroke", "value": appv_metrics_pan.children[3].stroke, "type": "color", "tools": true },
-                        ]
-                    }
-                    tosettable(json);
-                }
-            ],
-        },
-    })
-
     //心率图表
     pt_heart_pan = new Box({
         id: 'pt_heart_pan',
@@ -246,7 +168,7 @@ window.huitu = function() {
                 points: pt_heart_points,  // [x,y, x,y ...]
                 cornerRadius: 1,
                 strokeWidth: 3,
-                stroke: '#f6416c',
+                stroke: '#C71585',
                 strokeCap: 'round'
             },
             {
@@ -258,7 +180,7 @@ window.huitu = function() {
                 rotation: 90,
                 fill: "blue",
                 strokeWidth: 4,
-                stroke: '#c6f1e7',
+                stroke: '#FFFFFF',
                 strokeCap: 'round'
             },
             {
@@ -267,7 +189,7 @@ window.huitu = function() {
                 y: 160,
                 scale: 0.03,
                 path: heart_icon,
-                fill: '#f6416c'
+                fill: '#C71585'
             },
             {
                 tag: 'Text',
@@ -397,7 +319,7 @@ window.huitu = function() {
                 points: pt_paces_points,  // [x,y, x,y ...]
                 curve: true,
                 strokeWidth: 3,
-                stroke: '#00FFA2',
+                stroke: '#00CED1',
                 strokeCap: 'round'
             },
             {
@@ -409,7 +331,7 @@ window.huitu = function() {
                 rotation: 90,
                 fill: "blue",
                 strokeWidth: 4,
-                stroke: '#c6f1e7',
+                stroke: '   #FFFFFF',
                 strokeCap: 'round'
             },
             {
@@ -418,7 +340,7 @@ window.huitu = function() {
                 y: 160,
                 scale: 0.03,
                 path: run_icon,
-                fill: '#00FFA2'
+                fill: ' #00CED1'
             },
             {
                 tag: 'Text',
@@ -548,7 +470,7 @@ window.huitu = function() {
                 points: pt_ele_points,  // [x,y, x,y ...]
                 curve: true,
                 strokeWidth: 3,
-                stroke: '#ECB336',
+                stroke: '#FFD700',
                 strokeCap: 'round'
             },
             {
@@ -560,7 +482,7 @@ window.huitu = function() {
                 rotation: 90,
                 fill: "blue",
                 strokeWidth: 4,
-                stroke: '#c6f1e7',
+                stroke: '#FFFFFF',
                 strokeCap: 'round'
             },
             {
@@ -569,7 +491,7 @@ window.huitu = function() {
                 y: 160,
                 scale: 0.04,
                 path: mountain_icon,
-                fill: '#ECB336'
+                fill: '#FFD700'
             },
             {
                 tag: 'Text',
@@ -733,7 +655,7 @@ window.huitu = function() {
         height: 400,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -778,7 +700,7 @@ window.huitu = function() {
         height: 400,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -823,7 +745,7 @@ window.huitu = function() {
         //height: 400,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -968,7 +890,7 @@ window.huitu = function() {
                 fontSize: 28,
                 fontWeight: 'black',
                 text: '00:00:00',
-                fill: '	#191970',
+                fill: '#191970',
                 textAlign: 'right',
                 verticalAlign: 'top',
             }
@@ -1020,7 +942,7 @@ window.huitu = function() {
                 points: [],  // [x,y, x,y ...]
                 cornerRadius: 6,
                 strokeWidth: 6,
-                stroke: '#FF8C00',
+                stroke: '#FF7F00',
                 strokeCap: 'round'
             },
             {
@@ -1084,7 +1006,7 @@ window.huitu = function() {
                 points: [],  // [x,y, x,y ...]
                 cornerRadius: 6,
                 strokeWidth: 6,
-                stroke: '#FF8C00',
+                stroke: '#FF7F00',
                 strokeCap: 'round',
                 opacity: 0.7
             },
@@ -1216,8 +1138,6 @@ window.huitu = function() {
         y: 80,//左上角位置
         width: 260,
         height: 46,
-        //width: 130,
-        //height: 22,
         lockRatio: true,
         editable: true,
         fill: '#191970',
@@ -1305,6 +1225,71 @@ window.huitu = function() {
         },
     })
 
+    //lite距离框
+    lite_distance_pan = new Box({
+        id: 'lite_distance_pan',
+        x: appvWidth - 420,//左上角位置
+        y: 80,//左上角位置
+        width: 400,
+        height: 50,
+        lockRatio: true,
+        editable: true,
+        fill: '#191970',
+        cornerRadius: 4,//圆角
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Rect',
+                width: 400,
+                height: 50,
+                x: 0,
+                y: 0,
+                fill: '#CCCCCC',
+                cornerRadius: 4
+            },
+            {
+                tag: 'Rect',
+                width: 0,
+                height: 50,
+                x: 0,
+                y: 0,
+                fill: '#FFFFFF',
+                cornerRadius: 4
+            },
+            {
+                tag: 'Text',
+                resizeFontSize: true,
+                x: 390,
+                y: 3,
+                fontSize: 32,
+                fontWeight: 'black',
+                text: `--Km`,
+                fill: '#FF7F00',
+                textAlign: 'right',
+                verticalAlign: 'center',
+                shadow: textshadow
+            },
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "lite_distance_pan",
+                        "set": [
+                            { "name": `distance`, "url": lite_distance_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `text color`, "url": "lite_distance_pan.children[2].fill", "value": lite_distance_pan.children[2].fill, "type": "color", "tools": true },
+                            { "name": `progress Background color`, "url": "lite_distance_pan.children[0].fill", "value": lite_distance_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `progress color`, "url": "lite_distance_pan.children[1].fill", "value": lite_distance_pan.children[1].fill, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
     //时速
     TO_speed_pan = new Box({
         id: 'TO_speed_pan',
@@ -1314,7 +1299,7 @@ window.huitu = function() {
         height: 50,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1339,7 +1324,7 @@ window.huitu = function() {
                 height: 30,
                 scale: 0.045,
                 path: speed_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1369,7 +1354,7 @@ window.huitu = function() {
         height: 50,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1394,7 +1379,7 @@ window.huitu = function() {
                 height: 30,
                 scale: 0.05,
                 path: run_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1424,7 +1409,7 @@ window.huitu = function() {
         height: 50,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1449,7 +1434,7 @@ window.huitu = function() {
                 y: 2,
                 scale: 0.04,
                 path: heart_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1479,7 +1464,6 @@ window.huitu = function() {
         height: 50,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1504,7 +1488,7 @@ window.huitu = function() {
                 y: 2,
                 scale: 0.04,
                 path: rpm_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1526,6 +1510,100 @@ window.huitu = function() {
     })
 
     //步频
+    x_rpm_pan = new Box({
+        id: 'x_rpm_pan',
+        x: 600,
+        y: 800,
+        width: 200,
+        height: 200,
+        lockRatio: true,
+        editable: true,
+        cornerRadius: 4,//圆角
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                y: 55,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 46,
+                fontWeight: 'black',
+                text: `--:--`,
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 115,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `RPM`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 25,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `CADENCE`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#CCCCCC",
+                strokeWidth: 9,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#FFFFFF",
+                strokeWidth: 10,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            }
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "x_rpm_pan",
+                        "set": [
+                            { "name": `Rpm`, "url": x_rpm_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "x_rpm_pan.children[0].fill", "value": x_rpm_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Unit color`, "url": "x_rpm_pan.children[1].fill", "value": x_rpm_pan.children[1].fill, "type": "color", "tools": true },
+                            { "name": `Graphic backgrounds`, "url": "x_rpm_pan.children[3].stroke", "value": x_rpm_pan.children[3].stroke, "type": "color", "tools": true },
+                            { "name": `Graphic color`, "url": "x_rpm_pan.children[4].stroke", "value": x_rpm_pan.children[4].stroke, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+    //步频
     TO_cadence_pan = new Box({
         id: 'TO_cadence_pan',
         x: 330,//左上角位置
@@ -1534,7 +1612,7 @@ window.huitu = function() {
         height: 50,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1559,7 +1637,7 @@ window.huitu = function() {
                 y: 2,
                 scale: 0.04,
                 path: cadence_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1580,6 +1658,7 @@ window.huitu = function() {
         },
     })
 
+
     //步幅
     TO_step_pan = new Box({
         id: 'TO_step_pan',
@@ -1589,7 +1668,7 @@ window.huitu = function() {
         height: 50,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1614,7 +1693,7 @@ window.huitu = function() {
                 y: 2,
                 scale: 0.04,
                 path: step_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1644,7 +1723,7 @@ window.huitu = function() {
         height: 50,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1669,7 +1748,7 @@ window.huitu = function() {
                 y: 2,
                 scale: 0.04,
                 path: power_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1690,6 +1769,100 @@ window.huitu = function() {
         },
     })
 
+    //步频
+    x_power_pan = new Box({
+        id: 'x_power_pan',
+        x: 1000,
+        y: 800,
+        width: 200,
+        height: 200,
+        lockRatio: true,
+        editable: true,
+        cornerRadius: 4,//圆角
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                y: 55,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 46,
+                fontWeight: 'black',
+                text: `--:--`,
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 115,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `WATT`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 25,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `POWER`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#CCCCCC",
+                strokeWidth: 9,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#FFFFFF",
+                strokeWidth: 10,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            }
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "x_power_pan",
+                        "set": [
+                            { "name": `Power`, "url": x_power_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "x_power_pan.children[0].fill", "value": x_power_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Unit color`, "url": "x_power_pan.children[1].fill", "value": x_power_pan.children[1].fill, "type": "color", "tools": true },
+                            { "name": `Graphic backgrounds`, "url": "x_power_pan.children[3].stroke", "value": x_power_pan.children[3].stroke, "type": "color", "tools": true },
+                            { "name": `Graphic color`, "url": "x_power_pan.children[4].stroke", "value": x_power_pan.children[4].stroke, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
     //经纬度
     TO_gps_pan = new Box({
         id: 'TO_gps_pan',
@@ -1699,7 +1872,7 @@ window.huitu = function() {
         height: 100,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -1723,7 +1896,7 @@ window.huitu = function() {
                 y: 12,
                 scale: 0.06,
                 path: gps_icon,
-                fill: '#FF8C00'
+                fill: '#FF7F00'
             }
         ],
         event: {
@@ -1927,7 +2100,7 @@ window.huitu = function() {
                 startAngle: -210,
                 endAngle: 30,
                 innerRadius: 1,
-                stroke: "#FF8C00",
+                stroke: "#FF7F00",
                 strokeWidth: 24,
                 strokeWidthFixed: false,
                 strokeAlign: 'center',
@@ -1954,7 +2127,101 @@ window.huitu = function() {
         },
     })
 
-    //配速
+    //心率
+    x_heart_pan = new Box({
+        id: 'x_heart_pan',
+        x: 800,
+        y: 800,
+        width: 200,
+        height: 200,
+        lockRatio: true,
+        editable: true,
+        cornerRadius: 4,//圆角
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                y: 55,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 46,
+                fontWeight: 'black',
+                text: `--:--`,
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 115,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `BPM`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 25,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `HEART R`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#CCCCCC",
+                strokeWidth: 9,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#FFFFFF",
+                strokeWidth: 10,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            }
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "x_heart_pan",
+                        "set": [
+                            { "name": `heart rate`, "url": x_heart_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "x_heart_pan.children[0].fill", "value": x_heart_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Unit color`, "url": "x_heart_pan.children[1].fill", "value": x_heart_pan.children[1].fill, "type": "color", "tools": true },
+                            { "name": `Graphic backgrounds`, "url": "x_heart_pan.children[3].stroke", "value": x_heart_pan.children[3].stroke, "type": "color", "tools": true },
+                            { "name": `Graphic color`, "url": "x_heart_pan.children[4].stroke", "value": x_heart_pan.children[4].stroke, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+    //速度
     el_speed_pan = new Box({
         id: 'el_speed_pan',
         x: 400,
@@ -1963,7 +2230,7 @@ window.huitu = function() {
         height: 200,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -2011,7 +2278,7 @@ window.huitu = function() {
                 startAngle: -210,
                 endAngle: 30,
                 innerRadius: 1,
-                stroke: "#FF8C00",
+                stroke: "#FF7F00",
                 strokeWidth: 24,
                 strokeAlign: 'center',
                 strokeCap: 'round',
@@ -2037,6 +2304,100 @@ window.huitu = function() {
         },
     })
 
+    //速度
+    x_speed_pan = new Box({
+        id: 'x_speed_pan',
+        x: 400,
+        y: 800,
+        width: 200,
+        height: 200,
+        lockRatio: true,
+        editable: true,
+        cornerRadius: 4,//圆角
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                y: 55,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 46,
+                fontWeight: 'black',
+                text: `--:--`,
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 115,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `KM/H`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 25,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `SPEED`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#CCCCCC",
+                strokeWidth: 9,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#FFFFFF",
+                strokeWidth: 10,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            }
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "x_speed_pan",
+                        "set": [
+                            { "name": `Speed`, "url": x_speed_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "x_speed_pan.children[0].fill", "value": x_speed_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Unit color`, "url": "x_speed_pan.children[1].fill", "value": x_speed_pan.children[1].fill, "type": "color", "tools": true },
+                            { "name": `Graphic backgrounds`, "url": "x_speed_pan.children[3].stroke", "value": x_speed_pan.children[3].stroke, "type": "color", "tools": true },
+                            { "name": `Graphic color`, "url": "x_speed_pan.children[4].stroke", "value": x_speed_pan.children[4].stroke, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
     //配速
     el_pace_pan = new Box({
         id: 'el_pace_pan',
@@ -2046,7 +2407,7 @@ window.huitu = function() {
         height: 200,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -2094,7 +2455,7 @@ window.huitu = function() {
                 startAngle: -210,
                 endAngle: 30,
                 innerRadius: 1,
-                stroke: "#FF8C00",
+                stroke: "#FF7F00",
                 strokeWidth: 24,
                 strokeAlign: 'center',
                 strokeCap: 'round',
@@ -2120,6 +2481,101 @@ window.huitu = function() {
         },
     })
 
+    //配速
+    x_pace_pan = new Box({
+        id: 'x_pace_pan',
+        x: 400,
+        y: 800,
+        width: 200,
+        height: 200,
+        lockRatio: true,
+        editable: true,
+
+        cornerRadius: 4,//圆角
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                y: 55,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 46,
+                fontWeight: 'black',
+                text: `--:--`,
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 115,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `MIN/KM`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 25,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `PACE`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#CCCCCC",
+                strokeWidth: 9,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#FFFFFF",
+                strokeWidth: 10,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            }
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "x_pace_pan",
+                        "set": [
+                            { "name": `Pace`, "url": x_pace_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "x_pace_pan.children[0].fill", "value": x_pace_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Unit color`, "url": "x_pace_pan.children[1].fill", "value": x_pace_pan.children[1].fill, "type": "color", "tools": true },
+                            { "name": `Graphic backgrounds`, "url": "x_pace_pan.children[3].stroke", "value": x_pace_pan.children[3].stroke, "type": "color", "tools": true },
+                            { "name": `Graphic color`, "url": "x_pace_pan.children[4].stroke", "value": x_pace_pan.children[4].stroke, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
     //步频
     el_cadence_pan = new Box({
         id: 'el_cadence_pan',
@@ -2129,7 +2585,7 @@ window.huitu = function() {
         height: 200,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize
@@ -2177,7 +2633,7 @@ window.huitu = function() {
                 startAngle: -210,
                 endAngle: 30,
                 innerRadius: 1,
-                stroke: "#FF8C00",
+                stroke: "#FF7F00",
                 strokeWidth: 24,
                 strokeAlign: 'center',
                 strokeCap: 'round',
@@ -2195,6 +2651,100 @@ window.huitu = function() {
                             { "name": `Unit color`, "url": "el_cadence_pan.children[1].fill", "value": el_cadence_pan.children[1].fill, "type": "color", "tools": true },
                             { "name": `Graphic backgrounds`, "url": "el_cadence_pan.children[2].stroke", "value": el_cadence_pan.children[2].stroke, "type": "color", "tools": true },
                             { "name": `Graphic color`, "url": "el_cadence_pan.children[3].stroke", "value": el_cadence_pan.children[3].stroke, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+    //步频
+    x_cadence_pan = new Box({
+        id: 'x_cadence_pan',
+        x: 600,
+        y: 800,
+        width: 200,
+        height: 200,
+        lockRatio: true,
+        editable: true,
+        cornerRadius: 4,//圆角
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                y: 55,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 46,
+                fontWeight: 'black',
+                text: `--:--`,
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 115,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `STEPS`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Text',
+                y: 25,
+                x: 100,
+                resizeFontSize: true,
+                fontSize: 28,
+                fontWeight: 'black',
+                text: `CADENCE`,
+                fill: '#CCCCCC',
+                textAlign: 'center',
+                verticalAlign: 'center',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#CCCCCC",
+                strokeWidth: 9,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            },
+            {
+                tag: 'Ellipse',
+                width: 200,
+                height: 200,
+                startAngle: -150,
+                endAngle: 30,
+                innerRadius: 1,
+                stroke: "#FFFFFF",
+                strokeWidth: 10,
+                strokeAlign: 'center',
+                strokeCap: 'round',
+            }
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "x_cadence_pan",
+                        "set": [
+                            { "name": `Cadence`, "url": x_cadence_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "x_cadence_pan.children[0].fill", "value": x_cadence_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Unit color`, "url": "x_cadence_pan.children[1].fill", "value": x_cadence_pan.children[1].fill, "type": "color", "tools": true },
+                            { "name": `Graphic backgrounds`, "url": "x_cadence_pan.children[3].stroke", "value": x_cadence_pan.children[3].stroke, "type": "color", "tools": true },
+                            { "name": `Graphic color`, "url": "x_cadence_pan.children[4].stroke", "value": x_cadence_pan.children[4].stroke, "type": "color", "tools": true },
                         ]
                     }
                     tosettable(json);
@@ -2336,7 +2886,7 @@ window.huitu = function() {
         height: 100,
         lockRatio: true,
         editable: true,
-        //fill: '#CCEEFF',
+
         cornerRadius: 4,//圆角
         hitBox: true,
         resizeChildren: true,//子元素是否跟随 resize

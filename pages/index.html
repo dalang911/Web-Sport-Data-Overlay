@@ -338,9 +338,8 @@
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 22px;">
             Xscreen Sports Data Overlay
         </li>
-
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.50 .更新：重构视频生成,性能稳定性大幅提升;去除、修复、更新一些组件。保存还有问题;
+            Beta 0.51 .更新：修复、更新一些组件。
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -440,6 +439,10 @@
                                 <div>Distance</div>
                             </div>
                             <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="lite_distance_pan"><img src="./images/x7.png"></div>
+                                <div>Distance</div>
+                            </div>
+                            <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="appv_ele18_pan"><img src="./images/l4.png"></div>
                                 <div>Elevation</div>
                             </div>
@@ -472,10 +475,6 @@
                         </div>
                         <div>
                             <div class="layui-col-sm12">
-                                <div class="layui-anim" lay-active="appv_metrics_pan"><img src="./images/t1.png"></div>
-                                <div>HPC</div>
-                            </div>
-                            <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="pt_heart_pan"><img src="./images/t3.png"></div>
                                 <div>Heart</div>
                             </div>
@@ -486,6 +485,48 @@
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="pt_ele_pan"><img src="./images/t5.png"></div>
                                 <div>Elevation</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="el_heart_pan"><img src="./images/z5.png"></div>
+                                <div>Cadence</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="el_pace_pan"><img src="./images/z6.png"></div>
+                                <div>Pace</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="el_cadence_pan"><img src="./images/z7.png"></div>
+                                <div>Cadence</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="pl_heart_pan"><img src="./images/z8.png"></div>
+                                <div>Heart</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_speed_pan"><img src="./images/x6.png"></div>
+                                <div>Speed</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_pace_pan"><img src="./images/x5.png"></div>
+                                <div>Pace</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_cadence_pan"><img src="./images/x4.png"></div>
+                                <div>Cadence</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_rpm_pan"><img src="./images/x3.png"></div>
+                                <div>Rpm</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_power_pan"><img src="./images/x2.png"></div>
+                                <div>Power</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_heart_pan"><img src="./images/x1.png"></div>
+                                <div>Heart</div>
                             </div>
                         </div>
                         <div>
@@ -509,24 +550,6 @@
                                 <div class="layui-anim" lay-active="TO_power_pan"><img src="./images/z12.png"></div>
                                 <div>Power(.fit)</div>
                             </div>
-                            <div class="layui-col-sm12">
-                                <div class="layui-anim" lay-active="el_heart_pan"><img src="./images/z5.png"></div>
-                                <div>Cadence</div>
-                            </div>
-                            <div class="layui-col-sm12">
-                                <div class="layui-anim" lay-active="el_pace_pan"><img src="./images/z6.png"></div>
-                                <div>Pace</div>
-                            </div>
-                            <div class="layui-col-sm12">
-                                <div class="layui-anim" lay-active="el_cadence_pan"><img src="./images/z7.png"></div>
-                                <div>Cadence</div>
-                            </div>
-                            <div class="layui-col-sm12">
-                                <div class="layui-anim" lay-active="pl_heart_pan"><img src="./images/z8.png"></div>
-                                <div>Heart</div>
-                            </div>
-                        </div>
-                        <div>
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="appv_nowstatus_pan"><img src="./images/s1.png">
                                 </div>
@@ -553,12 +576,24 @@
                                 <div>Speed</div>
                             </div>
                             <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_speed_pan"><img src="./images/x6.png"></div>
+                                <div>Speed</div>
+                            </div>
+                            <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="TO_rpm_pan"><img src="./images/z10.png"></div>
+                                <div>Rpm</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_rpm_pan"><img src="./images/x3.png"></div>
                                 <div>Rpm</div>
                             </div>
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="TO_power_pan"><img src="./images/z12.png"></div>
                                 <div>Power(.fit)</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="x_power_pan"><img src="./images/x2.png"></div>
+                                <div>Power</div>
                             </div>
                         </div>
                     </div>
@@ -2083,14 +2118,17 @@
             heartRateMax = -Infinity;
             user_heartRateMax = heartRateMax;
             // 计算步频数据的最大值和最小值，用于后续y轴范围映射
-            let cadenceMin = Infinity;
-            let cadenceMax = -Infinity;
+            cadenceMin = Infinity;
+            cadenceMax = -Infinity;
             // 计算配速数据的最大值和最小值，用于后续y轴范围映射
             paceMin = Infinity;
             paceMax = -Infinity;
             // 计算高程数据的最大值和最小值，用于后续y轴范围映射
             eleMin = Infinity;
             eleMax = -Infinity;
+            // 计算高程数据的最大值和最小值，用于后续y轴范围映射
+            powerMin = Infinity;
+            powerMax = -Infinity;
 
 
             for (let i = 0; i < trkpt_data.length; i++) {
@@ -2121,6 +2159,13 @@
                 if (typeof ele === 'number') {
                     eleMin = Math.min(eleMin, ele);
                     eleMax = Math.max(eleMax, ele);
+                }
+
+                // 处理功率
+                const power = trkpt_data[i].power ?? 0;
+                if (typeof power === 'number') {
+                    powerMin = Math.min(powerMin, power);
+                    powerMax = Math.max(powerMax, power);
                 }
             }
 

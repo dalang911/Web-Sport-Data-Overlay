@@ -15,7 +15,7 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
 
         //长度条
 
-        if (validElementIds.includes('appv_distance_pan') || validElementIds.includes('l_distance_pan')) {
+        if (validElementIds.includes('appv_distance_pan') || validElementIds.includes('l_distance_pan') || validElementIds.includes('lite_distance_pan')) {
 
             //开始填充
             // 获取trkpt_data数组中最后一个元素的distance属性值，除以1000后进行四舍五入保留两位小数
@@ -32,8 +32,14 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             //距离条
             var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * l_distance_pan.children[2].width;//计算实时长度
             l_distance_pan.children[1].width = jdtcd;
-            l_distance_pan.children[6].x = jdtcd + l_distance_pan.children[1].x - l_distance_pan.children[6].width/2;
+            l_distance_pan.children[6].x = jdtcd + l_distance_pan.children[1].x - l_distance_pan.children[6].width / 2;
             l_distance_pan.children[7].x = jdtcd + l_distance_pan.children[1].x;
+
+            //距离条
+            var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * lite_distance_pan.children[0].width;//计算实时长度
+            lite_distance_pan.children[1].width = jdtcd;
+            lite_distance_pan.children[2].text = distance_in_km + `/`+ max_distance_in_km;//行进长度
+
 
         }
 
@@ -70,14 +76,14 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             // 当进度达到50%（中间点）时，将中间点端点改为白色
             if (progressRatio >= 0.5) {
                 x_distance_pan.children[2].fill = x_distance_pan.children[7].stroke;
-            }else{
+            } else {
                 x_distance_pan.children[2].fill = x_distance_pan.children[6].stroke;
             }
 
             // 当进度达到100%（终点）时，将终点端点改为白色
             if (progressRatio >= 1.0) {
                 x_distance_pan.children[4].fill = x_distance_pan.children[7].stroke;
-            }else{
+            } else {
                 x_distance_pan.children[4].fill = x_distance_pan.children[6].stroke;
             }
 
@@ -216,6 +222,30 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             TO_rpm_pan.children[0].text = `${(cadence / 2) | 0} Rpm`;
         }
 
+        if (validElementIds.includes('x_rpm_pan')) {
+            x_rpm_pan.children[0].text = `${(cadence / 2) | 0}`;
+            // 定义角度范围
+            const minEndAngle = -150;
+            const maxEndAngle = 30;
+            const angleRange = maxEndAngle - minEndAngle; // 180度区间
+            // 计算速度范围
+            const speedRange = cadenceMax - cadenceMin;
+            let currentAngle;
+            if (speedRange <= 0) {
+                // 处理速度范围为0的特殊情况（如所有速度相同）
+                currentAngle = minEndAngle; // 或设置为中间值 (minEndAngle + maxEndAngle) / 2
+            } else {
+                // 线性映射当前速度到角度范围
+                const speedRatio = (cadence - cadenceMin) / speedRange;
+                currentAngle = minEndAngle + (speedRatio * angleRange);
+
+                // 确保角度在有效范围内（防止超出边界）
+                currentAngle = Math.max(minEndAngle, Math.min(maxEndAngle, currentAngle));
+            }
+            // 设置最终角度
+            x_rpm_pan.children[4].endAngle = currentAngle;
+        }
+
         //to仪表盘
         if (validElementIds.includes('TO_step_pan')) {
             TO_step_pan.children[0].text = `${step_length} m`;
@@ -223,7 +253,31 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
 
         //to仪表盘
         if (validElementIds.includes('TO_power_pan')) {
-            TO_power_pan.children[0].text = `${(power) | 0} watt`;
+            TO_power_pan.children[0].text = `${(Math.trunc(power)) | 0} watt`;
+        }
+
+        if (validElementIds.includes('x_power_pan')) {
+            x_power_pan.children[0].text = `${Math.trunc(power)}`;
+            // 定义角度范围
+            const minEndAngle = -150;
+            const maxEndAngle = 30;
+            const angleRange = maxEndAngle - minEndAngle; // 180度区间
+            // 计算速度范围
+            const speedRange = powerMax - powerMin;
+            let currentAngle;
+            if (speedRange <= 0) {
+                // 处理速度范围为0的特殊情况（如所有速度相同）
+                currentAngle = minEndAngle; // 或设置为中间值 (minEndAngle + maxEndAngle) / 2
+            } else {
+                // 线性映射当前速度到角度范围
+                const speedRatio = (power - powerMin) / speedRange;
+                currentAngle = minEndAngle + (speedRatio * angleRange);
+
+                // 确保角度在有效范围内（防止超出边界）
+                currentAngle = Math.max(minEndAngle, Math.min(maxEndAngle, currentAngle));
+            }
+            // 设置最终角度
+            x_power_pan.children[4].endAngle = currentAngle;
         }
 
         //心率仪表盘
@@ -235,6 +289,32 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             }
             el_heart_pan.children[3].endAngle = -210 + (heart_rate - 40) * 1.33;
         }
+
+        if (validElementIds.includes('x_heart_pan')) {
+            x_heart_pan.children[0].text = `${heart_rate}`;
+            // 定义角度范围
+            const minEndAngle = -150;
+            const maxEndAngle = 30;
+            const angleRange = maxEndAngle - minEndAngle; // 180度区间
+            // 计算速度范围
+            const speedRange = heartRateMax - heartRateMin;
+            let currentAngle;
+            if (speedRange <= 0) {
+                // 处理速度范围为0的特殊情况（如所有速度相同）
+                currentAngle = minEndAngle; // 或设置为中间值 (minEndAngle + maxEndAngle) / 2
+            } else {
+                // 线性映射当前速度到角度范围
+                const speedRatio = (heart_rate - heartRateMin) / speedRange;
+                currentAngle = minEndAngle + (speedRatio * angleRange);
+
+                // 确保角度在有效范围内（防止超出边界）
+                currentAngle = Math.max(minEndAngle, Math.min(maxEndAngle, currentAngle));
+            }
+            // 设置最终角度
+            x_heart_pan.children[4].endAngle = currentAngle;
+        }
+
+
 
 
         //高级心率仪表盘
@@ -306,6 +386,31 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             el_pace_pan.children[3].endAngle = -210 + speed * 10.9;
         }
 
+        // 配速仪表盘
+        if (validElementIds.includes('x_pace_pan')) {
+            x_pace_pan.children[0].text = `${pace}`;
+            // 定义角度范围
+            const minEndAngle = -150;
+            const maxEndAngle = 30;
+            const angleRange = maxEndAngle - minEndAngle; // 180度区间
+            // 计算速度范围
+            const speedRange = paceMax - paceMin;
+            let currentAngle;
+            if (speedRange <= 0) {
+                // 处理速度范围为0的特殊情况（如所有速度相同）
+                currentAngle = minEndAngle; // 或设置为中间值 (minEndAngle + maxEndAngle) / 2
+            } else {
+                // 线性映射当前速度到角度范围
+                const speedRatio = (speed - paceMin) / speedRange;
+                currentAngle = minEndAngle + (speedRatio * angleRange);
+
+                // 确保角度在有效范围内（防止超出边界）
+                currentAngle = Math.max(minEndAngle, Math.min(maxEndAngle, currentAngle));
+            }
+            // 设置最终角度
+            x_pace_pan.children[4].endAngle = currentAngle;
+        }
+
         //速度仪表盘
         if (validElementIds.includes('el_speed_pan')) {
             el_speed_pan.children[0].text = `${speed}`;
@@ -313,11 +418,61 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             el_speed_pan.children[3].endAngle = -210 + speed * 3.5;
         }
 
+        if (validElementIds.includes('x_speed_pan')) {
+            x_speed_pan.children[0].text = `${speed}`;
+            // 定义角度范围
+            const minEndAngle = -150;
+            const maxEndAngle = 30;
+            const angleRange = maxEndAngle - minEndAngle; // 180度区间
+            // 计算速度范围
+            const speedRange = paceMax - paceMin;
+            let currentAngle;
+            if (speedRange <= 0) {
+                // 处理速度范围为0的特殊情况（如所有速度相同）
+                currentAngle = minEndAngle; // 或设置为中间值 (minEndAngle + maxEndAngle) / 2
+            } else {
+                // 线性映射当前速度到角度范围
+                const speedRatio = (speed - paceMin) / speedRange;
+                currentAngle = minEndAngle + (speedRatio * angleRange);
+
+                // 确保角度在有效范围内（防止超出边界）
+                currentAngle = Math.max(minEndAngle, Math.min(maxEndAngle, currentAngle));
+            }
+            // 设置最终角度
+            x_speed_pan.children[4].endAngle = currentAngle;
+        }
+
+
+
         //步频仪表盘
-        if (validElementIds.includes('el_pace_pan')) {
+        if (validElementIds.includes('el_cadence_pan')) {
             el_cadence_pan.children[0].text = `${cadence}`;
             //max240，min0，系数1
             el_cadence_pan.children[3].endAngle = -210 + cadence * 1;
+        }
+
+        if (validElementIds.includes('x_cadence_pan')) {
+            x_cadence_pan.children[0].text = `${cadence}`;
+            // 定义角度范围
+            const minEndAngle = -150;
+            const maxEndAngle = 30;
+            const angleRange = maxEndAngle - minEndAngle; // 180度区间
+            // 计算速度范围
+            const speedRange = cadenceMax - cadenceMin;
+            let currentAngle;
+            if (speedRange <= 0) {
+                // 处理速度范围为0的特殊情况（如所有速度相同）
+                currentAngle = minEndAngle; // 或设置为中间值 (minEndAngle + maxEndAngle) / 2
+            } else {
+                // 线性映射当前速度到角度范围
+                const speedRatio = (cadence - cadenceMin) / speedRange;
+                currentAngle = minEndAngle + (speedRatio * angleRange);
+
+                // 确保角度在有效范围内（防止超出边界）
+                currentAngle = Math.max(minEndAngle, Math.min(maxEndAngle, currentAngle));
+            }
+            // 设置最终角度
+            x_cadence_pan.children[4].endAngle = currentAngle;
         }
 
 
@@ -419,10 +574,6 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             appv_lap_user_pan.children[0].text = segment_info;
         }
 
-        //综合图表画进度 metrics
-        if (validElementIds.includes('appv_metrics_pan')) {
-            appv_metrics_pan.children[3].x = appv_metrics_pan.width / maxFrame * currentFrame;
-        }
 
         //带标尺的心率
         if (validElementIds.includes('pt_heart_pan')) {

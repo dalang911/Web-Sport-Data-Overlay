@@ -67,6 +67,33 @@ function tosettable(json) {
                 colorInput.className = 'layui-input';
                 colorInput.onchange = function () {
                     new Function('value', 'window.' + item.url + ' = value;')(this.value);
+                    //
+                    // 2. 根据 url 匹配场景，执行对应的颜色同步
+                    const targetUrl = item.url; // 获取当前操作的 url
+                    if (targetUrl === 'x_pace_pan.children[1].fill') {
+                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
+                        x_pace_pan.children[2].fill = x_pace_pan.children[1].fill;
+                    }
+                    if (targetUrl === 'x_cadence_pan.children[1].fill') {
+                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
+                        x_cadence_pan.children[2].fill = x_cadence_pan.children[1].fill;
+                    }
+                    if (targetUrl === 'x_speed_pan.children[1].fill') {
+                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
+                        x_speed_pan.children[2].fill = x_speed_pan.children[1].fill;
+                    }
+                    if (targetUrl === 'x_heart_pan.children[1].fill') {
+                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
+                        x_heart_pan.children[2].fill = x_heart_pan.children[1].fill;
+                    }
+                    if (targetUrl === 'x_rpm_pan.children[1].fill') {
+                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
+                        x_rpm_pan.children[2].fill = x_rpm_pan.children[1].fill;
+                    }
+                    if (targetUrl === 'x_power_pan.children[1].fill') {
+                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
+                        x_power_pan.children[2].fill = x_power_pan.children[1].fill;
+                    }
                 };
                 inputDiv.appendChild(colorInput);
                 break;
@@ -461,6 +488,52 @@ function tosettable(json) {
 
 
         }
+
+        function initColorDatalist() {
+            // 确保只创建一次
+            if (document.getElementById('globalColors')) {
+                return;
+            }
+
+            // 创建datalist元素
+            const datalist = document.createElement('datalist');
+            datalist.id = 'globalColors';
+
+            // 定义预定义颜色
+            const colorOptions = [
+                '#0A9A38', '#000000', '#FFFFFF',
+                '#CCCCCC', '#FF0000', '#C71585',
+                '#9900FF', '#6A0DAD', '#FF7F00',
+                '#FFD700', '#FFFACD', '#0000FF',
+                '#1E90FF', '#00CED1', '#808080',
+                '#8B0000', '#D9B3A1', '#E6E6FA'
+            ];
+
+            // 添加颜色选项
+            colorOptions.forEach(color => {
+                const option = document.createElement('option');
+                option.value = color;
+                datalist.appendChild(option);
+            });
+
+            // 将datalist添加到head或body中
+            document.head.appendChild(datalist);
+
+            // 调试信息，确认datalist已创建
+            console.log('全局颜色列表已初始化:', datalist);
+        }
+
+        initColorDatalist();
+
+        const settable = document.getElementById('settable');
+
+        // 在容器内查找所有符合条件的颜色输入框
+        const colorInputs = settable.querySelectorAll('input[type="color"].layui-input');
+
+        // 为每个找到的输入框添加list属性
+        colorInputs.forEach(input => {
+            input.setAttribute('list', 'globalColors');
+        });
 
     });
 }
