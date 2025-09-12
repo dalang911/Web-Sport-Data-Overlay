@@ -339,7 +339,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.51 .更新：添加一个颜色选择器；修复、更新一些样式组件。
+            Beta 0.52 .更新：对齐组件，选中多个对象时触发，用于快速对齐。
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -684,7 +684,7 @@
     // 从LeaferUI解构核心类（必须在DOM加载后执行）
 
 
-    const { App, Line, Rect, Ellipse, Polygon, Box, Text, PointerButton, PointerEvent, Frame, ZoomEvent, LeafHelper, ChildEvent, LeaferEvent } = LeaferUI;
+    const { App, Line, Rect, Ellipse, Polygon, Box, Text, PointerButton, PointerEvent, Frame, ZoomEvent, LeafHelper, ChildEvent, LeaferEvent, EditorEvent } = LeaferUI;
 
     const { HTMLText } = LeaferIN.html;
 
@@ -715,6 +715,14 @@
         fill: '#0A9A38' // 画布背景（黑幕）
     });
     window.appview.tree.add(window.frame);
+
+    // 注册元素多选事件
+    appview.editor.on(EditorEvent.SELECT, (e) => {
+        if (e.editor.list.length >= 2) {
+            //console.log(e.editor.list); // 打印当前选中的元素列表
+            MultiSelect(e.editor.list);
+        }
+    });
 
     // 6. 缩放到页面显示尺寸（适配960x960容器）
     if (window.appvWidth > window.appvHeight) {
@@ -2224,10 +2232,6 @@
             })
 
 
-
-
-
-
         } else {
             console.log(data.error);
         }
@@ -3599,6 +3603,300 @@
     //距离框
     //距离进度条
 
+    /**
+     * 修复：确保每次多选时工具都能显示（支持容器重建）
+     * @param {Array} selectedList - 选中的元素列表
+     */
+    /**
+     * Multi-select element layout tool (English version)
+     * @param {Array} selectedList - Selected elements list from editor
+     */
+    function MultiSelect(selectedList) {
+        // Persist state across function calls
+        MultiSelect.selectedElements = MultiSelect.selectedElements ?? [];
+        MultiSelect.layer = MultiSelect.layer ?? null;
+        MultiSelect.element = MultiSelect.element ?? null;
+
+        // Initialize layui dependencies (load once)
+        if (!MultiSelect.element || !MultiSelect.layer) {
+            layui.use(['element', 'layer'], function () {
+                MultiSelect.element = layui.element;
+                MultiSelect.layer = layui.layer;
+                handleMultiSelectLogic();
+            });
+        } else {
+            handleMultiSelectLogic();
+        }
+
+        // Core logic: Check tool existence & update elements
+        function handleMultiSelectLogic() {
+            MultiSelect.selectedElements = [...selectedList];
+            console.log('Current selected elements:', MultiSelect.selectedElements);
+
+            // Check if tool container exists in DOM
+            const toolContainer = document.getElementById('multiSelectLayoutTools');
+            if (!toolContainer) {
+                createLayoutTools();
+                MultiSelect.layer.msg(`Selected ${MultiSelect.selectedElements.length} elements<br>Layout tool activated`, {
+                    icon: 1,
+                    time: 1500,
+                    isHtml: true
+                });
+            } else {
+                toolContainer.style.display = 'block';
+                MultiSelect.layer.msg(`Updated: ${MultiSelect.selectedElements.length} elements selected`, {
+                    icon: 0,
+                    time: 1000
+                });
+            }
+        }
+
+        // Dynamically create layout tools (text buttons, 2-line support)
+        function createLayoutTools() {
+            const settableDiv = document.getElementById('settable');
+            if (!settableDiv) {
+                MultiSelect.layer.msg('settableDiv container not found<br>Cannot create layout tool', {
+                    icon: 2,
+                    time: 2000,
+                    isHtml: true
+                });
+                return;
+            }
+
+            // Remove old container if exists (avoid duplication)
+            const oldContainer = document.getElementById('multiSelectLayoutTools');
+            if (oldContainer) {
+                settableDiv.removeChild(oldContainer);
+            }
+
+            // Create main tool container (layui card style)
+            const toolContainer = document.createElement('div');
+            toolContainer.id = 'multiSelectLayoutTools';
+            toolContainer.className = 'layui-card';
+            toolContainer.style.cssText = `
+            margin: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            display: block;
+            max-width: 500px; /* Limit width for neat layout */
+        `;
+
+            // Card title (English)
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'layui-card-header';
+            cardHeader.style.fontWeight = 'bold';
+            cardHeader.textContent = 'Element Layout Tools';
+            toolContainer.appendChild(cardHeader);
+
+            // Card body (button groups)
+            const cardBody = document.createElement('div');
+            cardBody.className = 'layui-card-body';
+            cardBody.style.paddingTop = '10px';
+            toolContainer.appendChild(cardBody);
+
+            // Button group configuration (English, 2-line support)
+            const buttonGroups = [
+                {
+                    groupName: 'Horizontal Align',
+                    buttons: [
+                        { id: 'alignLeft', text: 'Left Align', callback: alignLeft },
+                        { id: 'alignHCenter', text: 'Horizontal<br>Center', callback: alignHCenter },
+                        { id: 'alignRight', text: 'Right Align', callback: alignRight }
+                    ]
+                },
+                {
+                    groupName: 'Vertical Align',
+                    buttons: [
+                        { id: 'alignTop', text: 'Top Align', callback: alignTop },
+                        { id: 'alignVCenter', text: 'Vertical<br>Center', callback: alignVCenter },
+                        { id: 'alignBottom', text: 'Bottom Align', callback: alignBottom }
+                    ]
+                },
+                {
+                    groupName: 'Even Distribution',
+                    buttons: [
+                        { id: 'distributeHor', text: 'Horizontal<br>Distribution', callback: distributeHorizontal },
+                        { id: 'distributeVer', text: 'Vertical<br>Distribution', callback: distributeVertical }
+                    ]
+                }
+            ];
+
+            // Create button groups (neat layout)
+            buttonGroups.forEach(group => {
+                // Group wrapper
+                const groupWrapper = document.createElement('div');
+                groupWrapper.style.marginBottom = '15px';
+                cardBody.appendChild(groupWrapper);
+
+                // Group label
+                const groupLabel = document.createElement('div');
+                groupLabel.style.cssText = `
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+                font-weight: 500;
+            `;
+                groupLabel.textContent = group.groupName;
+                groupWrapper.appendChild(groupLabel);
+
+                // Buttons container (flex layout for alignment)
+                const buttonsContainer = document.createElement('div');
+                buttonsContainer.style.cssText = `
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap; /* Wrap if space is limited */
+            `;
+                groupWrapper.appendChild(buttonsContainer);
+
+                // Create individual text buttons (2-line support)
+                group.buttons.forEach(btn => {
+                    const button = document.createElement('button');
+                    button.id = btn.id;
+                    button.className = 'layui-btn layui-btn-primary';
+                    button.style.cssText = `
+                    width: 80px; /* Fixed width for neatness */
+                    height: auto; /* Auto height for 2 lines */
+                    white-space: normal; /* Allow text wrapping */
+                    line-height: 1.4; /* Adjust line height for readability */
+                    padding: 6px 4px; /* Adjust padding */
+                    text-align: center;
+                    font-size: 12px;
+                `;
+                    button.innerHTML = btn.text; // Support <br> for line break
+
+                    // Bind click event
+                    button.addEventListener('click', () => {
+                        if (MultiSelect.selectedElements.length < 2) {
+                            MultiSelect.layer.msg('Please select at least 2 elements', {
+                                icon: 2,
+                                time: 1500
+                            });
+                            return;
+                        }
+                        btn.callback();
+                    });
+
+                    buttonsContainer.appendChild(button);
+                });
+            });
+
+            // Inject tool container into settableDiv
+            settableDiv.appendChild(toolContainer);
+        }
+
+        // ------------------------------
+        // Core Functions (English prompts)
+        // ------------------------------
+        function alignLeft() {
+            const minX = Math.min(...MultiSelect.selectedElements.map(el => el.x));
+            MultiSelect.selectedElements.forEach(el => {
+                if (window[el.id]) window[el.id].x = minX;
+            });
+            triggerRedraw();
+            MultiSelect.layer.msg('Horizontal Left Align completed', { icon: 1, time: 1000 });
+        }
+
+        function alignHCenter() {
+            const centerXList = MultiSelect.selectedElements.map(el => el.x + el.width / 2);
+            const avgCenterX = centerXList.reduce((sum, x) => sum + x, 0) / centerXList.length;
+            MultiSelect.selectedElements.forEach(el => {
+                if (window[el.id]) window[el.id].x = avgCenterX - el.width / 2;
+            });
+            triggerRedraw();
+            MultiSelect.layer.msg('Horizontal Center completed', { icon: 1, time: 1000 });
+        }
+
+        function alignRight() {
+            const rightXList = MultiSelect.selectedElements.map(el => el.x + el.width);
+            const maxRightX = Math.max(...rightXList);
+            MultiSelect.selectedElements.forEach(el => {
+                if (window[el.id]) window[el.id].x = maxRightX - el.width;
+            });
+            triggerRedraw();
+            MultiSelect.layer.msg('Horizontal Right Align completed', { icon: 1, time: 1000 });
+        }
+
+        function alignTop() {
+            const minY = Math.min(...MultiSelect.selectedElements.map(el => el.y));
+            MultiSelect.selectedElements.forEach(el => {
+                if (window[el.id]) window[el.id].y = minY;
+            });
+            triggerRedraw();
+            MultiSelect.layer.msg('Vertical Top Align completed', { icon: 1, time: 1000 });
+        }
+
+        function alignVCenter() {
+            const centerYList = MultiSelect.selectedElements.map(el => el.y + el.height / 2);
+            const avgCenterY = centerYList.reduce((sum, y) => sum + y, 0) / centerYList.length;
+            MultiSelect.selectedElements.forEach(el => {
+                if (window[el.id]) window[el.id].y = avgCenterY - el.height / 2;
+            });
+            triggerRedraw();
+            MultiSelect.layer.msg('Vertical Center completed', { icon: 1, time: 1000 });
+        }
+
+        function alignBottom() {
+            const bottomYList = MultiSelect.selectedElements.map(el => el.y + el.height);
+            const maxBottomY = Math.max(...bottomYList);
+            MultiSelect.selectedElements.forEach(el => {
+                if (window[el.id]) window[el.id].y = maxBottomY - el.height;
+            });
+            triggerRedraw();
+            MultiSelect.layer.msg('Vertical Bottom Align completed', { icon: 1, time: 1000 });
+        }
+
+        function distributeHorizontal() {
+            const sortedEls = [...MultiSelect.selectedElements].sort((a, b) => a.x - b.x);
+            const elCount = sortedEls.length;
+            if (elCount < 2) return;
+
+            const leftMostX = sortedEls[0].x;
+            const rightMostX = sortedEls[elCount - 1].x + sortedEls[elCount - 1].width;
+            const totalRange = rightMostX - leftMostX;
+            const totalElWidth = sortedEls.reduce((sum, el) => sum + el.width, 0);
+            const totalGap = totalRange - totalElWidth;
+            const singleGap = totalGap / (elCount - 1);
+
+            let currentX = leftMostX;
+            sortedEls.forEach((el, index) => {
+                if (window[el.id]) window[el.id].x = currentX;
+                if (index < elCount - 1) currentX += el.width + singleGap;
+            });
+
+            triggerRedraw();
+            MultiSelect.layer.msg('Horizontal Distribution completed', { icon: 1, time: 1000 });
+        }
+
+        function distributeVertical() {
+            const sortedEls = [...MultiSelect.selectedElements].sort((a, b) => a.y - b.y);
+            const elCount = sortedEls.length;
+            if (elCount < 2) return;
+
+            const topMostY = sortedEls[0].y;
+            const bottomMostY = sortedEls[elCount - 1].y + sortedEls[elCount - 1].height;
+            const totalRange = bottomMostY - topMostY;
+            const totalElHeight = sortedEls.reduce((sum, el) => sum + el.height, 0);
+            const totalGap = totalRange - totalElHeight;
+            const singleGap = totalGap / (elCount - 1);
+
+            let currentY = topMostY;
+            sortedEls.forEach((el, index) => {
+                if (window[el.id]) window[el.id].y = currentY;
+                if (index < elCount - 1) currentY += el.height + singleGap;
+            });
+
+            triggerRedraw();
+            MultiSelect.layer.msg('Vertical Distribution completed', { icon: 1, time: 1000 });
+        }
+
+        // Trigger redraw (adapt to your editor)
+        function triggerRedraw() {
+            console.log('Element position updated, triggering redraw');
+            if (appview && appview.editor && typeof appview.editor.refresh === 'function') {
+                appview.editor.refresh();
+            }
+        }
+    }
 </script>
 
 </html>
