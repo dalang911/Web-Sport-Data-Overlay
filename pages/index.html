@@ -28,7 +28,9 @@
 
 
     <!-- 引入Mediabunny视频编码库 -->
-    <script type="module" src="./js/mediabunny.js"></script>
+    <!-- <script type="module" src="./js/mediabunny.js"></script>mediabunny.min.mjs -->
+    <script type="module" src="./js/mediabunny.min.js"></script>
+
 
     <style>
         html,
@@ -339,7 +341,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.52 .更新：对齐组件，选中多个对象时触发，用于快速对齐。
+            Beta 0.60 .重大更新：导出支持透明通道的webm文件，需要剪辑软件支持(Shotcut..)。感谢开源社区Mediabunny的不懈努力。
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -712,7 +714,7 @@
         width: window.appvWidth,
         height: window.appvHeight,
         overflow: 'hide',
-        fill: '#0A9A38' // 画布背景（黑幕）
+        fill: '#0A9A3800' // 画布背景（黑幕）透明
     });
     window.appview.tree.add(window.frame);
 
@@ -761,7 +763,7 @@
         width: window.appvWidth,
         height: window.appvHeight,
         overflow: 'hide',
-        fill: '#0A9A38'
+        fill: '#0A9A3800'
     });
     window.memoryApp.tree.add(window.memoryFrame);
 
@@ -923,7 +925,8 @@
      * 前端Leafer对象 → 内存Leafer对象迁移（视频生成前调用）
      * @returns {Array} 迁移成功的对象列表（用于生成后回滚）
      */
-    window.moveFrontendObjectsToMemory = function () {
+    // 修改：添加format参数，用于判断是否需要跳过背景层
+    window.moveFrontendObjectsToMemory = function (format = 'mp4') {
         try {
             const frontendFrame = window.frame;
             const memoryFrame = window.memoryFrame;
@@ -934,7 +937,19 @@
             }
 
             // 浅拷贝前端所有子对象（避免remove时数组长度变化）
-            const frontendObjects = [...frontendFrame.children];
+            let frontendObjects = [...frontendFrame.children];
+
+            // 关键修改：如果是webm格式，过滤掉appv_bg_pan背景层
+            if (format === 'webm') {
+                frontendObjects = frontendObjects.filter(obj => {
+                    const shouldSkip = obj.id === 'appv_bg_pan';
+                    if (shouldSkip) {
+                        console.log('WebM格式：跳过背景层对象[appv_bg_pan]');
+                    }
+                    return !shouldSkip;
+                });
+            }
+
             if (frontendObjects.length === 0) {
                 console.warn('前端画布无任何可迁移的对象');
                 return [];
@@ -956,11 +971,11 @@
             throw error; // 抛出错误中断视频生成
         }
     };
-
     /**
      * 内存Leafer对象 → 前端Leafer对象回滚（视频生成后调用）
      * @param {Array} objectsToMove - 迁移时保存的对象列表
      */
+    // 回滚函数保持不变，但会自动忽略未迁移的背景层
     window.moveMemoryObjectsToFrontend = function (objectsToMove) {
         try {
             const frontendFrame = window.frame;
@@ -990,7 +1005,6 @@
             alert(`对象回滚失败：${error.message}，建议刷新页面`);
         }
     };
-
     /**
      * 清空内存Leafer容器（防止内存泄漏）
      */
@@ -1016,8 +1030,11 @@
             Output,
             BufferTarget,
             Mp4OutputFormat,
-            CanvasSource
-        } = await import('./js/mediabunny.js');
+            WebMOutputFormat, // 新增：WebM格式支持
+            CanvasSource,
+            QUALITY_HIGH  // 新增：WebM默认质量常量
+            // } = await import('./js/mediabunny.js');
+        } = await import('./js/mediabunny.min.js');
 
         // ==============================================
         // 5.1 视频生成器类（VideoGenerator）
@@ -1025,20 +1042,20 @@
         // ==============================================
         window.VideoGenerator = class VideoGenerator {
             constructor(frameCanvas, options = {}, onStatus) {
-                // 配置参数（默认1080P、8Mbps码率）
                 this.config = {
                     width: 1920,
                     height: 1080,
-                    codec: 'avc', // H.264编码
-                    bitrate: 8_000_000, // 8Mbps
+                    codec: 'avc', // MP4默认H.264
+                    bitrate: 8_000_000, // MP4默认8Mbps
                     quality: 1,
+                    videoFormat: 'mp4', // 新增：默认MP4格式
                     ...options
                 };
 
                 // 依赖挂载（避免作用域丢失）
                 this.frameCanvas = frameCanvas; // 视频帧输出Canvas
                 this.onStatus = onStatus || (() => { }); // 状态回调
-                this.mbModules = { Output, BufferTarget, Mp4OutputFormat, CanvasSource }; // Mediabunny模块
+                this.mbModules = { Output, BufferTarget, Mp4OutputFormat, WebMOutputFormat, CanvasSource, QUALITY_HIGH  }; // Mediabunny模块
 
                 // 状态变量
                 this.isInitialized = false;
@@ -1067,22 +1084,50 @@
 
                         this.onStatus('初始化视频编码器...');
 
-                        // 3. 创建Mediabunny输出配置（MP4格式）
-                        this.output = new this.mbModules.Output({
-                            format: new this.mbModules.Mp4OutputFormat({
+
+                        // 新增：根据格式动态创建输出格式
+                        let outputFormat;
+                        if (this.config.videoFormat === 'webm') {
+                            // WebM配置：VP9编码+透明支持
+                            outputFormat = new this.mbModules.WebMOutputFormat({
+                                codec: 'vp9', // 强制VP9编码（支持透明）
+                                bitrate: this.mbModules.QUALITY_HIGH  // 使用预定义次高质量
+                            });
+                        } else {
+                            // MP4配置：保持原有H.264逻辑
+                            outputFormat = new this.mbModules.Mp4OutputFormat({
                                 codec: this.config.codec,
                                 bitrate: this.config.bitrate
-                            }),
-                            target: new this.mbModules.BufferTarget() // 输出到内存Buffer
+                            });
+                        }
+
+                        // 创建输出器（使用动态格式）
+                        this.output = new this.mbModules.Output({
+                            format: outputFormat,
+                            target: new this.mbModules.BufferTarget()
                         });
 
-                        // 4. 创建Canvas视频源（从Canvas读取帧）
-                        this.videoSource = new this.mbModules.CanvasSource(this.frameCanvas, {
-                            codec: this.config.codec,
-                            bitrate: this.config.bitrate,
+                        // 新增：根据格式配置CanvasSource（核心透明参数）
+                        const canvasSourceOpts = {
                             width: this.config.width,
                             height: this.config.height
-                        });
+                        };
+                        if (this.config.videoFormat === 'webm') {
+                            // WebM：启用透明通道
+                            canvasSourceOpts.codec = 'vp9';
+                            canvasSourceOpts.bitrate = this.mbModules.QUALITY_HIGH ;
+                            canvasSourceOpts.alpha = 'keep'; // 关键：保留透明数据
+                        } else {
+                            // MP4：保持原有配置（H.264不支持透明）
+                            canvasSourceOpts.codec = this.config.codec;
+                            canvasSourceOpts.bitrate = this.config.bitrate;
+                        }
+
+                        // 创建Canvas源（使用动态配置）
+                        this.videoSource = new this.mbModules.CanvasSource(
+                            this.frameCanvas,
+                            canvasSourceOpts
+                        );
 
                         // 5. 添加视频轨道并启动编码器
                         this.output.addVideoTrack(this.videoSource);
@@ -1127,9 +1172,13 @@
 
                     // 从Buffer生成Blob
                     const videoBuffer = this.output.target.buffer;
-                    const videoBlob = new Blob([videoBuffer], { type: 'video/mp4' });
-                    this.onStatus('视频生成完成！');
+                    // 新增：根据格式设置MIME类型
+                    const mimeType = this.config.videoFormat === 'webm'
+                        ? 'video/webm'
+                        : 'video/mp4';
+                    const videoBlob = new Blob([videoBuffer], { type: mimeType });
 
+                    this.onStatus('视频生成完成！');
                     return videoBlob;
                 } catch (error) {
                     this.onStatus(`编码失败：${error.message}`, true);
@@ -1222,6 +1271,11 @@
             window.videoRenderState.isGenerating = true;
             window.videoRenderState.migratedObjects = []; // 清空历史回滚对象
 
+            // 新增：1.5 获取选中的视频格式（默认MP4）
+            const selectedFormat = document.querySelector('input[name="videoFormat"]:checked')?.value || 'mp4';
+            // 存储格式到全局，供预览弹窗使用
+            window.generatedVideoFormat = selectedFormat;
+
             // 【新增：记录生成开始时间戳（毫秒）】
             const generateStartTime = Date.now();
 
@@ -1276,8 +1330,8 @@
                 // 【新增：传递开始时间到预览弹窗】
                 window.generateStartTimestamp = generateStartTime;
 
-                // 5. 迁移前端对象到内存
-                const migratedObjects = window.moveFrontendObjectsToMemory();
+                // 5. 迁移前端对象到内存//selectedFormat选项卡输出格式
+                const migratedObjects = window.moveFrontendObjectsToMemory(selectedFormat);
                 if (migratedObjects.length === 0) {
                     throw new Error('无前端对象可迁移到内存，无法生成视频');
                 }
@@ -1286,7 +1340,8 @@
                 // 6. 初始化视频生成器
                 const videoGenerator = new window.VideoGenerator(targetCanvas, {
                     width: window.appvWidth,
-                    height: window.appvHeight
+                    height: window.appvHeight,
+                    videoFormat: selectedFormat // 关键：将选中格式传入
                 }, (text, isError) => {
                     // 【修改：视频状态改为控制台显示】
                     if (isError) {
@@ -1298,6 +1353,7 @@
                 window.videoRenderState.currentGenerator = videoGenerator; // 存储生成器实例
                 await videoGenerator.initEncoder();
                 console.log(`视频生成中`);
+
                 // 7. 逐帧生成视频（原有逻辑不变）
                 for (let i = 0; i < totalFrames; i++) {
                     // 【新增：判断是否已被终止，若终止则退出循环】
@@ -1389,8 +1445,8 @@
                 area: ['720px', '860px'],
                 title: 'Video Preview & Progress',
                 content: `
-                    <div class="view">
-                    <!-- 进度文字：生成完成后隐藏 -->
+                    <div class="view" style="background-color: #fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;">
+        <!-- 进度文字：生成完成后隐藏 -->
                     <div id="videoProgressText" style="font-size: 24px; text-align: center; margin: 20px 0; font-weight: bold; color: #333;">
                         视频生成中...（0%）
                     </div>
@@ -1456,7 +1512,7 @@
                 if (!progressText || !video || !downloadLink) return;
 
                 const progress = Math.round((currentFrame / (totalFrames - 1)) * 100);
-                progressText.textContent = `视频生成中...（${progress}%）`;
+                progressText.textContent = `视频生成中... ${currentFrame}/${totalFrames - 1} （${progress}%）`;
 
                 // 生成完成（进度100% + Blob已存在）：更新视频和下载按钮
                 if (progress === 100 && window.generatedVideoBlob) {
@@ -1466,6 +1522,10 @@
                             URL.revokeObjectURL(window.generatedVideoUrl); // 释放旧URL
                         }
                         window.generatedVideoUrl = URL.createObjectURL(window.generatedVideoBlob);
+
+                        // 新增：根据生成格式设置下载文件名
+                        const fileName = `Sport-Data-Overlay.${window.generatedVideoFormat || 'mp4'}`;
+                        downloadLink.download = fileName; // 动态设置后缀
 
                         // 2. 更新视频元素（设置src + 显示）
                         video.src = window.generatedVideoUrl;
@@ -1538,6 +1598,15 @@
                         Segmented Rendering:<br>
                         Select start/end frames to render. For long videos, 5000-frame intervals are recommended.
                     </div>
+                        <!-- 新增：视频格式单选卡 -->
+    <div style="margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
+        <label style="margin-right: 20px; cursor: pointer;">
+            <input type="radio" name="videoFormat" value="mp4" checked> MP4
+        </label>
+        <label style="cursor: pointer;">
+            <input type="radio" name="videoFormat" value="webm"> WebM (Alpha supports)
+        </label>
+    </div>
                     <!-- 帧范围输入 -->
                     <div style="margin-top: 15px;">
                         <!-- 起始帧 -->

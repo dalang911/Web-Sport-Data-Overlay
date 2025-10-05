@@ -1,10 +1,10 @@
 # Web Sport Data Overlay
 
-Supports FIT, GPX, TCX files for creating dashboard videos with filterable background colors.
-The frame rate of the data depends on the interval between timing points.
-The current version is an initial release.
-
-Fully built with JavaScript.
+Supports three file formats: FIT, GPX, and TCX. It can be used to create dashboard videos with background color filtering, and the generated videos have a frame rate of 1 frame per second.
+The project is fully built with JavaScript.
+This project relies on the professional rendering capabilities of the [leafer-ui](https://github.com/leaferjs/leafer-ui) graphics framework and the excellent performance of [Mediabunny](https://github.com/Vanilagy/mediabunny).
+Thanks to the ongoing contributions of the Mediabunny project, it now supports exporting WebM format videos with transparent channels.
+WebM videos with transparent channels can be edited with [Shotcut](https://github.com/mltframework/shotcut).
 
 https://www.bilibili.com/video/BV1m9fEYRE6u/
 
@@ -16,7 +16,7 @@ https://overlay.data4u.vip/
 
 ## Principle
 
-![Example image](./doc/20250124091311.png)
+![Example image](./doc/wechat_2025-10-05_094251_270.png)
 
 ## Web Interface
 
@@ -39,6 +39,5 @@ The server requires HTTPS support.
 - [leafer-ui](https://github.com/leaferjs/leafer-ui)
 - [mediabunny](https://github.com/Vanilagy/mediabunny)
 - [layui](https://github.com/layui/layui)
-- [jQuery](https://github.com/jquery/jquery)
 - [GPXParser.js](https://github.com/Luuka/GPXParser.js)
 - [BackFitClientSide](https://github.com/gfmoore/BackFitClientSide)
