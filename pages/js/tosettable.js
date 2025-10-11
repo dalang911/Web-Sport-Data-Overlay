@@ -461,14 +461,37 @@ function tosettable(json) {
 						`;
 
                 // 事件监听（使用动态对象引用）
+                // 事件监听（使用动态对象引用）
                 col1.querySelector('input').onchange = function () {
                     const value = parseFloat(this.value);
-                    if (!isNaN(value)) new Function(json.id + '.' + prop1 + ' = ' + value)();
+                    if (!isNaN(value)) {
+                        // 获取目标对象
+                        const target = window[json.id];
+                        // 根据属性名执行不同操作
+                        if (label1 === 'W') {
+                            target.resizeWidth(value);
+                        } else if (label1 === 'H') {
+                            target.resizeHeight(value);
+                        } else {
+                            target[prop1] = value;
+                        }
+                    }
                 };
 
                 col2.querySelector('input').onchange = function () {
                     const value = parseFloat(this.value);
-                    if (!isNaN(value)) new Function(json.id + '.' + prop2 + ' = ' + value)();
+                    if (!isNaN(value)) {
+                        // 获取目标对象
+                        const target = window[json.id];
+                        // 根据属性名执行不同操作
+                        if (label2 === 'W') {
+                            target.resizeWidth(value);
+                        } else if (label2 === 'H') {
+                            target.resizeHeight(value);
+                        } else {
+                            target[prop2] = value;
+                        }
+                    }
                 };
 
                 row.append(col1, col2);
