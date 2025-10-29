@@ -207,7 +207,7 @@ gpxParser.prototype.parse = function (gpxstring) {
                 let trackPointExtension = extensions.querySelector('ns3\\:TrackPointExtension, gpxtpx\\:TrackPointExtension, TrackPointExtension');
                 if (trackPointExtension) {
                     // 尝试获取心率值
-                    let hrElement = trackPointExtension.querySelector('ns3\\:hr, gpxtpx\\:hr, hr');
+                    let hrElement = trackPointExtension.querySelector('ns3\\:hr, gpxtpx\\:hr, hr,heartrate');
                     pt.hr = hrElement && hrElement.textContent ? parseFloat(hrElement.textContent) : 0;
 
                     // 尝试获取踏频值
@@ -216,7 +216,7 @@ gpxParser.prototype.parse = function (gpxstring) {
                 }
 
                 // 尝试获取心率值
-                let ghrElement = extensions.querySelector('gpxdata\\:hr,hr');
+                let ghrElement = extensions.querySelector('gpxdata\\:hr,hr,heartrate');
                 if (ghrElement) {
                     pt.hr = ghrElement && ghrElement.textContent ? parseFloat(ghrElement.textContent) : 0;
                 }
