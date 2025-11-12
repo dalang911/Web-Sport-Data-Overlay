@@ -340,6 +340,33 @@ function tosettable(json) {
                 inputDiv.appendChild(ele_line_textInput);
                 break;
 
+            //1:1 高程表背景线
+            case 'o2o_color_line':
+                const o2o_color_lineInput = document.createElement('input');
+                o2o_color_lineInput.type = 'color';
+                o2o_color_lineInput.value = item.value;
+                o2o_color_lineInput.className = 'layui-input';
+                o2o_color_lineInput.onchange = function () {
+                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
+                    o2o_ele_pan.children[1].stroke = o2o_ele_pan.children[0].stroke;
+                };
+                inputDiv.appendChild(o2o_color_lineInput);
+                break;
+
+            case 'o2o_line_text':
+                const o2o_line_textInput = document.createElement('input'); // 创建文本输入框
+                o2o_line_textInput.type = 'color'; // 设置类型为文本
+                o2o_line_textInput.value = item.value; // 同样修正了拼写错误
+                o2o_line_textInput.className = 'layui-input';
+                o2o_line_textInput.onchange = function () {
+                    //pl_heart_pan.children[1].text
+                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
+                    o2o_ele_pan.children[3].fill = o2o_ele_pan.children[2].fill;
+                    o2o_ele_pan.children[4].fill = o2o_ele_pan.children[2].fill;
+                };
+                inputDiv.appendChild(o2o_line_textInput);
+                break;
+
             case 'x_color':
                 const x_color = document.createElement('input');
                 x_color.type = 'color';

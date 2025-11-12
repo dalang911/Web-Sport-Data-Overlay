@@ -603,6 +603,21 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             pt_ele_pan.children[9].text = altitude;
         }
 
+        //1:1的高程
+        if (validElementIds.includes('o2o_ele_pan')) {
+            // X轴移动（保持不变）
+            o2o_ele_pan.children[5].x = o2o_ele_pan.width / 2 - trkpt_data[currentFrame].distance * o2o_ele_pan.width / 80;
+
+            const centerY = o2o_ele_pan.height / 2; // 容器高度100，中心固定为50
+            // 当前帧的Y像素（注意这里o2o_y已反转，计算方式同步调整）
+            const currentElevationY = (trkpt_data[currentFrame].altitude - baseAltitude) * - o2o_ele_pan.width / 80;
+            // Y偏移：让当前高程点对齐容器中心
+            const yOffset = centerY - currentElevationY;
+
+            o2o_ele_pan.children[5].y = yOffset;
+            o2o_ele_pan.children[8].text = altitude;
+        }
+
 
 
         //当前日期时间

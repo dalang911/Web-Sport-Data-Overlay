@@ -341,7 +341,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.60 .重大更新：导出支持透明通道的webm文件，需要剪辑软件支持(Shotcut..)。感谢开源社区Mediabunny的不懈努力。
+            Beta 0.61 .更新：新增1个真实比例的高程图表，显示高度20米，宽度80米的一个空间信息。
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -487,6 +487,10 @@
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="pt_ele_pan"><img src="./images/t5.png"></div>
                                 <div>Elevation</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="o2o_ele_pan"><img src="./images/t6.png"></div>
+                                <div>1:1 Elevation</div>
                             </div>
                         </div>
                         <div>
@@ -2060,6 +2064,7 @@
         ele18_points = [];//高程变量1:8
         pt_ele_points = [];//高程数据
         slopes_points = [];//坡度数据
+        o2o_ele_points = [];//1:1高程数据
 
         if (data.status === 0) {
             //定义数据
@@ -2246,6 +2251,8 @@
                 }
             }
 
+            // 在循环外初始化基准高程（以第一个点为基准）
+            baseAltitude = trkpt_data.length > 0 ? trkpt_data[0].altitude : 0;
 
             for (let i = 0; i < trkpt_data.length; i++) {
                 // 处理心率数据，将y轴值映射到0 - 200范围
@@ -2287,6 +2294,15 @@
                 let eleY18 = mapToRange(trkpt_data[i].altitude, eleMin - 5, eleMax + 5, 0, 50);
                 ele18_points.push(jdtcd);
                 ele18_points.push(50 - eleY18);
+
+                // 处理等比例高程数据（XY比例1:1，每米映射5像素）
+                // 处理等比例高程数据（修正Y轴方向，解决“反的”问题）
+                const o2o_x = trkpt_data[i].distance * 5; // X方向不变（每米5像素）
+                // Y方向：反转方向，让高程越高越靠上（高程-基准高程 乘以 -5）
+                const o2o_y = (trkpt_data[i].altitude - baseAltitude) * -5;
+
+                o2o_ele_points.push(o2o_x);
+                o2o_ele_points.push(o2o_y);
             }
 
             huitu();//开始绘制

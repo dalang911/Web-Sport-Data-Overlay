@@ -18,10 +18,10 @@ window.huitu = function () {
         resizeChildren: true,//子元素是否跟随 resize
         children: [
             {
-                tag: 'Rect',
+                tag: 'Canvas',
                 width: appvWidth,
                 height: appvHeight,
-                fill: '#0A9A38',
+                fill: '#0A9A38'
             }
         ],
         event: {
@@ -387,6 +387,151 @@ window.huitu = function () {
             ],
         },
     });
+
+    //高程图表
+    o2o_ele_pan = new Box({
+        id: 'o2o_ele_pan',
+        x: 550,//左上角位置
+        y: 850,//左上角位置
+        width: 400,
+        height: 100,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        cornerRadius: 8,//圆角
+        overflow: 'hide',	//越界隐藏
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Line',
+                lockRatio: true,
+                width: 400,
+                strokeWidth: 5,
+                stroke: '#FFFFFF',
+                dashPattern: [10, 10]
+            },
+            {
+                tag: 'Line',
+                lockRatio: true,
+                points: [0, 100, 400, 100],
+                width: 400,
+                strokeWidth: 5,
+                stroke: '#FFFFFF',
+                dashPattern: [10, 10],
+            },
+            {
+                tag: 'Text',
+                resizeFontSize: true,
+                x: 0,
+                y: 10,
+                fontSize: 20,
+                fontWeight: 'black',
+                text: '+10',
+                fill: '#FFFFFF',
+                textAlign: 'left',
+                verticalAlign: 'middle',
+            },
+            {
+                tag: 'Text',
+                resizeFontSize: true,
+                x: 0,
+                y: 50,
+                fontSize: 20,
+                fontWeight: 'black',
+                text: 0,
+                fill: '#FFFFFF',
+                textAlign: 'left',
+                verticalAlign: 'middle',
+            },
+            {
+                tag: 'Text',
+                resizeFontSize: true,
+                x: 0,
+                y: 90,
+                fontSize: 20,
+                fontWeight: 'black',
+                text: '-10',
+                fill: '#FFFFFF',
+                textAlign: 'left',
+                verticalAlign: 'middle',
+            },
+            {
+                tag: 'Line',
+                lockRatio: true,
+                x: 200,
+                y: 50,
+                points: o2o_ele_points,  // [x,y, x,y ...]
+                curve: true,
+                strokeWidth: 3,
+                stroke: '#FFD700',
+                strokeCap: 'round'
+            },
+            {
+                name: 'metrics',
+                tag: 'Line',
+                lockRatio: true,
+                x: 200,
+                width: 100,
+                rotation: 90,
+                fill: "blue",
+                strokeWidth: 4,
+                stroke: '#FFFFFF',
+                strokeCap: 'round'
+            },
+            {
+                tag: 'Rect',
+                x: 360,
+                y: 60,
+                scale: 0.04,
+                path: mountain_icon,
+                fill: '#FFD700'
+            },
+            {
+                tag: 'Text',
+                resizeFontSize: true,
+                x: 210,
+                y: 80,
+                fontSize: 24,
+                fontWeight: 'black',
+                text: '180',
+                fill: '#FFFFFF',
+                textAlign: 'left',
+                verticalAlign: 'middle',
+            },
+            {
+                tag: 'Ellipse',
+                lockRatio: true,
+                around: 'center',
+                x: 200,
+                y: 50,
+                width: 13,
+                height: 13,
+                fill: "#ffde7d"
+            }
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "o2o_ele_pan",
+                        "set": [
+                            { "name": `1:1 Elevation 80m`, "url": "", "value": "", "type": "title", "tools": false },
+                            { "name": `ruler color`, "url": "o2o_ele_pan.children[0].stroke", "value": o2o_ele_pan.children[0].stroke, "type": "o2o_color_line", "tools": true },
+                            { "name": `ruler text color`, "url": "o2o_ele_pan.children[2].fill", "value": o2o_ele_pan.children[2].fill, "type": "o2o_line_text", "tools": true },
+                            { "name": `ele line thickness`, "url": "o2o_ele_pan.children[5].strokeWidth", "value": o2o_ele_pan.children[5].strokeWidth, "type": "number", "tools": true },
+                            { "name": `ele line color`, "url": "o2o_ele_pan.children[5].stroke", "value": o2o_ele_pan.children[5].stroke, "type": "color", "tools": true },
+                            { "name": `Progress line thickness`, "url": "o2o_ele_pan.children[6].strokeWidth", "value": o2o_ele_pan.children[6].strokeWidth, "type": "number", "tools": true },
+                            { "name": `Progress line color`, "url": "o2o_ele_pan.children[6].stroke", "value": o2o_ele_pan.children[6].stroke, "type": "color", "tools": true },
+                            { "name": `Progress dot color`, "url": "o2o_ele_pan.children[9].fill", "value": o2o_ele_pan.children[9].fill, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    });
+
 
     //高程图表
     pt_ele_pan = new Box({
