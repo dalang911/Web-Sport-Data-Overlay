@@ -399,7 +399,7 @@ window.huitu = function () {
         editable: true,
         hitBox: true,
         cornerRadius: 8,//圆角
-        overflow: 'hide',	//越界隐藏
+        //overflow: 'hide',	//越界隐藏
         resizeChildren: true,//子元素是否跟随 resize
         children: [
             {
@@ -420,51 +420,74 @@ window.huitu = function () {
                 dashPattern: [10, 10],
             },
             {
+                tag: 'Rect',
+                x: 0,
+                y: 0,
+                width: 400,
+                height: 100,
+                path: o2o_bg,
+                fill: '#FFFFFF'
+            },
+            {
                 tag: 'Text',
                 resizeFontSize: true,
-                x: 0,
-                y: 10,
+                x: -6,
+                y: 0,
                 fontSize: 20,
                 fontWeight: 'black',
                 text: '+10',
                 fill: '#FFFFFF',
-                textAlign: 'left',
+                textAlign: 'right',
                 verticalAlign: 'middle',
             },
             {
                 tag: 'Text',
                 resizeFontSize: true,
-                x: 0,
+                x: -6,
                 y: 50,
                 fontSize: 20,
                 fontWeight: 'black',
                 text: 0,
                 fill: '#FFFFFF',
-                textAlign: 'left',
+                textAlign: 'right',
                 verticalAlign: 'middle',
             },
             {
                 tag: 'Text',
                 resizeFontSize: true,
-                x: 0,
-                y: 90,
+                x: -6,
+                y: 100,
                 fontSize: 20,
                 fontWeight: 'black',
                 text: '-10',
                 fill: '#FFFFFF',
-                textAlign: 'left',
+                textAlign: 'right',
                 verticalAlign: 'middle',
             },
             {
-                tag: 'Line',
+                tag: 'Box',
+                x: 0,//左上角位置
+                y: 0,//左上角位置
+                width: 400,
+                height: 100,
                 lockRatio: true,
-                x: 200,
-                y: 50,
-                points: o2o_ele_points,  // [x,y, x,y ...]
-                curve: true,
-                strokeWidth: 3,
-                stroke: '#FFD700',
-                strokeCap: 'round'
+                hitBox: true,
+                cornerRadius: 8,//圆角
+                overflow: 'hide',	//越界隐藏
+                resizeChildren: true,//子元素是否跟随 resize
+                children: [
+                    {
+                        tag: 'Line',
+                        lockRatio: true,
+                        x: 200,
+                        y: 50,
+                        points: o2o_ele_points,  // [x,y, x,y ...]
+                        curve: true,
+                        strokeWidth: 3,
+                        stroke: '#FFD700',
+                        strokeCap: 'round'
+                    }
+                ]
             },
             {
                 name: 'metrics',
@@ -518,12 +541,13 @@ window.huitu = function () {
                         "set": [
                             { "name": `1:1 Elevation 80m`, "url": "", "value": "", "type": "title", "tools": false },
                             { "name": `ruler color`, "url": "o2o_ele_pan.children[0].stroke", "value": o2o_ele_pan.children[0].stroke, "type": "o2o_color_line", "tools": true },
-                            { "name": `ruler text color`, "url": "o2o_ele_pan.children[2].fill", "value": o2o_ele_pan.children[2].fill, "type": "o2o_line_text", "tools": true },
-                            { "name": `ele line thickness`, "url": "o2o_ele_pan.children[5].strokeWidth", "value": o2o_ele_pan.children[5].strokeWidth, "type": "number", "tools": true },
-                            { "name": `ele line color`, "url": "o2o_ele_pan.children[5].stroke", "value": o2o_ele_pan.children[5].stroke, "type": "color", "tools": true },
-                            { "name": `Progress line thickness`, "url": "o2o_ele_pan.children[6].strokeWidth", "value": o2o_ele_pan.children[6].strokeWidth, "type": "number", "tools": true },
-                            { "name": `Progress line color`, "url": "o2o_ele_pan.children[6].stroke", "value": o2o_ele_pan.children[6].stroke, "type": "color", "tools": true },
-                            { "name": `Progress dot color`, "url": "o2o_ele_pan.children[9].fill", "value": o2o_ele_pan.children[9].fill, "type": "color", "tools": true },
+                            { "name": `Background line color`, "url": "o2o_ele_pan.children[2].fill", "value": o2o_ele_pan.children[2].fill, "type": "color", "tools": true },
+                            { "name": `ruler text color`, "url": "o2o_ele_pan.children[3].fill", "value": o2o_ele_pan.children[3].fill, "type": "o2o_line_text", "tools": true },
+                            { "name": `ele line thickness`, "url": "o2o_ele_pan.children[6].children[0].strokeWidth", "value": o2o_ele_pan.children[6].children[0].strokeWidth, "type": "number", "tools": true },
+                            { "name": `ele line color`, "url": "o2o_ele_pan.children[6].children[0].stroke", "value": o2o_ele_pan.children[6].children[0].stroke, "type": "color", "tools": true },
+                            { "name": `Progress line thickness`, "url": "o2o_ele_pan.children[7].strokeWidth", "value": o2o_ele_pan.children[7].strokeWidth, "type": "number", "tools": true },
+                            { "name": `Progress line color`, "url": "o2o_ele_pan.children[7].stroke", "value": o2o_ele_pan.children[7].stroke, "type": "color", "tools": true },
+                            { "name": `Progress dot color`, "url": "o2o_ele_pan.children[10].fill", "value": o2o_ele_pan.children[10].fill, "type": "color", "tools": true },
                         ]
                     }
                     tosettable(json);

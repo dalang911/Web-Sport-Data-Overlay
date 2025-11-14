@@ -361,8 +361,8 @@ function tosettable(json) {
                 o2o_line_textInput.onchange = function () {
                     //pl_heart_pan.children[1].text
                     new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    o2o_ele_pan.children[3].fill = o2o_ele_pan.children[2].fill;
-                    o2o_ele_pan.children[4].fill = o2o_ele_pan.children[2].fill;
+                    o2o_ele_pan.children[4].fill = o2o_ele_pan.children[3].fill;
+                    o2o_ele_pan.children[5].fill = o2o_ele_pan.children[3].fill;
                 };
                 inputDiv.appendChild(o2o_line_textInput);
                 break;
