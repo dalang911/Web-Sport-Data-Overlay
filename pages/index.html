@@ -1052,8 +1052,8 @@
         window.VideoGenerator = class VideoGenerator {
             constructor(frameCanvas, options = {}, onStatus) {
                 this.config = {
-                    width: 1920,
-                    height: 1080,
+                    width: window.appvWidth,
+                    height: window.appvHeight,
                     codec: 'avc', // MP4默认H.264
                     bitrate: 8_000_000, // MP4默认8Mbps
                     quality: 1,
@@ -1347,6 +1347,7 @@
                 window.videoRenderState.migratedObjects = migratedObjects; // 存储到全局，用于回滚
 
                 // 6. 初始化视频生成器
+                console.log(window.appvWidth,window.appvHeight);
                 const videoGenerator = new window.VideoGenerator(targetCanvas, {
                     width: window.appvWidth,
                     height: window.appvHeight,
@@ -2034,6 +2035,10 @@
                                     appview.tree.clear();
                                     appview.width = 960;
                                     appview.height = 960;
+                                    memoryApp.width = 1920;
+                                    memoryApp.height = 1080;
+                                    memoryFrame.width = 1920;
+                                    memoryFrame.height = 1080;
                                     processJson(data); // 调用processJson函数并传入解析后的JSON数据
 
                                     //upFrame(parseInt(maxFrame * 0.7));//默认祯
@@ -2053,6 +2058,10 @@
                                     appview.tree.clear();
                                     appview.width = 960;
                                     appview.height = 960;
+                                    memoryApp.width = 1080;
+                                    memoryApp.height = 1920;
+                                    memoryFrame.width = 1080;
+                                    memoryFrame.height = 1920;
                                     processJson(data); // 调用processJson函数并传入解析后的JSON数据
 
                                     //upFrame(parseInt(maxFrame * 0.7));//默认祯
