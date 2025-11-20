@@ -30,6 +30,28 @@ function tosettable(json) {
                     removeButton.className = 'layui-btn layui-btn-danger layui-btn-sm';
                     removeButton.onclick = function () {
                         new Function(json.id + '.remove();')();
+                        // 新增：如果是地图相关的id，销毁地图实例
+                        if (json.id === 'web_map_pan') {
+                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
+                            full_map.remove();
+                            full_map = null;
+                            full_mapInitialized = false;//地图未初始化
+                        }
+
+                        if (json.id === 'web_minimap_pan') {
+                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
+                            mini_map.remove();
+                            mini_map = null;
+                            mini_mapInitialized = false;//地图未初始化
+                        }
+
+                        if (json.id === 'web_rotatemap_pan') {
+                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
+                            rotate_map.remove();
+                            rotate_map = null;
+                            rotate_mapInitialized = false;//地图未初始化
+                        }
+
                         interaction.pointerDown({ x: 0, y: 0 });
                         interaction.pointerUp();
                         settableDiv.innerHTML = '';
@@ -129,18 +151,20 @@ function tosettable(json) {
                 inputDiv.appendChild(colorInput2);
                 break;
 
-            case 'funcolor':
-                const funcolorInput = document.createElement('input');
-                funcolorInput.type = 'color';
-                funcolorInput.value = item.value;
-                funcolorInput.className = 'layui-input';
-                funcolorInput.onchange = function () {
+            case 'web_map_color':
+                const web_map_colorInput = document.createElement('input');
+                web_map_colorInput.type = 'color';
+                web_map_colorInput.value = item.value;
+                web_map_colorInput.className = 'layui-input';
+                web_map_colorInput.onchange = function () {
                     const updateSymbolFunction = new Function('value', item.url);
                     // 调用创建的函数，并传递当前输入框的值
                     updateSymbolFunction(this.value);
-                    setTimeout(getProgressBarValueAndUpdate, 20);
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 300); // 500毫秒 = 0.5秒
                 };
-                inputDiv.appendChild(funcolorInput);
+                inputDiv.appendChild(web_map_colorInput);
                 break;
 
             case 'funnumber':
@@ -439,7 +463,161 @@ function tosettable(json) {
                 inputDiv.appendChild(lap_user_color);
                 break;
 
+            case 'full_map_zoom_number':
+                const full_map_zoom_numberInput = document.createElement('input');
+                full_map_zoom_numberInput.type = 'number';
+                full_map_zoom_numberInput.value = item.value;
+                full_map_zoom_numberInput.className = 'layui-input';
+                full_map_zoom_numberInput.onchange = function () {
+                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
+                    //console.log(this.value);
+                    full_map.fitExtent(full_polyline.getExtent(), (this.value / 100));
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 300); // 500毫秒 = 0.5秒
+                };
+                inputDiv.appendChild(full_map_zoom_numberInput);
+                break;
 
+            case 'full_map_sel':
+                // 1. 创建按钮容器（用于横向排列按钮）
+                const sourceBtnContainer = document.createElement('div');
+                sourceBtnContainer.style.display = 'flex'; // 横向排列
+                sourceBtnContainer.style.gap = '8px'; // 按钮间距（可选，更美观）
+                sourceBtnContainer.style.alignItems = 'center';
+
+                // 2. 遍历所有图源配置，创建对应按钮
+                Object.values(mapSourceConfigs).forEach(sourceConfig => {
+                    const sourceBtn = document.createElement('button');
+                    // 按钮名称 = 图源id（按你的要求）
+                    sourceBtn.textContent = sourceConfig.name;
+                    // 按钮样式（适配layui风格，与现有输入框样式协调）
+                    sourceBtn.className = 'layui-btn layui-btn-sm';
+                    sourceBtn.style.padding = '0 12px';
+                    sourceBtn.style.cursor = 'pointer';
+
+                    // 3. 点击事件：切换full_map的图源
+                    sourceBtn.onclick = function () {
+                        // 调用你之前的switchMapSource函数，mapId为'full_map'，sourceId为当前图源id
+                        switchMapSource(full_map, sourceConfig.id);
+                        // 可选：点击后高亮当前选中的按钮（提升体验）
+                        document.querySelectorAll('.layui-btn-sm', sourceBtnContainer).forEach(btn => {
+                            btn.classList.remove('layui-btn-primary');
+                        });
+                        this.classList.add('layui-btn-primary');
+                    };
+
+                    // 4. 按钮添加到容器
+                    sourceBtnContainer.appendChild(sourceBtn);
+                });
+
+                // 6. 按钮容器添加到布局
+                inputDiv.appendChild(sourceBtnContainer);
+                break;
+
+            case 'mini_map_zoom_number':
+                const mini_map_zoom_numberInput = document.createElement('input');
+                mini_map_zoom_numberInput.type = 'number';
+                mini_map_zoom_numberInput.value = item.value;
+                mini_map_zoom_numberInput.className = 'layui-input';
+                mini_map_zoom_numberInput.onchange = function () {
+                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
+                    //console.log(this.value);
+                    mini_map.setZoom(this.value);
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 300); // 500毫秒 = 0.5秒
+                };
+                inputDiv.appendChild(mini_map_zoom_numberInput);
+                break;
+
+            case 'mini_map_sel':
+                // 1. 创建按钮容器（用于横向排列按钮）
+                const minisourceBtnContainer = document.createElement('div');
+                minisourceBtnContainer.style.display = 'flex'; // 横向排列
+                minisourceBtnContainer.style.gap = '8px'; // 按钮间距（可选，更美观）
+                minisourceBtnContainer.style.alignItems = 'center';
+
+                // 2. 遍历所有图源配置，创建对应按钮
+                Object.values(mapSourceConfigs).forEach(sourceConfig => {
+                    const sourceBtn = document.createElement('button');
+                    // 按钮名称 = 图源id（按你的要求）
+                    sourceBtn.textContent = sourceConfig.name;
+                    // 按钮样式（适配layui风格，与现有输入框样式协调）
+                    sourceBtn.className = 'layui-btn layui-btn-sm';
+                    sourceBtn.style.padding = '0 12px';
+                    sourceBtn.style.cursor = 'pointer';
+
+                    // 3. 点击事件：切换full_map的图源
+                    sourceBtn.onclick = function () {
+                        // 调用你之前的switchMapSource函数，mapId为'full_map'，sourceId为当前图源id
+                        switchMapSource(mini_map, sourceConfig.id);
+                        // 可选：点击后高亮当前选中的按钮（提升体验）
+                        document.querySelectorAll('.layui-btn-sm', minisourceBtnContainer).forEach(btn => {
+                            btn.classList.remove('layui-btn-primary');
+                        });
+                        this.classList.add('layui-btn-primary');
+                    };
+
+                    // 4. 按钮添加到容器
+                    minisourceBtnContainer.appendChild(sourceBtn);
+                });
+
+                // 6. 按钮容器添加到布局
+                inputDiv.appendChild(minisourceBtnContainer);
+                break;
+
+            case 'rotate_map_zoom_number':
+                const rotate_map_zoom_numberInput = document.createElement('input');
+                rotate_map_zoom_numberInput.type = 'number';
+                rotate_map_zoom_numberInput.value = item.value;
+                rotate_map_zoom_numberInput.className = 'layui-input';
+                rotate_map_zoom_numberInput.onchange = function () {
+                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
+                    //console.log(this.value);
+                    rotate_map.setZoom(this.value);
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 300); // 500毫秒 = 0.5秒
+                };
+                inputDiv.appendChild(rotate_map_zoom_numberInput);
+                break;
+
+            case 'rotate_map_sel':
+                // 1. 创建按钮容器（用于横向排列按钮）
+                const rotatesourceBtnContainer = document.createElement('div');
+                rotatesourceBtnContainer.style.display = 'flex'; // 横向排列
+                rotatesourceBtnContainer.style.gap = '8px'; // 按钮间距（可选，更美观）
+                rotatesourceBtnContainer.style.alignItems = 'center';
+
+                // 2. 遍历所有图源配置，创建对应按钮
+                Object.values(mapSourceConfigs).forEach(sourceConfig => {
+                    const sourceBtn = document.createElement('button');
+                    // 按钮名称 = 图源id（按你的要求）
+                    sourceBtn.textContent = sourceConfig.name;
+                    // 按钮样式（适配layui风格，与现有输入框样式协调）
+                    sourceBtn.className = 'layui-btn layui-btn-sm';
+                    sourceBtn.style.padding = '0 12px';
+                    sourceBtn.style.cursor = 'pointer';
+
+                    // 3. 点击事件：切换full_map的图源
+                    sourceBtn.onclick = function () {
+                        // 调用你之前的switchMapSource函数，mapId为'full_map'，sourceId为当前图源id
+                        switchMapSource(rotate_map, sourceConfig.id);
+                        // 可选：点击后高亮当前选中的按钮（提升体验）
+                        document.querySelectorAll('.layui-btn-sm', rotatesourceBtnContainer).forEach(btn => {
+                            btn.classList.remove('layui-btn-primary');
+                        });
+                        this.classList.add('layui-btn-primary');
+                    };
+
+                    // 4. 按钮添加到容器
+                    rotatesourceBtnContainer.appendChild(sourceBtn);
+                });
+
+                // 6. 按钮容器添加到布局
+                inputDiv.appendChild(rotatesourceBtnContainer);
+                break;
 
         }
 

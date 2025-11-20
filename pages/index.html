@@ -23,6 +23,7 @@
     <script src="./js/widget.js"></script>
     <script src="./js/tosettable.js"></script>
     <script src="./js/updateLeaferData.js"></script>
+    <script src="./js/setmaptalks.js"></script>
 
 
 
@@ -341,7 +342,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.61 .更新：新增1个真实比例的高程图表，显示高度20米，宽度80米的一个空间信息。
+            Beta 0.62 .更新：新增3个web地图，分别为大地图，小地图，前进方向的旋转地图，地图加载有延迟，不太好用，手动预览先等地图下载完成。
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -462,14 +463,18 @@
                                 <div class="layui-anim" lay-active="appv_map_a_pan"><img src="./images/w5.png"></div>
                                 <div>Route</div>
                             </div>
-                            <!-- <div class="layui-col-sm12">
+                            <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="web_map_pan"><img src="./images/w3.png"></div>
-                                <div>WebRoute(long time)</div>
+                                <div>WebRoute</div>
                             </div>
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="web_minimap_pan"><img src="./images/w4.png"></div>
-                                <div>WebRoute(long time)</div>
-                            </div> -->
+                                <div>WebMiniRoute</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="web_rotatemap_pan"><img src="./images/w6.png"></div>
+                                <div>WebRotateRoute</div>
+                            </div>
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="TO_gps_pan"><img src="./images/w2.png"></div>
                                 <div>Location</div>
@@ -1450,14 +1455,14 @@
                 title: 'Video Preview & Progress',
                 content: `
                     <div class="view" style="background-color: #fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;">
-        <!-- 进度文字：生成完成后隐藏 -->
-                    <div id="videoProgressText" style="font-size: 24px; text-align: center; margin: 20px 0; font-weight: bold; color: #333;">
-                        视频生成中...（0%）
-                    </div>
-                    <!-- 视频预览：初始隐藏 -->
-                    <video id="previewVideo" width="720px" height="720px" controls autoplay style="display: none; margin: 0 auto;"></video>
-                    <!-- 下载区域：显示生成实际耗时 -->
-                    <div class="download_button" style="width: 380px; margin: 10px auto;">
+                    <!-- 进度文字：生成完成后隐藏 -->
+                            <div id="videoProgressText" style="font-size: 24px; text-align: center; margin: 20px 0; font-weight: bold; color: #333;">
+                                视频生成中...（0%）
+                            </div>
+                            <!-- 视频预览：初始隐藏 -->
+                            <video id="previewVideo" width="720px" height="720px" controls autoplay style="display: none; margin: 0 auto;"></video>
+                            <!-- 下载区域：显示生成实际耗时 -->
+                            <div class="download_button" style="width: 380px; margin: 10px auto;">
                         Generation Time: <span id="runtime">${initialRuntime}</span> <!-- 文案改为"生成耗时" -->
                         <a id="videoDownloadLink" download="Sport-Data-Overlay.mp4" style="display: none; margin-top: 10px;">
                         <button class="layui-btn layui-bg-blue layui-btn-fluid">Download Video</button>
@@ -1603,14 +1608,14 @@
                         Select start/end frames to render. For long videos, 5000-frame intervals are recommended.
                     </div>
                         <!-- 新增：视频格式单选卡 -->
-    <div style="margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
-        <label style="margin-right: 20px; cursor: pointer;">
-            <input type="radio" name="videoFormat" value="mp4" checked> MP4
-        </label>
-        <label style="cursor: pointer;">
-            <input type="radio" name="videoFormat" value="webm"> WebM (Alpha supports)
-        </label>
-    </div>
+                        <div style="margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
+                            <label style="margin-right: 20px; cursor: pointer;">
+                                <input type="radio" name="videoFormat" value="mp4" checked> MP4
+                            </label>
+                            <label style="cursor: pointer;">
+                                <input type="radio" name="videoFormat" value="webm"> WebM (Alpha supports)
+                            </label>
+                        </div>
                     <!-- 帧范围输入 -->
                     <div style="margin-top: 15px;">
                         <!-- 起始帧 -->
@@ -1712,21 +1717,62 @@
             var find = frame.find(selector);
             if (find.length == 0) {
                 console.log(layActiveValue);
-                frame.add(window[layActiveValue]);
-
-                // 设置进度条值
-                const progressBar = document.getElementById('progressBar');
-                progressBar.value = parseInt(maxFrame * 0.7);
-
-                // 手动触发input事件，执行与拖动时相同的处理逻辑
-                const event = new Event('input', { bubbles: true });
-                progressBar.dispatchEvent(event);
 
 
-                if (layActiveValue == "web_map_pan" || layActiveValue == "web_map_a_pan") {
-                    console.log("webmap");
-                    new_maptalks();
+                //web地图
+                if (layActiveValue === 'web_map_pan') {
+                    full_map_maptalks(); //加载大地图
+
+                    // 设置进度条值
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.value = parseInt(maxFrame * 0.7);
+
+                    // 手动触发input事件，执行与拖动时相同的处理逻辑
+                    const event = new Event('input', { bubbles: true });
+                    progressBar.dispatchEvent(event);
+                    // 延迟0.5秒执行，不阻断后续代码
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 500); // 500毫秒 = 0.5秒
+                }else if (layActiveValue === 'web_minimap_pan') {
+                    mini_map_maptalks(); //加载小地图
+
+                    // 设置进度条值
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.value = parseInt(maxFrame * 0.7);
+
+                    // 手动触发input事件，执行与拖动时相同的处理逻辑
+                    const event = new Event('input', { bubbles: true });
+                    progressBar.dispatchEvent(event);
+                    // 延迟0.5秒执行，不阻断后续代码
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 500); // 500毫秒 = 0.5秒
+                }else if (layActiveValue === 'web_rotatemap_pan') {
+                    rotate_map_maptalks(); //加载小地图
+
+                    // 设置进度条值
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.value = parseInt(maxFrame * 0.7);
+
+                    // 手动触发input事件，执行与拖动时相同的处理逻辑
+                    const event = new Event('input', { bubbles: true });
+                    progressBar.dispatchEvent(event);
+                    // 延迟0.5秒执行，不阻断后续代码
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 500); // 500毫秒 = 0.5秒
+                } else {
+                    frame.add(window[layActiveValue]);
+                    // 设置进度条值
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.value = parseInt(maxFrame * 0.7);
+
+                    // 手动触发input事件，执行与拖动时相同的处理逻辑
+                    const event = new Event('input', { bubbles: true });
+                    progressBar.dispatchEvent(event);
                 }
+
 
                 //用户计圈数据
                 if (layActiveValue == "appv_lap_user_pan") {
@@ -2403,162 +2449,7 @@
         }
     }
 
-    // 卫星地图经纬度提取
-    function set_leafletmap_latlngs(rqjson) {
-        // 清空现有的latlngs数组
-        latlngs.length = 0;
 
-        // 遍历rqjson.data.trkpt数组
-        for (var i = 0; i < rqjson.data.trkpt.length; i++) {
-            // 获取每个点的纬度和经度
-            var lat = rqjson.data.trkpt[i].position_lat;
-            var lng = rqjson.data.trkpt[i].position_long;
-
-            // 注意：maptalks的经纬度顺序是先经度后纬度
-            latlngs.push([lng, lat]);
-        }
-
-
-    }
-
-    //经纬度数组
-    latlngs = [
-        [119.1, 33.1],
-        [119.2, 33.2],
-        [119.1, 33.5]
-    ];
-
-    // 配置卫星地图
-    function new_maptalks() {
-        // 使用 typeof 避免变量未声明时报错
-        if (typeof globalThis.myMap === 'undefined' || !(globalThis.myMap instanceof Map)) {
-            // maptalks地图
-            map = new maptalks.Map('leafletmap', {
-                center: [118.9, 33.8], // 初始中心点
-                zoom: 15, // 初始缩放级别
-                baseLayer: new maptalks.TileLayer('base', {
-                    renderer: 'canvas',//可选 webgl，去除行即可
-                    crossOrigin: 'anonymous',
-                    urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                    subdomains: ['a', 'b', 'c'],
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
-                })
-                // baseLayer: new maptalks.TileLayer('base', {
-                //     urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                //     subdomains: ['a', 'b', 'c', 'd'],
-                //     attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
-                // })
-            });
-
-            minimap = new maptalks.Map('leafletmap_mini', {
-                center: [118.9, 33.8], // 初始中心点
-                zoom: 17, // 初始缩放级别
-                baseLayer: new maptalks.TileLayer('base', {
-                    renderer: 'canvas',//可选 webgl，去除行即可
-                    crossOrigin: 'anonymous',
-                    urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                    subdomains: ['a', 'b', 'c'],
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://hot.openstreetmap.org/">Humanitarian OpenStreetMap Team</a>'
-                })
-            });
-
-
-
-            // 创建折线实例
-            polyline = new maptalks.LineString(latlngs, {
-                symbol: {
-                    'lineColor': '#FFFF00',
-                    'lineWidth': 5,
-                    'lineOpacity': 0.9
-                }
-            });
-
-            // 创建折线实例
-            mini_polyline = new maptalks.LineString(latlngs, {
-                symbol: {
-                    'lineColor': '#FFFF00',
-                    'lineWidth': 5,
-                    'lineOpacity': 0.9
-                }
-            });
-
-            // 创建折线实例
-            new_polyline = new maptalks.LineString([], {
-                symbol: {
-                    'lineColor': '#FF8C00',
-                    'lineWidth': 5,
-                    'lineOpacity': 0.9
-                }
-            });
-            // 创建折线实例
-            mini_new_polyline = new maptalks.LineString([], {
-                symbol: {
-                    'lineColor': '#FF8C00',
-                    'lineWidth': 5,
-                    'lineOpacity': 0.9
-                }
-            });
-
-
-
-
-            // red circle
-            marker = new maptalks.Marker(latlngs[0], {
-                symbol:
-                {
-                    'markerType': 'ellipse',
-                    'markerFill': '#FF6347',
-                    'markerFillOpacity': 0.9,
-                    'markerLineWidth': 0,
-                    'markerWidth': 15,
-                    'markerHeight': 15
-                }
-
-            });
-
-            mini_marker = new maptalks.Marker(latlngs[0], {
-                symbol:
-                {
-                    'markerType': 'ellipse',
-                    'markerFill': '#FF6347',
-                    'markerFillOpacity': 0.9,
-                    'markerLineWidth': 0,
-                    'markerWidth': 15,
-                    'markerHeight': 15
-                }
-
-            });
-
-
-
-
-
-            layer = new maptalks.VectorLayer('vector').addTo(map);
-            minilayer = new maptalks.VectorLayer('vector').addTo(minimap);
-
-            // 将折线添加到地图上
-            layer.addGeometry(polyline, new_polyline, marker);
-            minilayer.addGeometry(mini_polyline, mini_new_polyline, mini_marker);
-            // 调整视野到折线范围
-            map.fitExtent(polyline.getExtent(), -0.125);
-            minimap.fitExtent(mini_polyline.getExtent(), 16);
-            //minimap.setPitch(40);
-
-            // 更新折线
-            polyline.setCoordinates(latlngs);
-            mini_polyline.setCoordinates(latlngs);
-            // 重新调整视野到折线范围
-            map.fitExtent(polyline.getExtent(), -0.125);
-            minimap.setCenterAndZoom(latlngs[0], 16)
-            //minimap.fitExtent(mini_polyline.getExtent());
-
-        } else {
-            // 已存在 → 退出
-            console.log('使用全局 Map:', globalThis.myMap);
-            return;
-        }
-
-    }
 
     // 轨迹图数组
     function mapToRange(value, fromMin, fromMax, toMin, toMax) {

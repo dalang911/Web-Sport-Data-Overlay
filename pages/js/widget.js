@@ -1220,7 +1220,7 @@ window.huitu = function () {
         lockRatio: true,
         editable: true,
         hitBox: true,
-        cornerRadius: 1000,//圆角
+        cornerRadius: 150,//圆角
         overflow: 'hide',
         stroke: '#FFC800',
         strokeWidth: 10,
@@ -1242,10 +1242,14 @@ window.huitu = function () {
                         "id": "web_map_pan",
                         "set": [
                             { "name": `webroute (long time)`, "url": web_map_pan.id, "value": "", "type": "title", "tools": false },
+                            { "name": `map setup`, "url": "", "value": "", "type": "full_map_sel", "tools": true },
+                            { "name": `border radius`, "url": "web_map_pan.cornerRadius", "value": web_map_pan.cornerRadius, "type": "number", "tools": true },
                             { "name": `border color`, "url": "web_map_pan.stroke", "value": web_map_pan.stroke, "type": "color", "tools": true },
-                            { "name": `Background route color`, "url": "polyline.updateSymbol({'lineColor': value})", "value": polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-                            { "name": `progress route color`, "url": "new_polyline.updateSymbol({'lineColor': value})", "value": new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-                            { "name": `Current position color`, "url": "marker.updateSymbol({'markerFill': value})", "value": marker._symbol.markerFill, "type": "funcolor", "tools": true },
+                            { "name": `Background route color`, "url": "full_polyline.updateSymbol({'lineColor': value})", "value": full_polyline._compiledSymbol.lineColor, "type": "web_map_color", "tools": true },
+                            { "name": `progress route color`, "url": "new_full_polyline.updateSymbol({'lineColor': value})", "value": new_full_polyline._compiledSymbol.lineColor, "type": "web_map_color", "tools": true },
+                            { "name": `Current position color`, "url": "full_marker.updateSymbol({'markerFill': value})", "value": full_marker._symbol.markerFill, "type": "web_map_color", "tools": true },
+                            { "name": `zoom+0.x`, "url": "", "value": Math.round((full_map.fitExtent()._zoomLevel - Math.floor(full_map.fitExtent()._zoomLevel)) * 100), "type": "full_map_zoom_number", "tools": true },
+
 
                         ]
                     }
@@ -1260,12 +1264,12 @@ window.huitu = function () {
         id: 'web_minimap_pan',
         x: appvWidth - 620,//左上角位置
         y: 200,//左上角位置
-        width: 200,
-        height: 200,
+        width: 300,
+        height: 300,
         lockRatio: true,
         editable: true,
         hitBox: true,
-        cornerRadius: 1000,//圆角
+        cornerRadius: 150,//圆角
         overflow: 'hide',
         stroke: '#FFC800',
         strokeWidth: 10,
@@ -1273,8 +1277,8 @@ window.huitu = function () {
         children: [
             {
                 tag: 'Canvas',
-                width: 200,
-                height: 200,
+                width: 300,
+                height: 300,
                 draggable: true
             },
 
@@ -1287,10 +1291,61 @@ window.huitu = function () {
                         "id": "web_minimap_pan",
                         "set": [
                             { "name": `webroute (long time)`, "url": web_minimap_pan.id, "value": "", "type": "title", "tools": false },
+                            { "name": `minimap setup`, "url": "", "value": "", "type": "mini_map_sel", "tools": true },
+                            { "name": `border radius`, "url": "web_minimap_pan.cornerRadius", "value": web_minimap_pan.cornerRadius, "type": "number", "tools": true },
                             { "name": `border color`, "url": "web_minimap_pan.stroke", "value": web_minimap_pan.stroke, "type": "color", "tools": true },
-                            { "name": `Background route color`, "url": "mini_polyline.updateSymbol({'lineColor': value})", "value": mini_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-                            { "name": `progress route color`, "url": "mini_new_polyline.updateSymbol({'lineColor': value})", "value": mini_new_polyline._compiledSymbol.lineColor, "type": "funcolor", "tools": true },
-                            { "name": `Current position color`, "url": "mini_marker.updateSymbol({'markerFill': value})", "value": mini_marker._symbol.markerFill, "type": "funcolor", "tools": true },
+                            { "name": `Background route color`, "url": "mini_polyline.updateSymbol({'lineColor': value})", "value": mini_polyline._compiledSymbol.lineColor, "type": "web_map_color", "tools": true },
+                            { "name": `progress route color`, "url": "new_mini_polyline.updateSymbol({'lineColor': value})", "value": new_mini_polyline._compiledSymbol.lineColor, "type": "web_map_color", "tools": true },
+                            { "name": `Current position color`, "url": "mini_marker.updateSymbol({'markerFill': value})", "value": mini_marker._symbol.markerFill, "type": "web_map_color", "tools": true },
+                            { "name": `zoom`, "url": "", "value": Math.round(mini_map.getZoom()), "type": "mini_map_zoom_number", "tools": true },
+
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+    //miniweb地图
+    web_rotatemap_pan = new Box({
+        id: 'web_rotatemap_pan',
+        x: appvWidth - 620,//左上角位置
+        y: 200,//左上角位置
+        width: 300,
+        height: 300,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        cornerRadius: 150,//圆角
+        overflow: 'hide',
+        stroke: '#FFC800',
+        strokeWidth: 10,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Canvas',
+                width: 300,
+                height: 300,
+                draggable: true
+            },
+
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "web_rotatemap_pan",
+                        "set": [
+                            { "name": `webroute (long time)`, "url": web_rotatemap_pan.id, "value": "", "type": "title", "tools": false },
+                            { "name": `rotatemap setup`, "url": "", "value": "", "type": "rotate_map_sel", "tools": true },
+                            { "name": `border radius`, "url": "web_rotatemap_pan.cornerRadius", "value": web_rotatemap_pan.cornerRadius, "type": "number", "tools": true },
+                            { "name": `border color`, "url": "web_rotatemap_pan.stroke", "value": web_rotatemap_pan.stroke, "type": "color", "tools": true },
+                            { "name": `Background route color`, "url": "rotate_polyline.updateSymbol({'lineColor': value})", "value": rotate_polyline._compiledSymbol.lineColor, "type": "web_map_color", "tools": true },
+                            { "name": `progress route color`, "url": "new_rotate_polyline.updateSymbol({'lineColor': value})", "value": new_rotate_polyline._compiledSymbol.lineColor, "type": "web_map_color", "tools": true },
+                            { "name": `Current position color`, "url": "rotate_marker.updateSymbol({'markerFill': value})", "value": rotate_marker._symbol.markerFill, "type": "web_map_color", "tools": true },
+                            { "name": `zoom`, "url": "", "value": Math.round(rotate_map.getZoom()), "type": "rotate_map_zoom_number", "tools": true },
 
                         ]
                     }

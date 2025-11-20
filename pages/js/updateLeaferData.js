@@ -38,7 +38,7 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             //距离条
             var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * lite_distance_pan.children[0].width;//计算实时长度
             lite_distance_pan.children[1].width = jdtcd;
-            lite_distance_pan.children[2].text = distance_in_km + `/`+ max_distance_in_km;//行进长度
+            lite_distance_pan.children[2].text = distance_in_km + `/` + max_distance_in_km;//行进长度
 
 
         }
@@ -136,22 +136,22 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
 
 
         //画web地图
-        if (validElementIds.includes('web_map_pan') || validElementIds.includes('web_minimap_pan')) {
-
-            daohang(currentFrame);
-            if (validElementIds.includes('web_map_pan')) {
-                const mapCanvas = document.querySelector("#leafletmap > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
-                web_map_pan.children[0].context.drawImage(mapCanvas, 0, 0, web_map_pan.children[0].width, web_map_pan.children[0].height);
-                web_map_pan.children[0].paint()
-            }
-            if (validElementIds.includes('web_minimap_pan')) {
-                const minimapCanvas = document.querySelector("#leafletmap_mini > div > div.maptalks-all-layers > div.maptalks-canvas-layer > canvas");
-                web_minimap_pan.children[0].context.drawImage(minimapCanvas, 0, 0, web_minimap_pan.children[0].width, web_minimap_pan.children[0].height);
-                web_minimap_pan.children[0].paint()
-            }
-
+        if (validElementIds.includes('web_map_pan')) {
+            //console.log(currentFrame);
+            full_daohang(currentFrame);
         }
 
+        //画miniweb地图
+        if (validElementIds.includes('web_minimap_pan')) {
+            //console.log(currentFrame);
+            mini_daohang(currentFrame);
+        }
+
+        //画rotateweb地图
+        if (validElementIds.includes('web_rotatemap_pan')) {
+            //console.log(currentFrame);
+            rotate_daohang(currentFrame);
+        }
 
 
         //当前经纬度
