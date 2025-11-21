@@ -54,7 +54,7 @@ function tosettable(json) {
 
                         if (json.id === 'web_gaodemap_pan') {
                             // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
-                            gaode_map.remove();
+                            gaode_map.destroy();
                             gaode_map = null;
                             gaode_mapInitialized = false;//地图未初始化
                         }
