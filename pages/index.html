@@ -24,6 +24,7 @@
     <script src="./js/tosettable.js"></script>
     <script src="./js/updateLeaferData.js"></script>
     <script src="./js/setmaptalks.js"></script>
+    <script language="javascript" src="https://webapi.amap.com/maps?v=2.0&key=dc517396597f9dbd58c7483f2626c68c"></script>
 
 
 
@@ -342,7 +343,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.62 .更新：新增3个web地图，分别为大地图，小地图，前进方向的旋转地图，地图加载有延迟，不太好用，手动预览先等地图下载完成。
+            Beta 0.62 .更新：新增3个web地图，分别为大地图，小地图，前进方向的旋转地图，不太好用。
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -474,6 +475,10 @@
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="web_rotatemap_pan"><img src="./images/w6.png"></div>
                                 <div>WebRotateRoute</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="web_gaodemap_pan"><img src="./images/w7.png"></div>
+                                <div>WebGaodeRoute</div>
                             </div>
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="TO_gps_pan"><img src="./images/w2.png"></div>
@@ -1052,8 +1057,8 @@
         window.VideoGenerator = class VideoGenerator {
             constructor(frameCanvas, options = {}, onStatus) {
                 this.config = {
-                    width: window.appvWidth,
-                    height: window.appvHeight,
+                    width: 1920,
+                    height: 1080,
                     codec: 'avc', // MP4默认H.264
                     bitrate: 8_000_000, // MP4默认8Mbps
                     quality: 1,
@@ -1347,7 +1352,6 @@
                 window.videoRenderState.migratedObjects = migratedObjects; // 存储到全局，用于回滚
 
                 // 6. 初始化视频生成器
-                console.log(window.appvWidth,window.appvHeight);
                 const videoGenerator = new window.VideoGenerator(targetCanvas, {
                     width: window.appvWidth,
                     height: window.appvHeight,
@@ -1763,6 +1767,20 @@
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
                     }, 500); // 500毫秒 = 0.5秒
+                }else if (layActiveValue === 'web_gaodemap_pan') {
+                    gaode_map_amap(); //加载小地图
+
+                    // 设置进度条值
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.value = parseInt(maxFrame * 0.7);
+
+                    // 手动触发input事件，执行与拖动时相同的处理逻辑
+                    const event = new Event('input', { bubbles: true });
+                    progressBar.dispatchEvent(event);
+                    // 延迟0.5秒执行，不阻断后续代码
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 500); // 500毫秒 = 0.5秒
                 } else {
                     frame.add(window[layActiveValue]);
                     // 设置进度条值
@@ -2035,10 +2053,6 @@
                                     appview.tree.clear();
                                     appview.width = 960;
                                     appview.height = 960;
-                                    memoryApp.width = 1920;
-                                    memoryApp.height = 1080;
-                                    memoryFrame.width = 1920;
-                                    memoryFrame.height = 1080;
                                     processJson(data); // 调用processJson函数并传入解析后的JSON数据
 
                                     //upFrame(parseInt(maxFrame * 0.7));//默认祯
@@ -2058,10 +2072,6 @@
                                     appview.tree.clear();
                                     appview.width = 960;
                                     appview.height = 960;
-                                    memoryApp.width = 1080;
-                                    memoryApp.height = 1920;
-                                    memoryFrame.width = 1080;
-                                    memoryFrame.height = 1920;
                                     processJson(data); // 调用processJson函数并传入解析后的JSON数据
 
                                     //upFrame(parseInt(maxFrame * 0.7));//默认祯

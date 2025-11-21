@@ -1355,6 +1355,54 @@ window.huitu = function () {
         },
     })
 
+    //miniweb地图
+    web_gaodemap_pan = new Box({
+        id: 'web_gaodemap_pan',
+        x: appvWidth - 620,//左上角位置
+        y: 200,//左上角位置
+        width: 300,
+        height: 300,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        cornerRadius: 150,//圆角
+        overflow: 'hide',
+        stroke: '#FFC800',
+        strokeWidth: 10,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Canvas',
+                width: 300,
+                height: 300,
+                draggable: true
+            },
+
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "web_gaodemap_pan",
+                        "set": [
+                            { "name": `webroute (long time)`, "url": web_gaodemap_pan.id, "value": "", "type": "title", "tools": false },
+                            { "name": `gaodemap setup`, "url": "", "value": "", "type": "gaode_map_sel", "tools": true },
+                            { "name": `border radius`, "url": "web_gaodemap_pan.cornerRadius", "value": web_gaodemap_pan.cornerRadius, "type": "number", "tools": true },
+                            { "name": `border color`, "url": "web_gaodemap_pan.stroke", "value": web_gaodemap_pan.stroke, "type": "color", "tools": true },
+                            { "name": `Background route color`, "url": "gaode_polyline.setOptions({'strokeColor': value})", "value": gaode_polyline._opts.strokeColor, "type": "web_map_color", "tools": true },
+                            { "name": `progress route color`, "url": "new_gaode_polyline.setOptions({'strokeColor': value})", "value": new_gaode_polyline._opts.strokeColor, "type": "web_map_color", "tools": true },
+                            { "name": `Current position color`, "url": "gaode_marker.setOptions({'fillColor': value})", "value": gaode_marker._opts.fillColor, "type": "web_map_color", "tools": true },
+                            { "name": `zoom`, "url": "", "value": Math.round(gaode_map.getZoom()), "type": "gaode_map_zoom_number", "tools": true },
+
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
     //距离框
     appv_distance_pan = new Box({
         id: 'appv_distance_pan',

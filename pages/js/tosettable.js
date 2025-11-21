@@ -52,6 +52,13 @@ function tosettable(json) {
                             rotate_mapInitialized = false;//地图未初始化
                         }
 
+                        if (json.id === 'web_gaodemap_pan') {
+                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
+                            gaode_map.remove();
+                            gaode_map = null;
+                            gaode_mapInitialized = false;//地图未初始化
+                        }
+
                         interaction.pointerDown({ x: 0, y: 0 });
                         interaction.pointerUp();
                         settableDiv.innerHTML = '';
@@ -615,8 +622,77 @@ function tosettable(json) {
                     rotatesourceBtnContainer.appendChild(sourceBtn);
                 });
 
-                // 6. 按钮容器添加到布局
-                inputDiv.appendChild(rotatesourceBtnContainer);
+            case 'gaode_map_zoom_number':
+                const gaode_map_zoom_numberInput = document.createElement('input');
+                gaode_map_zoom_numberInput.type = 'number';
+                gaode_map_zoom_numberInput.value = item.value;
+                gaode_map_zoom_numberInput.className = 'layui-input';
+                gaode_map_zoom_numberInput.onchange = function () {
+                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
+                    //console.log(this.value);
+                    gaode_map.setZoom(this.value);
+                    setTimeout(() => {
+                        updateLeaferData(parseInt(maxFrame * 0.7));
+                    }, 300); // 500毫秒 = 0.5秒
+                };
+                inputDiv.appendChild(gaode_map_zoom_numberInput);
+                break;
+
+            case 'gaode_map_sel':
+                // 1. 创建按钮容器（用于横向排列按钮）
+                const gaodesourceBtnContainer = document.createElement('div');
+                gaodesourceBtnContainer.style.display = 'flex'; // 横向排列
+                gaodesourceBtnContainer.style.gap = '8px'; // 按钮间距
+                gaodesourceBtnContainer.style.alignItems = 'center';
+
+                // 2. 定义固定按钮配置（名称 + 点击执行的图层逻辑）
+                const buttonConfigs = [
+                    {
+                        name: '高德矢量',
+                        setLayer: () => {
+                            gaode_map.setLayers([new AMap.createDefaultLayer()]);
+                        }
+                    },
+                    {
+                        name: '高德卫星',
+                        setLayer: () => {
+                            gaode_map.setLayers([new AMap.TileLayer.Satellite()]);
+                        }
+                    }
+                ];
+
+                // 3. 创建固定按钮并绑定逻辑
+                buttonConfigs.forEach((config, index) => {
+                    const sourceBtn = document.createElement('button');
+                    sourceBtn.textContent = config.name;
+                    // 按钮样式（适配layui风格，与现有输入框协调）
+                    sourceBtn.className = 'layui-btn layui-btn-sm';
+                    sourceBtn.style.padding = '0 12px';
+                    sourceBtn.style.cursor = 'pointer';
+
+                    // 4. 点击事件：执行对应的图层切换
+                    sourceBtn.onclick = function () {
+                        // 执行当前按钮的图层设置逻辑
+                        config.setLayer();
+                        // 高亮当前选中按钮，取消其他按钮高亮
+                        document.querySelectorAll('.layui-btn-sm', gaodesourceBtnContainer).forEach(btn => {
+                            btn.classList.remove('layui-btn-primary');
+                        });
+                        this.classList.add('layui-btn-primary');
+
+                        setTimeout(() => {
+                            updateLeaferData(parseInt(maxFrame * 0.7));
+                        }, 300); // 500毫秒 = 0.5秒
+                    };
+
+
+
+                    // 6. 按钮添加到容器
+                    gaodesourceBtnContainer.appendChild(sourceBtn);
+                });
+
+                // 7. 按钮容器添加到布局
+                inputDiv.appendChild(gaodesourceBtnContainer);
                 break;
 
         }

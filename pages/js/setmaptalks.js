@@ -35,6 +35,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // 此时document.body已存在，可安全调用appendChild
     document.body.appendChild(rotatemap);
 
+    //rotate
+    // 4. 高德旋转地图
+    gaodemap = document.createElement('div');
+    gaodemap.style.width = '300px';
+    gaodemap.style.height = '300px';
+    gaodemap.style.position = 'fixed'; // 关键：脱离文档流，使left生效
+    gaodemap.style.left = '-400px'; // 元素宽300px，刚好移出左侧可视区域
+    gaodemap.style.top = '-400px'; // 可选：固定在顶部，避免垂直方向占位
+    gaodemap.style.visibility = 'hidden'; // 双重保险：视觉隐藏
+
+    // 此时document.body已存在，可安全调用appendChild
+    document.body.appendChild(gaodemap);
+
 });
 
 
@@ -55,6 +68,94 @@ function set_leafletmap_latlngs(rqjson) {
 
 
 }
+
+/**
+ * 标准 WGS84 转 GCJ-02（高德坐标系）算法
+ * 基于官方公开逻辑实现，误差≤2米，无异常值
+ */
+function wgs84ToGcj02(lng, lat) {
+    const PI = Math.PI;
+    const a = 6378137.0; // 地球长半轴
+    const ee = 0.00669342162296594323; // 第一偏心率平方（WGS84标准值）
+
+    // 先判断是否在中国大陆境内（境外不偏移）
+    if (!isInChina(lng, lat)) {
+      return { lng, lat };
+    }
+
+    let dLat = transformLat(lng - 105.0, lat - 35.0);
+    let dLng = transformLng(lng - 105.0, lat - 35.0);
+    const radLat = lat / 180.0 * PI;
+    let magic = Math.sin(radLat);
+    magic = 1 - ee * magic * magic;
+    const sqrtMagic = Math.sqrt(magic);
+    dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * PI);
+    dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * PI);
+
+    // 叠加偏移量，得到GCJ-02坐标
+    const gcjLat = lat + dLat;
+    const gcjLng = lng + dLng;
+    return { lng: gcjLng, lat: gcjLat };
+  }
+
+  /**
+   * 纬度偏移量计算（标准GCJ-02公式）
+   */
+  function transformLat(x, y) {
+    const PI = Math.PI;
+    let ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+    ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+    ret += (20.0 * Math.sin(y * PI) + 40.0 * Math.sin(y / 3.0 * PI)) * 2.0 / 3.0;
+    ret += (160.0 * Math.sin(y / 12.0 * PI) + 320.0 * Math.sin(y * PI / 30.0)) * 2.0 / 3.0;
+    return ret;
+  }
+
+  /**
+   * 经度偏移量计算（标准GCJ-02公式）
+   */
+  function transformLng(x, y) {
+    const PI = Math.PI;
+    let ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+    ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+    ret += (20.0 * Math.sin(x * PI) + 40.0 * Math.sin(x / 3.0 * PI)) * 2.0 / 3.0;
+    ret += (150.0 * Math.sin(x / 12.0 * PI) + 300.0 * Math.sin(x * PI / 30.0)) * 2.0 / 3.0;
+    return ret;
+  }
+
+  /**
+   * 校验坐标是否在中国大陆境内
+   */
+  function isInChina(lng, lat) {
+    return lng >= 73.66 && lng <= 135.05 && lat >= 3.86 && lat <= 53.55;
+  }
+
+  /**
+   * 批量转换 + 过滤无效坐标
+   */
+  function batchWgs84ToGcj02(wgs84Arr) {
+    return wgs84Arr
+      // 先过滤原始数据中的无效坐标
+      .filter(([lng, lat]) =>
+        typeof lng === "number" && !isNaN(lng) &&
+        typeof lat === "number" && !isNaN(lat) &&
+        lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90
+      )
+      // 转换为GCJ-02
+      .map(([lng, lat]) => {
+        const gcj = wgs84ToGcj02(lng, lat);
+        // 保留8位小数，确保精度
+        return [Number(gcj.lng.toFixed(8)), Number(gcj.lat.toFixed(8))];
+      });
+  }
+
+  // ------------------------------
+  // 批量转换并输出结果
+  // ------------------------------
+//   const gcj02Data = batchWgs84ToGcj02(wgs84Data);
+//   console.log("WGS84 原始数据：");
+//   console.log(wgs84Data);
+//   console.log("\n高德 GCJ-02 转换结果：");
+//   console.log(gcj02Data);
 
 // 1. 大地图变量
 let full_map = null; // 地图实例
@@ -77,7 +178,15 @@ let rotate_polyline = null; //完整轨迹折线
 let new_rotate_polyline = null; // 进行中轨迹折线
 let rotate_mapInitialized = false; // 地图初始化状态标记
 
+// 4. gaoderotate地图变量
+let gaode_map = null; // 地图实例
+let gaode_marker = null; // 标记点
+let gaode_polyline = null; //完整轨迹折线
+let new_gaode_polyline = null; // 进行中轨迹折线
+let gaode_mapInitialized = false; // 地图初始化状态标记
+
 let latlngs = []; // 导航坐标数组（请确保该数组在调用前已初始化）
+let gaode_latlngs = []; // 导航坐标数组（请确保该数组在调用前已初始化）
 
 // 1. 定义多个图源配置（可按需扩展/修改）
 mapSourceConfigs = {
@@ -454,6 +563,145 @@ function rotate_daohang(index) {
     web_rotatemap_pan.children[0].context.drawImage(rotatemapCanvas, 0, 0, web_rotatemap_pan.children[0].width, web_rotatemap_pan.children[0].height);
     web_rotatemap_pan.children[0].paint()
 }
+
+// 配置rotate地图
+function gaode_map_amap() {
+    //检查是否是第一次转换
+    if (gaode_latlngs.length == 0) {
+        gaode_latlngs = batchWgs84ToGcj02(latlngs);
+    }
+
+
+
+
+    // 避免重复初始化
+    if (gaode_mapInitialized) {
+        console.log('地图已初始化，无需重复创建');
+        return;
+    }
+
+    // 检查坐标数组是否已初始化（避免后续操作空数组）
+    if (!gaode_latlngs || gaode_latlngs.length === 0) {
+        console.error('gaode_latlngs 坐标数组未初始化或为空，无法创建地图');
+        return;
+    }
+
+
+
+    // 3. 初始化地图（默认加载 osmHot 图源）
+    gaode_map = new AMap.Map(gaodemap, {
+        center: [118.9, 33.8], // 初始中心点
+        zoom: 18, // 初始缩放级别
+        zooms:[2,26],
+        pitch: 45,
+        rotation: (0 - trkpt_data[0].azimuth),
+        viewMode:'3D', //开启3D视图,默认为关闭
+        WebGLParams: {//允许截图
+            preserveDrawingBuffer: true
+        },
+
+
+    });
+
+
+
+    // 创建折线实例（全局变量赋值）
+    gaode_polyline = new AMap.Polyline({
+        path: gaode_latlngs,
+        strokeColor: "#FFFF00",
+        strokeOpacity: 0.9,
+        strokeWeight: 5,
+        // 折线样式还支持 'dashed'
+        strokeStyle: "solid",
+        lineJoin: 'round',
+        lineCap: 'round',
+      })
+
+    // 导航折线（全局变量赋值）
+
+    new_gaode_polyline = new AMap.Polyline({
+        //path: [],
+        strokeColor: "#FF8C00",
+        strokeOpacity: 0.9,
+        strokeWeight: 5,
+        // 折线样式还支持 'dashed'
+        strokeStyle: "solid",
+        lineJoin: 'round',
+        lineCap: 'round',
+      })
+
+
+    // 标记点（全局变量赋值）
+    gaode_marker = new AMap.CircleMarker({
+        center:gaode_latlngs[0],
+        radius:15,//3D视图下，CircleMarker半径不要超过64px
+        strokeWeight:0,
+        fillColor:'#FF6347',
+        fillOpacity:0.9,
+      })
+
+
+    // 添加图层和几何对象
+    //const gaodelayer = new maptalks.VectorLayer('vector').addTo(gaode_map);
+    // const minilayer = new maptalks.VectorLayer('vector').addTo(minimap);
+    //gaodelayer.addGeometry(gaode_polyline, new_gaode_polyline, gaode_marker);
+    // minilayer.addGeometry(mini_polyline, mini_new_polyline, mini_marker);
+    gaode_map.add([gaode_polyline, new_gaode_polyline, gaode_marker]);
+
+
+
+    // 更新折线和视野
+    //gaode_polyline.setCoordinates(latlngs);
+    // mini_polyline.setCoordinates(latlngs);
+    gaode_map.setZoomAndCenter(20, gaode_latlngs[0])
+    // minimap.setCenterAndZoom(latlngs[0], 16);
+
+    // 2. 初始化完成！标记状态为 true
+    gaode_mapInitialized = true;
+    console.log('地图初始化完成，可调用 rgaode_daohang()');
+
+    frame.add(window['web_gaodemap_pan']);
+
+
+
+
+}
+
+// 小地图导航函数
+function gaode_daohang(index) {
+    // 3. 第一步：检查初始化状态和所有依赖变量
+    if (!gaode_mapInitialized) {
+        console.warn('地图未初始化完成，请等待后再调用 mini_daohang()');
+        return;
+    }
+    if (!gaode_marker || !new_gaode_polyline || !gaode_latlngs) {
+        console.error('导航依赖的变量未初始化（mini_marker/new_mini_polyline/latlngs）');
+        return;
+    }
+
+    // 4. 第二步：检查下标有效性（原逻辑保留）
+    if (index < 0 || index >= gaode_latlngs.length) {
+        console.error('下标超出范围（有效范围：0 ~ ' + (gaode_latlngs.length - 1) + '）');
+        return;
+    }
+
+    // 5. 正常执行导航逻辑（原逻辑保留）
+    const coordinates = gaode_latlngs[index];
+    gaode_marker.setCenter(coordinates);
+
+    const polylineCoordinates = gaode_latlngs.slice(0, index + 1);
+    new_gaode_polyline.setPath(polylineCoordinates);
+
+    // map.panTo(coordinates);
+    gaode_map.setCenter(coordinates,true);
+    //appv_map_a_pan.children[2].rotation = trkpt_data[currentFrame].azimuth;
+    gaode_map.setRotation(0 - trkpt_data[index].azimuth,true);
+    //console.log(gaode_map.getRotation(),trkpt_data[index].azimuth);
+    const gaodemapCanvas = gaode_map.getContainer().querySelector('div.amap-layers > canvas');
+    web_gaodemap_pan.children[0].context.drawImage(gaodemapCanvas, 0, 0, web_gaodemap_pan.children[0].width, web_gaodemap_pan.children[0].height);
+    web_gaodemap_pan.children[0].paint()
+}
+
 
 
 // 4. 封装图源切换函数（核心：一键切换，自动刷新）

@@ -153,6 +153,12 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             rotate_daohang(currentFrame);
         }
 
+        //画gaodeweb地图
+        if (validElementIds.includes('web_gaodemap_pan')) {
+            //console.log(currentFrame);
+            gaode_daohang(currentFrame);
+        }
+
 
         //当前经纬度
         if (validElementIds.includes('TO_gps_pan')) {
