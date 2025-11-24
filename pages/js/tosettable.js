@@ -1,3 +1,75 @@
+// 提前加载Layui依赖（确保动态生成时模块已加载）
+layui.use(['colorpicker', 'jquery'], function () { });
+
+// 公共配置：预定义颜色（所有Layui颜色选择器共用）
+const presetColors = [
+    '#0A9A38', '#000000', '#FFFFFF',
+    '#CCCCCC', '#FF0000', '#C71585',
+    '#9900FF', '#6A0DAD', '#FF7F00',
+    '#FFD700', '#FFFACD', '#0000FF',
+    '#1E90FF', '#00CED1', '#808080',
+    '#8B0000', '#D9B3A1', '#E6E6FA'
+];
+
+// 公共函数：创建Layui颜色选择器（适配所有颜色类型的业务逻辑）
+function createLayuiColorPicker(inputDiv, item, callback) {
+    layui.use(['colorpicker', 'jquery'], function () {
+        const colorpicker = layui.colorpicker;
+        const $ = layui.jquery;
+
+        // 1. 创建隐藏的原生输入框（仅用于存储颜色值，不显示）
+        const colorInput = document.createElement('input');
+        colorInput.type = 'hidden'; // 隐藏存储用输入框
+        colorInput.value = item.value || '#FFFFFF';
+        colorInput.className = 'layui-input';
+        inputDiv.appendChild(colorInput);
+
+        // 2. 创建可视化触发按钮（用户实际点击的元素）
+        const triggerBtn = document.createElement('div');
+        triggerBtn.className = 'laycolor-trigger';
+        triggerBtn.style.cssText = `
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            border: 1px solid #e6e6e6;
+            background-color: ${item.value || '#FFFFFF'};
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            vertical-align: middle;
+        `;
+        inputDiv.appendChild(triggerBtn);
+
+        // 3. 渲染Layui颜色选择器
+        colorpicker.render({
+            elem: triggerBtn, // 绑定触发按钮
+            target: colorInput, // 关联存储用输入框
+            color: item.value || '#FFFFFF', // 初始颜色
+            alpha: true, // 开启透明度（可选关闭）
+            format: 'rgb', // 输出十六进制颜色
+            predefine: true,
+            colors: presetColors, // 自定义预定义颜色
+            change: function (color) {
+                // 实时更新触发按钮背景
+                triggerBtn.style.backgroundColor = color;
+                colorInput.value = color;
+            },
+            done: function (color) {
+                // 选择完成后：更新样式 + 执行业务回调（保留原有逻辑）
+                triggerBtn.style.backgroundColor = color;
+                colorInput.value = color;
+                callback(color); // 传入选择的颜色，执行对应业务逻辑
+            }
+        });
+
+        // 鼠标悬浮样式优化
+        $(triggerBtn).hover(
+            () => $(triggerBtn).css({ borderColor: '#1E9FFF', boxShadow: '0 0 8px rgba(30, 159, 255, 0.3)' }),
+            () => $(triggerBtn).css({ borderColor: '#e6e6e6', boxShadow: 'none' })
+        );
+    });
+}
+
 // 更新编辑事件，json部件点击事件
 function tosettable(json) {
     const settableDiv = document.getElementById('settable');
@@ -32,42 +104,33 @@ function tosettable(json) {
                         new Function(json.id + '.remove();')();
                         // 新增：如果是地图相关的id，销毁地图实例
                         if (json.id === 'web_map_pan') {
-                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
                             full_map.remove();
                             full_map = null;
-                            full_mapInitialized = false;//地图未初始化
+                            full_mapInitialized = false;
                         }
-
                         if (json.id === 'web_minimap_pan') {
-                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
                             mini_map.remove();
                             mini_map = null;
-                            mini_mapInitialized = false;//地图未初始化
+                            mini_mapInitialized = false;
                         }
-
                         if (json.id === 'web_rotatemap_pan') {
-                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
                             rotate_map.remove();
                             rotate_map = null;
-                            rotate_mapInitialized = false;//地图未初始化
+                            rotate_mapInitialized = false;
                         }
-
                         if (json.id === 'web_gaodemap_pan') {
-                            // 调用之前定义的销毁函数（确保map变量在当前作用域可访问）
                             gaode_map.destroy();
                             gaode_map = null;
-                            gaode_mapInitialized = false;//地图未初始化
+                            gaode_mapInitialized = false;
                         }
-
                         interaction.pointerDown({ x: 0, y: 0 });
                         interaction.pointerUp();
                         settableDiv.innerHTML = '';
                     };
                     inputDiv.appendChild(removeButton);
-
-
                 }
                 break;
+
             case 'number':
                 const numberInput = document.createElement('input');
                 numberInput.type = 'number';
@@ -78,6 +141,7 @@ function tosettable(json) {
                 };
                 inputDiv.appendChild(numberInput);
                 break;
+
             case 'Ellipse':
                 const EllipseInput = document.createElement('input');
                 EllipseInput.type = 'number';
@@ -89,91 +153,175 @@ function tosettable(json) {
                 };
                 inputDiv.appendChild(EllipseInput);
                 break;
+
+            // ---------------------- 所有颜色类型统一使用Layui选择器 ----------------------
             case 'color':
-                const colorInput = document.createElement('input');
-                colorInput.type = 'color';
-                colorInput.value = item.value;
-                colorInput.className = 'layui-input';
-                colorInput.onchange = function () {
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    //
-                    // 2. 根据 url 匹配场景，执行对应的颜色同步
-                    const targetUrl = item.url; // 获取当前操作的 url
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    // 原有颜色同步逻辑
+                    const targetUrl = item.url;
                     if (targetUrl === 'x_pace_pan.children[1].fill') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        x_pace_pan.children[2].fill = x_pace_pan.children[1].fill;
+                        x_pace_pan.children[2].fill = color;
                     }
                     if (targetUrl === 'x_cadence_pan.children[1].fill') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        x_cadence_pan.children[2].fill = x_cadence_pan.children[1].fill;
+                        x_cadence_pan.children[2].fill = color;
                     }
                     if (targetUrl === 'x_speed_pan.children[1].fill') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        x_speed_pan.children[2].fill = x_speed_pan.children[1].fill;
+                        x_speed_pan.children[2].fill = color;
                     }
                     if (targetUrl === 'x_heart_pan.children[1].fill') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        x_heart_pan.children[2].fill = x_heart_pan.children[1].fill;
+                        x_heart_pan.children[2].fill = color;
                     }
                     if (targetUrl === 'x_rpm_pan.children[1].fill') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        x_rpm_pan.children[2].fill = x_rpm_pan.children[1].fill;
+                        x_rpm_pan.children[2].fill = color;
                     }
                     if (targetUrl === 'x_power_pan.children[1].fill') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        x_power_pan.children[2].fill = x_power_pan.children[1].fill;
+                        x_power_pan.children[2].fill = color;
                     }
-                };
-                inputDiv.appendChild(colorInput);
+                });
                 break;
 
             case 'color2':
-                const colorInput2 = document.createElement('input');
-                colorInput2.type = 'color';
-                colorInput2.value = item.value;
-                colorInput2.className = 'layui-input';
-                colorInput2.onchange = function () {
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    // 解析路径并生成刷新逻辑
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    // 原有刷新逻辑
                     const pathSegments = item.url.split('.');
                     const baseElementName = pathSegments[0];
                     if (!baseElementName) return;
-
-                    // 动态创建执行函数
                     const refreshCode = `
-								(function() {
-									const element = window.${baseElementName};
-									if (element && typeof element.resizeWidth === 'function') {
-										element.resizeWidth(element.width - 1);
-										setTimeout(() => {
-											element.resizeWidth(element.width + 1);
-										}, 10);
-									}
-								})();
-							`;
-
+                        (function() {
+                            const element = window.${baseElementName};
+                            if (element && typeof element.resizeWidth === 'function') {
+                                element.resizeWidth(element.width - 1);
+                                setTimeout(() => {
+                                    element.resizeWidth(element.width + 1);
+                                }, 10);
+                            }
+                        })();
+                    `;
                     new Function(refreshCode)();
-
-                };
-                inputDiv.appendChild(colorInput2);
+                });
                 break;
 
             case 'web_map_color':
-                const web_map_colorInput = document.createElement('input');
-                web_map_colorInput.type = 'color';
-                web_map_colorInput.value = item.value;
-                web_map_colorInput.className = 'layui-input';
-                web_map_colorInput.onchange = function () {
+                createLayuiColorPicker(inputDiv, item, function (color) {
                     const updateSymbolFunction = new Function('value', item.url);
-                    // 调用创建的函数，并传递当前输入框的值
-                    updateSymbolFunction(this.value);
+                    updateSymbolFunction(color);
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
-                    }, 300); // 500毫秒 = 0.5秒
-                };
-                inputDiv.appendChild(web_map_colorInput);
+                    }, 300);
+                });
                 break;
 
+            case 'heart_color':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    pl_heart_pan.children[2].fill = color;
+                    pl_heart_pan.children[3].fill = color;
+                    pl_heart_pan.children[4].fill = color;
+                    pl_heart_pan.children[5].fill = color;
+                });
+                break;
+
+            case 'heart_color_line':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    pt_heart_pan.children[1].stroke = color;
+                    pt_heart_pan.children[2].stroke = color;
+                });
+                break;
+
+            case 'heart_line_text':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    pt_heart_pan.children[4].fill = color;
+                    pt_heart_pan.children[5].fill = color;
+                });
+                break;
+
+            case 'pace_color_line':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    pt_pace_pan.children[1].stroke = color;
+                    pt_pace_pan.children[2].stroke = color;
+                });
+                break;
+
+            case 'pace_line_text':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    pt_pace_pan.children[4].fill = color;
+                    pt_pace_pan.children[5].fill = color;
+                });
+                break;
+
+            case 'ele_color_line':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    pt_ele_pan.children[1].stroke = color;
+                    pt_ele_pan.children[2].stroke = color;
+                });
+                break;
+
+            case 'ele_line_text':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    pt_ele_pan.children[4].fill = color;
+                    pt_ele_pan.children[5].fill = color;
+                });
+                break;
+
+            case 'o2o_color_line':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    o2o_ele_pan.children[1].stroke = color;
+                });
+                break;
+
+            case 'o2o_line_text':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    o2o_ele_pan.children[4].fill = color;
+                    o2o_ele_pan.children[5].fill = color;
+                });
+                break;
+
+            case 'x_color':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    const targetUrl = item.url;
+                    const xPan = window.x_distance_pan;
+                    if (targetUrl === 'x_distance_pan.children[6].stroke') {
+                        xPan.children[2].fill = color;
+                        xPan.children[4].fill = color;
+                    } else if (targetUrl === 'x_distance_pan.children[7].stroke') {
+                        xPan.children[0].fill = color;
+                    } else if (targetUrl === 'x_distance_pan.children[1].fill') {
+                        xPan.children[3].fill = color;
+                        xPan.children[5].fill = color;
+                        xPan.children[8].children[0].fill = color;
+                    }
+                });
+                break;
+
+            case 'lap_user_color':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    const targetUrl = item.url;
+                    const xPan = window.appv_lap_user_pan;
+                    if (targetUrl === 'appv_lap_user_pan.children[1].fill') {
+                        xPan.children[2].fill = color;
+                        xPan.children[3].fill = color;
+                        xPan.children[4].fill = color;
+                        xPan.children[5].fill = color;
+                        xPan.children[6].fill = color;
+                    } else if (targetUrl === 'appv_lap_user_pan.children[0].fill') {
+                        xPan.children[0].shadow.color = color;
+                    }
+                });
+                break;
+
+            // ---------------------- 其他原有case（原封不动保留） ----------------------
             case 'funnumber':
                 const funnumberInput = document.createElement('input');
                 funnumberInput.type = 'number';
@@ -181,7 +329,6 @@ function tosettable(json) {
                 funnumberInput.className = 'layui-input';
                 funnumberInput.onchange = function () {
                     const updateSymbolFunction = new Function('value', item.url);
-                    // 调用创建的函数，并传递当前输入框的值
                     updateSymbolFunction(this.value);
                     setTimeout(getProgressBarValueAndUpdate, 20);
                 };
@@ -189,9 +336,9 @@ function tosettable(json) {
                 break;
 
             case 'text':
-                const textInput = document.createElement('input'); // 创建文本输入框
-                textInput.type = 'text'; // 设置类型为文本
-                textInput.value = item.value; // 同样修正了拼写错误
+                const textInput = document.createElement('input');
+                textInput.type = 'text';
+                textInput.value = item.value;
                 textInput.className = 'layui-input';
                 textInput.onchange = function () {
                     new Function('value', 'window.' + item.url + ' = value;')(this.value);
@@ -200,11 +347,8 @@ function tosettable(json) {
                 break;
 
             case 'weather':
-                // 创建按钮容器
                 const buttonGroup = document.createElement('div');
                 buttonGroup.className = 'layui-btn-group layui-row layui-col-space1';
-
-                // 天气配置数据
                 const weatherTypes = [
                     { class: 'weather_sunny_icon', text: 'sunny' },
                     { class: 'weather_cloudy_icon', text: 'cloudy' },
@@ -214,14 +358,10 @@ function tosettable(json) {
                     { class: 'weather_snow_icon', text: 'snow' },
                     { class: 'weather_night_icon', text: 'night' }
                 ];
-
-                // 内部函数直接访问外部变量
                 function updateIcon(index) {
                     const icon = weatherTypes[index];
                     el_weather_pan.children[4].path = window[icon.class];
                 }
-
-                // 生成按钮并绑定事件
                 weatherTypes.forEach((type, i) => {
                     const btn = document.createElement('button');
                     btn.className = `layui-btn layui-btn-xs ${type.class} layui-margin-1`;
@@ -233,241 +373,34 @@ function tosettable(json) {
                     };
                     buttonGroup.appendChild(btn);
                 });
-
                 inputDiv.appendChild(buttonGroup);
-                // 添加底部链接
                 const linkContainer = document.createElement('div');
                 linkContainer.className = 'layui-row layui-col-space1';
-
                 const weatherLink = document.createElement('a');
                 weatherLink.className = 'layui-btn layui-btn-xs active';
                 weatherLink.href = 'https://meteostat.net/';
                 weatherLink.textContent = 'Link meteostat.net';
-                weatherLink.target = '_blank'; // 新标签页打开
-
+                weatherLink.target = '_blank';
                 linkContainer.appendChild(weatherLink);
                 inputDiv.appendChild(linkContainer);
-
                 break;
 
-            //高级心率文本
             case 'heart_text':
-                const heart_textInput = document.createElement('input'); // 创建文本输入框
-                heart_textInput.type = 'text'; // 设置类型为文本
-                heart_textInput.value = item.value; // 同样修正了拼写错误
+                const heart_textInput = document.createElement('input');
+                heart_textInput.type = 'text';
+                heart_textInput.value = item.value;
                 heart_textInput.className = 'layui-input';
                 heart_textInput.onchange = function () {
-                    //pl_heart_pan.children[1].text
                     new Function('value', 'window.' + item.url + ' = value;')(this.value);
                     var min = parseInt(pl_heart_pan.children[1].text);
                     var max = parseInt(pl_heart_pan.children[2].text);
-
-                    // 计算区间参数
                     var interval = max - min;
                     var step = interval / 4;
-
                     pl_heart_pan.children[3].text = Math.round(min + step * 1);
                     pl_heart_pan.children[4].text = Math.round(min + step * 2);
                     pl_heart_pan.children[5].text = Math.round(min + step * 3);
-
                 };
                 inputDiv.appendChild(heart_textInput);
-                break;
-
-            case 'heart_color':
-                const heart_colorInput = document.createElement('input');
-                heart_colorInput.type = 'color';
-                heart_colorInput.value = item.value;
-                heart_colorInput.className = 'layui-input';
-                heart_colorInput.onchange = function () {
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    pl_heart_pan.children[2].fill = pl_heart_pan.children[1].fill;
-                    pl_heart_pan.children[3].fill = pl_heart_pan.children[1].fill;
-                    pl_heart_pan.children[4].fill = pl_heart_pan.children[1].fill;
-                    pl_heart_pan.children[5].fill = pl_heart_pan.children[1].fill;
-                };
-                inputDiv.appendChild(heart_colorInput);
-                break;
-
-            //高级心率表背景线
-            case 'heart_color_line':
-                const heart_color_lineInput = document.createElement('input');
-                heart_color_lineInput.type = 'color';
-                heart_color_lineInput.value = item.value;
-                heart_color_lineInput.className = 'layui-input';
-                heart_color_lineInput.onchange = function () {
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    pt_heart_pan.children[1].stroke = pt_heart_pan.children[0].stroke;
-                    pt_heart_pan.children[2].stroke = pt_heart_pan.children[0].stroke;
-                };
-                inputDiv.appendChild(heart_color_lineInput);
-                break;
-
-            case 'heart_line_text':
-                const heart_line_textInput = document.createElement('input'); // 创建文本输入框
-                heart_line_textInput.type = 'color'; // 设置类型为文本
-                heart_line_textInput.value = item.value; // 同样修正了拼写错误
-                heart_line_textInput.className = 'layui-input';
-                heart_line_textInput.onchange = function () {
-                    //pl_heart_pan.children[1].text
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    pt_heart_pan.children[4].fill = pt_heart_pan.children[3].fill;
-                    pt_heart_pan.children[5].fill = pt_heart_pan.children[3].fill;
-                };
-                inputDiv.appendChild(heart_line_textInput);
-                break;
-            //高级配速表背景线
-            case 'pace_color_line':
-                const pace_color_lineInput = document.createElement('input');
-                pace_color_lineInput.type = 'color';
-                pace_color_lineInput.value = item.value;
-                pace_color_lineInput.className = 'layui-input';
-                pace_color_lineInput.onchange = function () {
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    pt_pace_pan.children[1].stroke = pt_pace_pan.children[0].stroke;
-                    pt_pace_pan.children[2].stroke = pt_pace_pan.children[0].stroke;
-                };
-                inputDiv.appendChild(pace_color_lineInput);
-                break;
-
-            case 'pace_line_text':
-                const pace_line_textInput = document.createElement('input'); // 创建文本输入框
-                pace_line_textInput.type = 'color'; // 设置类型为文本
-                pace_line_textInput.value = item.value; // 同样修正了拼写错误
-                pace_line_textInput.className = 'layui-input';
-                pace_line_textInput.onchange = function () {
-                    //pl_heart_pan.children[1].text
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    pt_pace_pan.children[4].fill = pt_pace_pan.children[3].fill;
-                    pt_pace_pan.children[5].fill = pt_pace_pan.children[3].fill;
-                };
-                inputDiv.appendChild(pace_line_textInput);
-                break;
-            //高级高程表背景线
-            case 'ele_color_line':
-                const ele_color_lineInput = document.createElement('input');
-                ele_color_lineInput.type = 'color';
-                ele_color_lineInput.value = item.value;
-                ele_color_lineInput.className = 'layui-input';
-                ele_color_lineInput.onchange = function () {
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    pt_ele_pan.children[1].stroke = pt_ele_pan.children[0].stroke;
-                    pt_ele_pan.children[2].stroke = pt_ele_pan.children[0].stroke;
-                };
-                inputDiv.appendChild(ele_color_lineInput);
-                break;
-
-            case 'ele_line_text':
-                const ele_line_textInput = document.createElement('input'); // 创建文本输入框
-                ele_line_textInput.type = 'color'; // 设置类型为文本
-                ele_line_textInput.value = item.value; // 同样修正了拼写错误
-                ele_line_textInput.className = 'layui-input';
-                ele_line_textInput.onchange = function () {
-                    //pl_heart_pan.children[1].text
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    pt_ele_pan.children[4].fill = pt_ele_pan.children[3].fill;
-                    pt_ele_pan.children[5].fill = pt_ele_pan.children[3].fill;
-                };
-                inputDiv.appendChild(ele_line_textInput);
-                break;
-
-            //1:1 高程表背景线
-            case 'o2o_color_line':
-                const o2o_color_lineInput = document.createElement('input');
-                o2o_color_lineInput.type = 'color';
-                o2o_color_lineInput.value = item.value;
-                o2o_color_lineInput.className = 'layui-input';
-                o2o_color_lineInput.onchange = function () {
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    o2o_ele_pan.children[1].stroke = o2o_ele_pan.children[0].stroke;
-                };
-                inputDiv.appendChild(o2o_color_lineInput);
-                break;
-
-            case 'o2o_line_text':
-                const o2o_line_textInput = document.createElement('input'); // 创建文本输入框
-                o2o_line_textInput.type = 'color'; // 设置类型为文本
-                o2o_line_textInput.value = item.value; // 同样修正了拼写错误
-                o2o_line_textInput.className = 'layui-input';
-                o2o_line_textInput.onchange = function () {
-                    //pl_heart_pan.children[1].text
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-                    o2o_ele_pan.children[4].fill = o2o_ele_pan.children[3].fill;
-                    o2o_ele_pan.children[5].fill = o2o_ele_pan.children[3].fill;
-                };
-                inputDiv.appendChild(o2o_line_textInput);
-                break;
-
-            case 'x_color':
-                const x_color = document.createElement('input');
-                x_color.type = 'color';
-                x_color.value = item.value;
-                x_color.className = 'layui-input';
-                x_color.onchange = function () {
-                    // 1. 先执行原逻辑：设置当前选择的目标元素颜色
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-
-                    // 2. 根据 url 匹配场景，执行对应的颜色同步
-                    const targetUrl = item.url; // 获取当前操作的 url
-                    const xPan = window.x_distance_pan; // 简化进度条对象引用
-
-                    // 场景1：url 为 "x_distance_pan.children[6].fill"（背景颜色）
-                    if (targetUrl === 'x_distance_pan.children[6].stroke') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        xPan.children[2].fill = xPan.children[6].stroke;
-                        xPan.children[4].fill = xPan.children[6].stroke;
-                    }
-
-                    // 场景2：url 为 "x_distance_pan.children[7].fill"（前景颜色）
-                    else if (targetUrl === 'x_distance_pan.children[7].stroke') {
-                        // 同步起点(children[0])的颜色为前景色
-                        xPan.children[0].fill = xPan.children[7].stroke;
-                    }
-
-                    // 场景3：url 为 "x_distance_pan.children[1].fill"（文字颜色）
-                    else if (targetUrl === 'x_distance_pan.children[1].fill') {
-                        // 同步中间点文字(3)、终点文字(5)、进度文本(8的子元素)的颜色为文字色
-                        xPan.children[3].fill = xPan.children[1].fill;
-                        xPan.children[5].fill = xPan.children[1].fill;
-                        xPan.children[8].children[0].fill = xPan.children[1].fill;
-                    }
-                };
-                inputDiv.appendChild(x_color);
-                break;
-
-            case 'lap_user_color':
-                const lap_user_color = document.createElement('input');
-                lap_user_color.type = 'color';
-                lap_user_color.value = item.value;
-                lap_user_color.className = 'layui-input';
-                lap_user_color.onchange = function () {
-                    // 1. 先执行原逻辑：设置当前选择的目标元素颜色
-                    new Function('value', 'window.' + item.url + ' = value;')(this.value);
-
-                    // 2. 根据 url 匹配场景，执行对应的颜色同步
-                    const targetUrl = item.url; // 获取当前操作的 url
-                    const xPan = window.appv_lap_user_pan; // 简化进度条对象引用
-
-                    // （文字颜色）
-                    if (targetUrl === 'appv_lap_user_pan.children[1].fill') {
-                        // 同步中间点(children[2])和终点(children[4])的颜色为背景色
-                        xPan.children[2].fill = xPan.children[1].fill;
-                        xPan.children[3].fill = xPan.children[1].fill;
-                        xPan.children[4].fill = xPan.children[1].fill;
-                        xPan.children[5].fill = xPan.children[1].fill;
-                        xPan.children[6].fill = xPan.children[1].fill;
-
-                    }
-
-                    // （背景颜色）
-                    else if (targetUrl === 'appv_lap_user_pan.children[0].fill') {
-                        // 同步起点(children[0])的颜色为前景色
-                        xPan.children[0].shadow.color = xPan.children[0].fill;
-
-                    }
-
-                };
-                inputDiv.appendChild(lap_user_color);
                 break;
 
             case 'full_map_zoom_number':
@@ -476,49 +409,34 @@ function tosettable(json) {
                 full_map_zoom_numberInput.value = item.value;
                 full_map_zoom_numberInput.className = 'layui-input';
                 full_map_zoom_numberInput.onchange = function () {
-                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
-                    //console.log(this.value);
                     full_map.fitExtent(full_polyline.getExtent(), (this.value / 100));
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
-                    }, 300); // 500毫秒 = 0.5秒
+                    }, 300);
                 };
                 inputDiv.appendChild(full_map_zoom_numberInput);
                 break;
 
             case 'full_map_sel':
-                // 1. 创建按钮容器（用于横向排列按钮）
                 const sourceBtnContainer = document.createElement('div');
-                sourceBtnContainer.style.display = 'flex'; // 横向排列
-                sourceBtnContainer.style.gap = '8px'; // 按钮间距（可选，更美观）
+                sourceBtnContainer.style.display = 'flex';
+                sourceBtnContainer.style.gap = '8px';
                 sourceBtnContainer.style.alignItems = 'center';
-
-                // 2. 遍历所有图源配置，创建对应按钮
                 Object.values(mapSourceConfigs).forEach(sourceConfig => {
                     const sourceBtn = document.createElement('button');
-                    // 按钮名称 = 图源id（按你的要求）
                     sourceBtn.textContent = sourceConfig.name;
-                    // 按钮样式（适配layui风格，与现有输入框样式协调）
                     sourceBtn.className = 'layui-btn layui-btn-sm';
                     sourceBtn.style.padding = '0 12px';
                     sourceBtn.style.cursor = 'pointer';
-
-                    // 3. 点击事件：切换full_map的图源
                     sourceBtn.onclick = function () {
-                        // 调用你之前的switchMapSource函数，mapId为'full_map'，sourceId为当前图源id
                         switchMapSource(full_map, sourceConfig.id);
-                        // 可选：点击后高亮当前选中的按钮（提升体验）
                         document.querySelectorAll('.layui-btn-sm', sourceBtnContainer).forEach(btn => {
                             btn.classList.remove('layui-btn-primary');
                         });
                         this.classList.add('layui-btn-primary');
                     };
-
-                    // 4. 按钮添加到容器
                     sourceBtnContainer.appendChild(sourceBtn);
                 });
-
-                // 6. 按钮容器添加到布局
                 inputDiv.appendChild(sourceBtnContainer);
                 break;
 
@@ -528,49 +446,34 @@ function tosettable(json) {
                 mini_map_zoom_numberInput.value = item.value;
                 mini_map_zoom_numberInput.className = 'layui-input';
                 mini_map_zoom_numberInput.onchange = function () {
-                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
-                    //console.log(this.value);
                     mini_map.setZoom(this.value);
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
-                    }, 300); // 500毫秒 = 0.5秒
+                    }, 300);
                 };
                 inputDiv.appendChild(mini_map_zoom_numberInput);
                 break;
 
             case 'mini_map_sel':
-                // 1. 创建按钮容器（用于横向排列按钮）
                 const minisourceBtnContainer = document.createElement('div');
-                minisourceBtnContainer.style.display = 'flex'; // 横向排列
-                minisourceBtnContainer.style.gap = '8px'; // 按钮间距（可选，更美观）
+                minisourceBtnContainer.style.display = 'flex';
+                minisourceBtnContainer.style.gap = '8px';
                 minisourceBtnContainer.style.alignItems = 'center';
-
-                // 2. 遍历所有图源配置，创建对应按钮
                 Object.values(mapSourceConfigs).forEach(sourceConfig => {
                     const sourceBtn = document.createElement('button');
-                    // 按钮名称 = 图源id（按你的要求）
                     sourceBtn.textContent = sourceConfig.name;
-                    // 按钮样式（适配layui风格，与现有输入框样式协调）
                     sourceBtn.className = 'layui-btn layui-btn-sm';
                     sourceBtn.style.padding = '0 12px';
                     sourceBtn.style.cursor = 'pointer';
-
-                    // 3. 点击事件：切换full_map的图源
                     sourceBtn.onclick = function () {
-                        // 调用你之前的switchMapSource函数，mapId为'full_map'，sourceId为当前图源id
                         switchMapSource(mini_map, sourceConfig.id);
-                        // 可选：点击后高亮当前选中的按钮（提升体验）
                         document.querySelectorAll('.layui-btn-sm', minisourceBtnContainer).forEach(btn => {
                             btn.classList.remove('layui-btn-primary');
                         });
                         this.classList.add('layui-btn-primary');
                     };
-
-                    // 4. 按钮添加到容器
                     minisourceBtnContainer.appendChild(sourceBtn);
                 });
-
-                // 6. 按钮容器添加到布局
                 inputDiv.appendChild(minisourceBtnContainer);
                 break;
 
@@ -580,47 +483,36 @@ function tosettable(json) {
                 rotate_map_zoom_numberInput.value = item.value;
                 rotate_map_zoom_numberInput.className = 'layui-input';
                 rotate_map_zoom_numberInput.onchange = function () {
-                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
-                    //console.log(this.value);
                     rotate_map.setZoom(this.value);
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
-                    }, 300); // 500毫秒 = 0.5秒
+                    }, 300);
                 };
                 inputDiv.appendChild(rotate_map_zoom_numberInput);
                 break;
 
             case 'rotate_map_sel':
-                // 1. 创建按钮容器（用于横向排列按钮）
                 const rotatesourceBtnContainer = document.createElement('div');
-                rotatesourceBtnContainer.style.display = 'flex'; // 横向排列
-                rotatesourceBtnContainer.style.gap = '8px'; // 按钮间距（可选，更美观）
+                rotatesourceBtnContainer.style.display = 'flex';
+                rotatesourceBtnContainer.style.gap = '8px';
                 rotatesourceBtnContainer.style.alignItems = 'center';
-
-                // 2. 遍历所有图源配置，创建对应按钮
                 Object.values(mapSourceConfigs).forEach(sourceConfig => {
                     const sourceBtn = document.createElement('button');
-                    // 按钮名称 = 图源id（按你的要求）
                     sourceBtn.textContent = sourceConfig.name;
-                    // 按钮样式（适配layui风格，与现有输入框样式协调）
                     sourceBtn.className = 'layui-btn layui-btn-sm';
                     sourceBtn.style.padding = '0 12px';
                     sourceBtn.style.cursor = 'pointer';
-
-                    // 3. 点击事件：切换full_map的图源
                     sourceBtn.onclick = function () {
-                        // 调用你之前的switchMapSource函数，mapId为'full_map'，sourceId为当前图源id
                         switchMapSource(rotate_map, sourceConfig.id);
-                        // 可选：点击后高亮当前选中的按钮（提升体验）
                         document.querySelectorAll('.layui-btn-sm', rotatesourceBtnContainer).forEach(btn => {
                             btn.classList.remove('layui-btn-primary');
                         });
                         this.classList.add('layui-btn-primary');
                     };
-
-                    // 4. 按钮添加到容器
                     rotatesourceBtnContainer.appendChild(sourceBtn);
                 });
+                inputDiv.appendChild(rotatesourceBtnContainer);
+                break;
 
             case 'gaode_map_zoom_number':
                 const gaode_map_zoom_numberInput = document.createElement('input');
@@ -628,24 +520,19 @@ function tosettable(json) {
                 gaode_map_zoom_numberInput.value = item.value;
                 gaode_map_zoom_numberInput.className = 'layui-input';
                 gaode_map_zoom_numberInput.onchange = function () {
-                    //new Function('value', 'window.' + item.url + ' = value;')(Number(this.value));
-                    //console.log(this.value);
                     gaode_map.setZoom(this.value);
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
-                    }, 300); // 500毫秒 = 0.5秒
+                    }, 300);
                 };
                 inputDiv.appendChild(gaode_map_zoom_numberInput);
                 break;
 
             case 'gaode_map_sel':
-                // 1. 创建按钮容器（用于横向排列按钮）
                 const gaodesourceBtnContainer = document.createElement('div');
-                gaodesourceBtnContainer.style.display = 'flex'; // 横向排列
-                gaodesourceBtnContainer.style.gap = '8px'; // 按钮间距
+                gaodesourceBtnContainer.style.display = 'flex';
+                gaodesourceBtnContainer.style.gap = '8px';
                 gaodesourceBtnContainer.style.alignItems = 'center';
-
-                // 2. 定义固定按钮配置（名称 + 点击执行的图层逻辑）
                 const buttonConfigs = [
                     {
                         name: '高德矢量',
@@ -660,95 +547,140 @@ function tosettable(json) {
                         }
                     }
                 ];
-
-                // 3. 创建固定按钮并绑定逻辑
                 buttonConfigs.forEach((config, index) => {
                     const sourceBtn = document.createElement('button');
                     sourceBtn.textContent = config.name;
-                    // 按钮样式（适配layui风格，与现有输入框协调）
                     sourceBtn.className = 'layui-btn layui-btn-sm';
                     sourceBtn.style.padding = '0 12px';
                     sourceBtn.style.cursor = 'pointer';
-
-                    // 4. 点击事件：执行对应的图层切换
                     sourceBtn.onclick = function () {
-                        // 执行当前按钮的图层设置逻辑
                         config.setLayer();
-                        // 高亮当前选中按钮，取消其他按钮高亮
                         document.querySelectorAll('.layui-btn-sm', gaodesourceBtnContainer).forEach(btn => {
                             btn.classList.remove('layui-btn-primary');
                         });
                         this.classList.add('layui-btn-primary');
-
                         setTimeout(() => {
                             updateLeaferData(parseInt(maxFrame * 0.7));
-                        }, 300); // 500毫秒 = 0.5秒
+                        }, 300);
                     };
-
-
-
-                    // 6. 按钮添加到容器
                     gaodesourceBtnContainer.appendChild(sourceBtn);
                 });
-
-                // 7. 按钮容器添加到布局
                 inputDiv.appendChild(gaodesourceBtnContainer);
                 break;
 
+            case 'font_selector':
+                // 字体选择容器（纵向排列所有元素）
+                const fontContainer = document.createElement('div');
+                fontContainer.style.display = 'flex';
+                fontContainer.style.flexDirection = 'column';
+                fontContainer.style.gap = '12px'; // 元素间距
+                fontContainer.style.alignItems = 'flex-start';
+
+                // 第一行：文本框 + 确定按钮（横向排列）
+                const inputRow = document.createElement('div');
+                inputRow.style.display = 'flex';
+                inputRow.style.gap = '8px';
+                inputRow.style.alignItems = 'center';
+
+                // 文本框（初始值同步全局字体变量，空值时显示空）
+                const fontInput = document.createElement('input');
+                fontInput.type = 'text';
+                fontInput.value = globalFontFamily; // 直接绑定全局变量，保持同步
+                fontInput.className = 'layui-input';
+                fontInput.style.width = '200px';
+                fontInput.placeholder = 'Please enter the font name (e.g., Bitter)';
+                inputRow.appendChild(fontInput);
+
+                // 确定按钮（支持手动清空文本框后点击，触发恢复默认）
+                const confirmBtn = document.createElement('button');
+                confirmBtn.textContent = 'Confirm';
+                confirmBtn.className = 'layui-btn layui-btn-sm layui-btn-normal';
+                confirmBtn.onclick = function () {
+                    loadFontAndUpdate(fontInput.value); // 直接传入文本框值（空值也会处理）
+                };
+                inputRow.appendChild(confirmBtn);
+                fontContainer.appendChild(inputRow);
+
+                // 第二行：预设字体按钮（默认=清空，Bitter/Satisfy=自定义）
+                const presetBtnGroup = document.createElement('div');
+                presetBtnGroup.className = 'layui-btn-group';
+                presetBtnGroup.style.gap = '8px';
+
+                // 预设按钮配置（默认按钮 value 为空字符串）
+                const presetFonts = [
+                    { name: 'Default', value: '' }, // 核心：默认=空值，触发恢复默认
+                    { name: 'Bitter', value: 'Bitter' },
+                    { name: 'Satisfy', value: 'Satisfy' }
+                ];
+
+                presetFonts.forEach(preset => {
+                    const presetBtn = document.createElement('button');
+                    presetBtn.textContent = preset.name;
+                    presetBtn.className = 'layui-btn layui-btn-sm layui-btn-primary';
+                    presetBtn.onclick = function () {
+                        fontInput.value = preset.value; // 同步文本框值（默认按钮清空文本框）
+                        loadFontAndUpdate(preset.value); // 直接触发更新，无需再点确定
+                    };
+                    presetBtnGroup.appendChild(presetBtn);
+                });
+                fontContainer.appendChild(presetBtnGroup);
+
+                // 第三行：提示文字 + 字体网站链接
+                const tipDiv = document.createElement('div');
+                tipDiv.className = 'layui-form-mid layui-word-aux';
+                tipDiv.style.marginTop = '4px';
+                tipDiv.innerHTML = `
+  Please enter a font name (obtainable from the following websites):
+  <a href="https://fonts.googleapis.com" target="_blank" style="color: #1E9FFF;">Google Fonts</a>
+  or
+  <a href="https://fonts.joway.io/" target="_blank" style="color: #1E9FFF;">Font Library</a>
+  <br>
+  Click "Default" to restore the browser's native font
+`;
+                fontContainer.appendChild(tipDiv);
+
+                // 将字体选择容器添加到输入区域
+                inputDiv.appendChild(fontContainer);
+                break;
         }
 
         div.appendChild(inputDiv);
         settableDiv.appendChild(div);
 
+        // 原有属性输入容器逻辑（原封不动保留）
         if (item.type == 'title' && item.name != `Canvas Settings`) {
-            // 获取目标对象
-            const targetObj = window[json.id]; // 假设对象存储在全局作用域
-            //console.log(targetObj);
-
-            // 创建属性输入容器
+            const targetObj = window[json.id];
             const attrContainer = document.createElement('div');
             attrContainer.className = 'layui-form layui-form-pane';
-
-            // 创建两行两列布局
             const createInputRow = (prop1, prop2, label1, label2) => {
                 const row = document.createElement('div');
                 row.className = 'layui-row';
-
-                // 从目标对象获取当前值
                 const val1 = targetObj[prop1];
                 const val2 = targetObj[prop2];
-                // 第一列
                 const col1 = document.createElement('div');
                 col1.className = 'layui-col-md6';
                 col1.innerHTML = `
-							<div class="layui-form-item">
-								<label class="layui-form-label" style="width: 30px;padding: 8px 5px;">${label1}</label>
-								<div class="layui-input-block" style="margin-left: 30px;">
-									<input type="number" class="layui-input" step="any" value="${val1}">
-								</div>
-							</div>
-						`;
-
-                // 第二列
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 30px;padding: 8px 5px;">${label1}</label>
+                        <div class="layui-input-block" style="margin-left: 30px;">
+                            <input type="number" class="layui-input" step="any" value="${val1}">
+                        </div>
+                    </div>
+                `;
                 const col2 = document.createElement('div');
                 col2.className = 'layui-col-md6';
                 col2.innerHTML = `
-							<div class="layui-form-item">
-								<label class="layui-form-label" style="width: 30px;padding: 8px 5px;">${label2}</label>
-								<div class="layui-input-block" style="margin-left: 30px;">
-									<input type="number" class="layui-input" step="any" value="${val2}">
-								</div>
-							</div>
-						`;
-
-                // 事件监听（使用动态对象引用）
-                // 事件监听（使用动态对象引用）
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 30px;padding: 8px 5px;">${label2}</label>
+                        <div class="layui-input-block" style="margin-left: 30px;">
+                            <input type="number" class="layui-input" step="any" value="${val2}">
+                        </div>
+                    </div>
+                `;
                 col1.querySelector('input').onchange = function () {
                     const value = parseFloat(this.value);
                     if (!isNaN(value)) {
-                        // 获取目标对象
                         const target = window[json.id];
-                        // 根据属性名执行不同操作
                         if (label1 === 'W') {
                             target.resizeWidth(value);
                         } else if (label1 === 'H') {
@@ -758,13 +690,10 @@ function tosettable(json) {
                         }
                     }
                 };
-
                 col2.querySelector('input').onchange = function () {
                     const value = parseFloat(this.value);
                     if (!isNaN(value)) {
-                        // 获取目标对象
                         const target = window[json.id];
-                        // 根据属性名执行不同操作
                         if (label2 === 'W') {
                             target.resizeWidth(value);
                         } else if (label2 === 'H') {
@@ -774,70 +703,13 @@ function tosettable(json) {
                         }
                     }
                 };
-
                 row.append(col1, col2);
                 return row;
             };
-
-            // 添加坐标行
-            attrContainer.appendChild(
-                createInputRow('x', 'y', 'X', 'Y')
-            );
-
-            // 添加尺寸行
-            attrContainer.appendChild(
-                createInputRow('width', 'height', 'W', 'H')
-            );
+            attrContainer.appendChild(createInputRow('x', 'y', 'X', 'Y'));
+            attrContainer.appendChild(createInputRow('width', 'height', 'W', 'H'));
             div.appendChild(attrContainer);
-
-
         }
-
-        function initColorDatalist() {
-            // 确保只创建一次
-            if (document.getElementById('globalColors')) {
-                return;
-            }
-
-            // 创建datalist元素
-            const datalist = document.createElement('datalist');
-            datalist.id = 'globalColors';
-
-            // 定义预定义颜色
-            const colorOptions = [
-                '#0A9A38', '#000000', '#FFFFFF',
-                '#CCCCCC', '#FF0000', '#C71585',
-                '#9900FF', '#6A0DAD', '#FF7F00',
-                '#FFD700', '#FFFACD', '#0000FF',
-                '#1E90FF', '#00CED1', '#808080',
-                '#8B0000', '#D9B3A1', '#E6E6FA'
-            ];
-
-            // 添加颜色选项
-            colorOptions.forEach(color => {
-                const option = document.createElement('option');
-                option.value = color;
-                datalist.appendChild(option);
-            });
-
-            // 将datalist添加到head或body中
-            document.head.appendChild(datalist);
-
-            // 调试信息，确认datalist已创建
-            console.log('全局颜色列表已初始化:', datalist);
-        }
-
-        initColorDatalist();
-
-        const settable = document.getElementById('settable');
-
-        // 在容器内查找所有符合条件的颜色输入框
-        const colorInputs = settable.querySelectorAll('input[type="color"].layui-input');
-
-        // 为每个找到的输入框添加list属性
-        colorInputs.forEach(input => {
-            input.setAttribute('list', 'globalColors');
-        });
 
     });
 }

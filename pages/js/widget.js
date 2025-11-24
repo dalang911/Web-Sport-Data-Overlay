@@ -33,6 +33,13 @@ window.huitu = function () {
                         "set": [
                             { "name": `Canvas Settings`, "url": '', "value": "", "type": "title", "tools": false },
                             { "name": `Canvas color`, "url": "appv_bg_pan.children[0].fill", "value": appv_bg_pan.children[0].fill, "type": "color", "tools": true },
+                            {
+                                "name": `global FontFamily`,
+                                "url": "",
+                                "value": globalFontFamily || 'caption', // 关联全局字体变量（默认caption）
+                                "type": "font_selector",
+                                "tools": true
+                            }
                         ]
                     }
                     tosettable(json);

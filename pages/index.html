@@ -24,7 +24,8 @@
     <script src="./js/tosettable.js"></script>
     <script src="./js/updateLeaferData.js"></script>
     <script src="./js/setmaptalks.js"></script>
-    <script language="javascript" src="https://webapi.amap.com/maps?v=2.0&key=dc517396597f9dbd58c7483f2626c68c"></script>
+    <script language="javascript"
+        src="https://webapi.amap.com/maps?v=2.0&key=dc517396597f9dbd58c7483f2626c68c"></script>
 
 
 
@@ -32,7 +33,7 @@
     <!-- 引入Mediabunny视频编码库 -->
     <!-- <script type="module" src="./js/mediabunny.js"></script>mediabunny.min.mjs -->
     <script type="module" src="./js/mediabunny.min.js"></script>
-
+    <link href="https://gstatic.qaq.qa/css2?family=Sofadi One&display=swap" rel="stylesheet">
 
     <style>
         html,
@@ -40,6 +41,8 @@
             height: 100%;
             margin: 0;
             padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', Tahoma, Arial, sans-serif;
+
         }
 
         .layui-container {
@@ -343,7 +346,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.62 .更新：新增3个web地图，分别为大地图，小地图，前进方向的旋转地图，不太好用。
+            Beta 0.63 .更新：颜色选择器更换，支持颜色透明度调整、GOOGLE FONTS全局字体在背景设置里。
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -650,6 +653,8 @@
     // ==================================================
     // 1. 全局变量初始化（优先级最高，确保所有模块可访问）
     // ==================================================
+
+
 
     // 新增：视频渲染状态跟踪
     window.videoRenderState = {
@@ -1069,7 +1074,7 @@
                 // 依赖挂载（避免作用域丢失）
                 this.frameCanvas = frameCanvas; // 视频帧输出Canvas
                 this.onStatus = onStatus || (() => { }); // 状态回调
-                this.mbModules = { Output, BufferTarget, Mp4OutputFormat, WebMOutputFormat, CanvasSource, QUALITY_HIGH  }; // Mediabunny模块
+                this.mbModules = { Output, BufferTarget, Mp4OutputFormat, WebMOutputFormat, CanvasSource, QUALITY_HIGH }; // Mediabunny模块
 
                 // 状态变量
                 this.isInitialized = false;
@@ -1129,7 +1134,7 @@
                         if (this.config.videoFormat === 'webm') {
                             // WebM：启用透明通道
                             canvasSourceOpts.codec = 'vp9';
-                            canvasSourceOpts.bitrate = this.mbModules.QUALITY_HIGH ;
+                            canvasSourceOpts.bitrate = this.mbModules.QUALITY_HIGH;
                             canvasSourceOpts.alpha = 'keep'; // 关键：保留透明数据
                         } else {
                             // MP4：保持原有配置（H.264不支持透明）
@@ -1739,7 +1744,7 @@
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
                     }, 500); // 500毫秒 = 0.5秒
-                }else if (layActiveValue === 'web_minimap_pan') {
+                } else if (layActiveValue === 'web_minimap_pan') {
                     mini_map_maptalks(); //加载小地图
 
                     // 设置进度条值
@@ -1753,7 +1758,7 @@
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
                     }, 500); // 500毫秒 = 0.5秒
-                }else if (layActiveValue === 'web_rotatemap_pan') {
+                } else if (layActiveValue === 'web_rotatemap_pan') {
                     rotate_map_maptalks(); //加载小地图
 
                     // 设置进度条值
@@ -1767,7 +1772,7 @@
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
                     }, 500); // 500毫秒 = 0.5秒
-                }else if (layActiveValue === 'web_gaodemap_pan') {
+                } else if (layActiveValue === 'web_gaodemap_pan') {
                     gaode_map_amap(); //加载小地图
 
                     // 设置进度条值
@@ -1809,6 +1814,8 @@
                     appv_lap_user_pan.children[5].text = arrayToNewlineString(cadenceColumn.data);
                     appv_lap_user_pan.children[6].text = arrayToNewlineString(heartColumn.data);
                 }
+
+                updateAllTextFontFamily(globalFontFamily);
 
             } else {
                 alert(`Object Already Exists`);
@@ -3892,6 +3899,121 @@
             }
         }
     }
+
+
+    // 1. 定义全局变量（放在代码最顶部，确保全局可访问）
+    let globalFontFamily = ''; // 全局字体变量，默认caption
+    const loadedFonts = new Set(); // 存储已加载的字体，避免重复加载
+
+
+    // 2. 辅助函数：加载字体CSS并更新所有Text元素字体（全局定义）
+    function loadFontAndUpdate(fontName) {
+        const trimmedFont = fontName.trim();
+
+        // 核心修改1：支持空值（清空字体，恢复默认）
+        if (!trimmedFont) {
+            globalFontFamily = ''; // 清空全局字体变量
+            updateAllTextFontFamily(''); // 传入空字符串，触发恢复默认
+            alert('Restored to browser default font!');
+            return;
+        }
+
+        // 原有逻辑：处理自定义字体加载
+        const formattedFont = trimmedFont.replace(/\s+/g, '+'); // 空格转+，适配 Google Fonts
+        const fontCssUrl = `https://gstatic.qaq.qa/css2?family=${formattedFont}&display=swap`;
+
+        // 检查是否已加载，避免重复请求
+        if (loadedFonts.has(formattedFont)) {
+            updateAllTextFontFamily(trimmedFont);
+            alert(`Font "${trimmedFont}" has been loaded, and all text has been updated!`);
+            return;
+        }
+
+        // 创建 link 标签加载 CSS
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = fontCssUrl;
+        link.crossOrigin = 'anonymous';
+
+        // 加载成功回调
+        link.onload = function () {
+            loadedFonts.add(formattedFont);
+            globalFontFamily = trimmedFont; // 更新全局字体变量
+            updateAllTextFontFamily(trimmedFont); // 更新所有文本元素字体
+            alert(`Font "${trimmedFont}" loaded successfully and applied!`);
+        };
+
+        // 加载失败回调
+        link.onerror = function () {
+            alert(`Failed to load font "${trimmedFont}"! Please check if the font name is correct or try another font.`);
+        };
+
+        // 插入到 head 标签（优先加载）
+        document.head.appendChild(link);
+    }
+
+    // 3. 辅助函数：更新所有缓存对象中的Text元素字体
+    function updateAllTextFontFamily(fontName) {
+        // 容错1：确保 validElementIds 是数组
+        if (!Array.isArray(validElementIds)) {
+            console.warn('validElementIds has an invalid format (must be an array of object name strings), unable to update font');
+
+            return;
+        }
+
+        // 容错2：对象名称数组为空时返回
+        if (validElementIds.length === 0) {
+            console.log('validElementIds contains no object names, no need to update font');
+            return;
+        }
+
+        // 核心逻辑：对象名称 → 全局对象实例 → 子元素 → 筛选 tag='Text' → 更新字体
+        validElementIds.forEach(parentName => {
+            // 步骤1：通过对象名称获取全局对象实例（关键修改！替代 getElementById）
+            // 若对象不在 window 全局，而是在某个命名空间下（如 app.parentObj），需改为：const parentObj = app[parentName];
+            const parentObj = window[parentName];
+
+            // 容错3：对象实例不存在（可能名称写错或对象未定义）
+            if (!parentObj) {
+                console.warn(`Global object "${parentName}" does not exist, skipping`);
+                return;
+            }
+
+            // 容错4：对象没有 children 属性，或 children 不可迭代
+            if (!parentObj.children || !Array.isArray(parentObj.children) && !(parentObj.children instanceof NodeList)) {
+                console.warn(`Object "${parentName}" does not have an iterable "children" property, skipping`);
+                return;
+            }
+
+            // 容错5：对象的 children 为空
+            if (parentObj.children.length === 0) {
+                console.log(`Object "${parentName}" has empty "children", skipping`);
+                return;
+            }
+
+            // 步骤2：遍历对象的 children 子元素（validElementIds[xx].children[i]）
+            parentObj.children.forEach(childElement => {
+                // 步骤3：筛选 tag='Text' 的子元素（根据你的实际 tag 定义调整，3选1）
+                // 场景1：子元素的 tag 是直接属性（如 childElement.tag = 'Text'）
+                if (childElement.tag !== 'Text') return;
+
+                // 场景2：子元素的自定义属性（如 childElement['data-tag'] = 'Text'）
+                // if (childElement['data-tag'] !== 'Text') return;
+
+                // 场景3：子元素的 tag 是其他命名（如 childElement.type = 'Text'），按需修改
+                // if (childElement.type !== 'Text') return;
+
+                // 步骤4：更新字体
+                if (fontName.trim()) {
+                    childElement.fontFamily = `${fontName}, sans-serif`; // 自定义字体
+                } else {
+                    childElement.fontFamily = ''; // 清空，恢复默认
+                }
+            });
+        });
+    }
+
+
 </script>
 
 </html>
