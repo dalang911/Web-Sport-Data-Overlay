@@ -3992,24 +3992,28 @@
             }
 
             // 步骤2：遍历对象的 children 子元素（validElementIds[xx].children[i]）
-            parentObj.children.forEach(childElement => {
-                // 步骤3：筛选 tag='Text' 的子元素（根据你的实际 tag 定义调整，3选1）
-                // 场景1：子元素的 tag 是直接属性（如 childElement.tag = 'Text'）
-                if (childElement.tag !== 'Text') return;
+            // 步骤2：递归遍历所有层级的 children，查找所有 tag='Text' 的元素
+            function recursiveUpdateTextFont(parentObj, fontName) {
+                // 终止条件：如果当前对象无 children 或非数组，直接返回
+                if (!parentObj.children || !Array.isArray(parentObj.children)) return;
 
-                // 场景2：子元素的自定义属性（如 childElement['data-tag'] = 'Text'）
-                // if (childElement['data-tag'] !== 'Text') return;
+                parentObj.children.forEach(childElement => {
+                    // 步骤3：筛选 tag='Text' 的子元素，更新字体
+                    if (childElement.tag === 'Text') {
+                        if (fontName.trim()) {
+                            childElement.fontFamily = `${fontName}, sans-serif`; // 自定义字体
+                        } else {
+                            childElement.fontFamily = ''; // 清空，恢复默认
+                        }
+                    }
 
-                // 场景3：子元素的 tag 是其他命名（如 childElement.type = 'Text'），按需修改
-                // if (childElement.type !== 'Text') return;
+                    // 步骤4：递归处理当前子元素的 children（支持无限嵌套）
+                    recursiveUpdateTextFont(childElement, fontName);
+                });
+            }
 
-                // 步骤4：更新字体
-                if (fontName.trim()) {
-                    childElement.fontFamily = `${fontName}, sans-serif`; // 自定义字体
-                } else {
-                    childElement.fontFamily = ''; // 清空，恢复默认
-                }
-            });
+            // 调用递归函数（替换你原来的 parentObj.children.forEach 循环）
+            recursiveUpdateTextFont(parentObj, fontName);
         });
     }
 

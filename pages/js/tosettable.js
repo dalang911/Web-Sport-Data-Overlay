@@ -603,14 +603,20 @@ function tosettable(json) {
 
                 // 第二行：预设字体按钮（默认=清空，Bitter/Satisfy=自定义）
                 const presetBtnGroup = document.createElement('div');
-                presetBtnGroup.className = 'layui-btn-group';
-                presetBtnGroup.style.gap = '8px';
+                // presetBtnGroup.className = 'layui-btn-group';
+                // presetBtnGroup.style.gap = '8px';
 
                 // 预设按钮配置（默认按钮 value 为空字符串）
                 const presetFonts = [
                     { name: 'Default', value: '' }, // 核心：默认=空值，触发恢复默认
                     { name: 'Bitter', value: 'Bitter' },
-                    { name: 'Satisfy', value: 'Satisfy' }
+                    { name: 'Roboto Slab', value: 'Roboto Slab' },
+                    { name: 'Fira Sans', value: 'Fira Sans' },
+                    { name: 'Quicksand', value: 'Quicksand' },
+                    { name: 'Teko', value: 'Teko' },
+                    { name: 'Play', value: 'Play' },
+                    { name: 'Courgette', value: 'Courgette' },
+                    { name: 'VT323', value: 'VT323' },
                 ];
 
                 presetFonts.forEach(preset => {
