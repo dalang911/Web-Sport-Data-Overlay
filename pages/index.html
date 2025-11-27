@@ -3175,7 +3175,31 @@
                         console.log(variable);
 
                         // 将变量添加到 frame 中
+                        if (idValue === 'web_map_pan') {
+                            full_map_maptalks(); //加载大地图
+                            setTimeout(() => {
+                                updateLeaferData(parseInt(maxFrame * 0.7));
+                            }, 500); // 500毫秒 = 0.5秒
+                        } else if (idValue === 'web_minimap_pan') {
+                            mini_map_maptalks(); //加载小地图
+                            setTimeout(() => {
+                                updateLeaferData(parseInt(maxFrame * 0.7));
+                            }, 500); // 500毫秒 = 0.5秒
+                        } else if (idValue === 'web_rotatemap_pan') {
+                            rotate_map_maptalks(); //加载小地图
+                            // 延迟0.5秒执行，不阻断后续代码
+                            setTimeout(() => {
+                                updateLeaferData(parseInt(maxFrame * 0.7));
+                            }, 500); // 500毫秒 = 0.5秒
+                        } else if (idValue === 'web_gaodemap_pan') {
+                            gaode_map_amap(); //加载小地图
+                            setTimeout(() => {
+                                updateLeaferData(parseInt(maxFrame * 0.7));
+                            }, 500); // 500毫秒 = 0.5秒
+                        }
+
                         frame.add(variable);
+
 
                         if (child.width !== undefined && variable.resizeWidth) {
                             variable.resizeWidth(child.width);
