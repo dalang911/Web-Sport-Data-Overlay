@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="./css/maptalks.css">
     <script src="./js/maptalks.min.js"></script>
     <script src="./js/widget.js"></script>
+    <script src="./js/initialize_widget.js"></script>
     <script src="./js/tosettable.js"></script>
     <script src="./js/updateLeaferData.js"></script>
     <script src="./js/setmaptalks.js"></script>
@@ -346,7 +347,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.63 .更新：颜色选择器更换，支持颜色透明度调整、GOOGLE FONTS全局字体在背景设置里。
+            Beta 0.64 .更新：背景图片预览，用于对比配色，不会被生成；新增一个带头像的主题；
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -404,6 +405,9 @@
                         <div class="tab layui-btn-primary"><i class="layui-icon layui-icon-engine iconcc"></i>
                             <div class="docs-icon-name">Cycling</div>
                         </div>
+                        <div class="tab layui-btn-primary"><i class="layui-icon layui-icon-theme iconcc"></i>
+                            <div class="docs-icon-name">Theme</div>
+                        </div>
                     </div>
                     <div class="demo-tab-body layui-col-md9 grid-demo-bg2 ws-docs-anim" id="tabBody">
                         <div class="layui-show">
@@ -444,6 +448,10 @@
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="x_distance_pan"><img src="./images/l6.png"></div>
                                 <div>Distance</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="zh_distance_pan"><img src="./images/zt1.png"></div>
+                                <div>Avatar</div>
                             </div>
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="lite_distance_pan"><img src="./images/x7.png"></div>
@@ -613,6 +621,12 @@
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="x_power_pan"><img src="./images/x2.png"></div>
                                 <div>Power</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="zh_distance_pan"><img src="./images/zt1.png"></div>
+                                <div>Avatar</div>
                             </div>
                         </div>
                     </div>
@@ -967,6 +981,25 @@
                     }
                     return !shouldSkip;
                 });
+            }
+
+            //去除预览背景图像
+            const bgcolor = appv_bg_pan.children[0].fill;
+            const targetCanvas = appv_bg_pan?.children?.[0];
+            if (targetCanvas) {
+                // 参考高德代码：直接使用 Canvas 实例的 context 属性（无需 getContext）
+                const ctx = targetCanvas.context;
+                if (ctx) {
+                    // 1. 清空画布残留内容
+                    ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+                    // 2. 填充纯色背景
+                    ctx.fillStyle = bgcolor;
+                    ctx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+                    // 强制触发重绘（leaferjs 核心）
+                    targetCanvas.paint();
+                }
+                targetCanvas.fill = bgcolor; // 保留fill属性，便于后续回显
+                delete appv_bg_pan.bgImageUrl; // 清空图片地址存储
             }
 
             if (frontendObjects.length === 0) {
@@ -1786,6 +1819,14 @@
                     setTimeout(() => {
                         updateLeaferData(parseInt(maxFrame * 0.7));
                     }, 500); // 500毫秒 = 0.5秒
+                } else if (layActiveValue === 'zh_distance_pan') {
+                    frame.add(window[layActiveValue]);
+                    set_zh_distance_pan(); //加载小地图
+
+                    // 设置进度条值
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.value = parseInt(maxFrame * 0.7);
+
                 } else {
                     frame.add(window[layActiveValue]);
                     // 设置进度条值
@@ -2137,6 +2178,8 @@
         pt_ele_points = [];//高程数据
         slopes_points = [];//坡度数据
         o2o_ele_points = [];//1:1高程数据
+        zh_ele_points = [];//zh高程
+        zh_eled_points = [];//zh高程倒影
 
         if (data.status === 0) {
             //定义数据
@@ -2326,55 +2369,98 @@
             // 在循环外初始化基准高程（以第一个点为基准）
             baseAltitude = trkpt_data.length > 0 ? trkpt_data[0].altitude : 0;
 
-            for (let i = 0; i < trkpt_data.length; i++) {
-                // 处理心率数据，将y轴值映射到0 - 200范围
-                let heartY = mapToRange(trkpt_data[i].heart_rate, 40, heartRateMax, 40, 200);
-                heart_points.push(i * xScale);
-                heart_points.push(200 - heartY);
+            // ========== 第二步：将zh相关逻辑移出外层循环，仅执行1次（核心优化） ==========
+            if (trkpt_data && trkpt_data.length > 0) {
+                // 预计算zh所需的全局参数（仅算1次）
+                const totalDistance = trkpt_data[trkpt_data.length - 1].distance || 0;
+                const maxWidth = (totalDistance / 1000) * 30;
+                const eleFromMin = eleMin-5;
+                const eleFromMax = eleMax+5;
 
-                heartY = mapToRange(trkpt_data[i].heart_rate, heartRateMin, heartRateMax, 0, 200);
-                pt_heart_points.push(i * xScale);
-                pt_heart_points.push(200 - heartY);
+                // 【修改1：定义底部预留像素，统一控制】
+                const bottomOffset = 10; // 底部预留10像素
+                const eleToMin = 40 - bottomOffset; // 原40 → 改为30（最低点Y=30，距离底部10）
+                const eleToMax = 10; // 高海拔Y值不变，高差仍为20（30-10）
 
-                // 处理步频数据，将y轴值映射到0 - 200范围
-                let cadenceY = mapToRange(trkpt_data[i].cadence, 120, cadenceMax, 60, 160);
-                cadences_points.push(i * xScale);
-                cadences_points.push(200 - cadenceY);
+                // 1. 构建rawPoints（仅遍历1次trkpt_data）
+                let rawPoints = [];
+                for (let j = 0; j < trkpt_data.length; j++) { // 改名i→j，避免和外层冲突
+                    const x = totalDistance === 0 ? 0 : (trkpt_data[j].distance / 1000) * 30;
+                    // 映射后的最低点Y=30（距离底部10像素）
+                    const eleY = mapToRange(trkpt_data[j].altitude, eleFromMin, eleFromMax, eleToMin, eleToMax);
+                    rawPoints.push([x, eleY]);
+                }
 
-                // 处理配速数据，将y轴值映射到0 - 200范围
-                let paceY = mapToRange(trkpt_data[i].speed, 0, paceMax, 20, 120);
-                paces_points.push(i * xScale);
-                paces_points.push(200 - paceY);
+                // 2. 抽稀（仅执行1次）
+                const epsilon = 2;
+                const sparsePoints = douglasPeucker(rawPoints, epsilon);
 
-                paceY = mapToRange(trkpt_data[i].speed, paceMin, paceMax, 0, 200);
-                pt_paces_points.push(i * xScale);
-                pt_paces_points.push(200 - paceY);
+                // 3. 构建zh_ele_points（仅执行1次）
+                let baseElePoints = [];
+                let baseEleYList = [];
+                // 优化：用forEach代替for循环，减少变量声明开销
+                sparsePoints.forEach(([x, y]) => {
+                    baseElePoints.push(x, y);
+                    baseEleYList.push(y);
+                });
+                // 【修改2：闭合点Y值同步改为30（和eleToMin一致）】
+                zh_ele_points = [...baseElePoints, maxWidth, 0, 0, 0]; // 合并push，减少数组操作
 
-                // 处理高程数据，将y轴值映射到0 - 200范围
-                var jdtcd = (trkpt_data[i].distance / trkpt_data[trkpt_data.length - 1].distance) * 400;//计算实时长度，当前距离除全距离，乘容器长度，得到现在位置
-                let eleY = mapToRange(trkpt_data[i].altitude, eleMin - 5, eleMax + 5, 0, 200);
-                ele_points.push(jdtcd);
-                ele_points.push(200 - eleY);
+                // 4. 构建zh_eled_points（仅执行1次）
+                // 【修改3：镜像基线同步改为30，保证倒影最低点也距离底部10像素】
+                const mirrorBaseline = eleToMin; // 原40 → 30（和高程最低点一致）
+                zh_eled_points = []; // 清空
+                sparsePoints.forEach(([x], idx) => {
+                    const eleY = baseEleYList[idx];
+                    const eledY = mirrorBaseline + (mirrorBaseline - eleY);
+                    zh_eled_points.push(x, eledY);
+                });
+                // 【修改4：倒影闭合点Y值同步改为30】
+                zh_eled_points.push(maxWidth, mirrorBaseline, 0, mirrorBaseline); // 合并push
+            }
 
-                eleY = mapToRange(trkpt_data[i].altitude, eleMin, eleMax, 0, 200);
-                pt_ele_points.push(i * xScale);
-                pt_ele_points.push(200 - eleY);
+            // ========== 第三步：原有逐点循环（仅保留非zh逻辑，无重复计算） ==========
+            if (trkpt_data && trkpt_data.length > 0) {
+                const xScale = 800 / (trkpt_data.length - 1); // 预计算xScale，避免循环内重复算
+                const totalDistance = trkpt_data[trkpt_data.length - 1].distance || 0; // 预计算总距离
 
-                // 处理高程数据1:8，将y轴值映射到0 - 200范围
-                //let xScale800 = 800 / (trkpt_data.length - 1);
-                var jdtcd = (trkpt_data[i].distance / trkpt_data[trkpt_data.length - 1].distance) * 800;//计算实时长度，当前距离除全距离，乘容器长度，得到现在位置
-                let eleY18 = mapToRange(trkpt_data[i].altitude, eleMin - 5, eleMax + 5, 0, 50);
-                ele18_points.push(jdtcd);
-                ele18_points.push(50 - eleY18);
+                for (let i = 0; i < trkpt_data.length; i++) {
+                    // 处理心率数据
+                    let heartY = mapToRange(trkpt_data[i].heart_rate, 40, heartRateMax, 40, 200);
+                    heart_points.push(i * xScale, 200 - heartY); // 合并push，减少调用次数
 
-                // 处理等比例高程数据（XY比例1:1，每米映射5像素）
-                // 处理等比例高程数据（修正Y轴方向，解决“反的”问题）
-                const o2o_x = trkpt_data[i].distance * 5; // X方向不变（每米5像素）
-                // Y方向：反转方向，让高程越高越靠上（高程-基准高程 乘以 -5）
-                const o2o_y = (trkpt_data[i].altitude - baseAltitude) * -5;
+                    heartY = mapToRange(trkpt_data[i].heart_rate, heartRateMin, heartRateMax, 0, 200);
+                    pt_heart_points.push(i * xScale, 200 - heartY);
 
-                o2o_ele_points.push(o2o_x);
-                o2o_ele_points.push(o2o_y);
+                    // 处理步频数据
+                    let cadenceY = mapToRange(trkpt_data[i].cadence, 120, cadenceMax, 60, 160);
+                    cadences_points.push(i * xScale, 200 - cadenceY);
+
+                    // 处理配速数据
+                    let paceY = mapToRange(trkpt_data[i].speed, 0, paceMax, 20, 120);
+                    paces_points.push(i * xScale, 200 - paceY);
+
+                    paceY = mapToRange(trkpt_data[i].speed, paceMin, paceMax, 0, 200);
+                    pt_paces_points.push(i * xScale, 200 - paceY);
+
+                    // 处理高程数据
+                    const jdtcd400 = (trkpt_data[i].distance / totalDistance) * 400;
+                    let eleY = mapToRange(trkpt_data[i].altitude, eleMin - 5, eleMax + 5, 0, 200);
+                    ele_points.push(jdtcd400, 200 - eleY);
+
+                    eleY = mapToRange(trkpt_data[i].altitude, eleMin, eleMax, 0, 200);
+                    pt_ele_points.push(i * xScale, 200 - eleY);
+
+                    // 处理高程数据1:8
+                    const jdtcd800 = (trkpt_data[i].distance / totalDistance) * 800;
+                    let eleY18 = mapToRange(trkpt_data[i].altitude, eleMin - 5, eleMax + 5, 0, 50);
+                    ele18_points.push(jdtcd800, 50 - eleY18);
+
+                    // 处理等比例高程数据
+                    const o2o_x = trkpt_data[i].distance * 5;
+                    const o2o_y = (trkpt_data[i].altitude - baseAltitude) * -5;
+                    o2o_ele_points.push(o2o_x, o2o_y);
+                }
             }
 
             huitu();//开始绘制
@@ -2479,8 +2565,63 @@
 
     // 轨迹图数组
     function mapToRange(value, fromMin, fromMax, toMin, toMax) {
+        if (Math.abs(fromMax - fromMin) < 1e-10) { // 浮点容错
+            return (toMin + toMax) / 2;
+        }
         return (value - fromMin) * (toMax - toMin) / (fromMax - fromMin) + toMin;
     }
+
+    // ========== 新增：道格拉斯-普克抽稀函数（核心） ==========
+    // 功能：抽稀点数组，保留趋势，减少点数量
+    // 参数：
+    //   points: 二维点数组 [[x1,y1],[x2,y2],...]
+    //   epsilon: 抽稀阈值（像素），值越大抽稀越狠（推荐1-5，根据需求调整）
+    // ========== 优化版抽稀函数（迭代版，避免递归栈开销） ==========
+    function douglasPeucker(points, epsilon) {
+        if (points.length <= 2) return [...points];
+        const stack = [[0, points.length - 1]];
+        const keep = new Array(points.length).fill(false);
+        keep[0] = true;
+        keep[points.length - 1] = true;
+
+        // 预定义距离计算函数（避免循环内重复声明）
+        const getDistance = (p, lineStart, lineEnd) => {
+            if (lineStart[0] === lineEnd[0] && lineStart[1] === lineEnd[1]) {
+                return Math.hypot(p[0] - lineStart[0], p[1] - lineStart[1]);
+            }
+            const numerator = Math.abs(
+                (lineEnd[1] - lineStart[1]) * p[0] -
+                (lineEnd[0] - lineStart[0]) * p[1] +
+                lineEnd[0] * lineStart[1] -
+                lineEnd[1] * lineStart[0]
+            );
+            const denominator = Math.hypot(lineEnd[1] - lineStart[1], lineEnd[0] - lineStart[0]);
+            return numerator / denominator;
+        };
+
+        while (stack.length > 0) {
+            const [startIdx, endIdx] = stack.pop();
+            let maxDist = 0;
+            let maxIdx = -1;
+
+            for (let i = startIdx + 1; i < endIdx; i++) {
+                const dist = getDistance(points[i], points[startIdx], points[endIdx]);
+                if (dist > maxDist) {
+                    maxDist = dist;
+                    maxIdx = i;
+                }
+            }
+
+            if (maxDist > epsilon) {
+                keep[maxIdx] = true;
+                stack.push([startIdx, maxIdx], [maxIdx, endIdx]);
+            }
+        }
+
+        // 过滤需要保留的点
+        return points.filter((_, idx) => keep[idx]);
+    }
+
 
     //时间转换函数
     function timestampToDateString(timestamp, type) {
@@ -3193,6 +3334,11 @@
                             }, 500); // 500毫秒 = 0.5秒
                         } else if (idValue === 'web_gaodemap_pan') {
                             gaode_map_amap(); //加载小地图
+                            setTimeout(() => {
+                                updateLeaferData(parseInt(maxFrame * 0.7));
+                            }, 500); // 500毫秒 = 0.5秒
+                        } else if (idValue === 'zh_distance_pan') {
+                            set_zh_distance_pan(); //加载小地图
                             setTimeout(() => {
                                 updateLeaferData(parseInt(maxFrame * 0.7));
                             }, 500); // 500毫秒 = 0.5秒

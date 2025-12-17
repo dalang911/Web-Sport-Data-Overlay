@@ -667,6 +667,31 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             el_slope_pan.children[0].points = newSlopePoints;
         }
 
+        //当前日期
+        if (validElementIds.includes('zh_distance_pan')) {
+            var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * zh_distance_pan.children[2].width;//计算实时长度
+            zh_distance_pan.children[5].x = jdtcd;
+
+            //行进时间
+            zh_distance_pan.children[5].children[5].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
+
+            //行进距离
+            let currentDistance = trkpt_data[currentFrame].distance;
+            let distanceInKm = Math.round(currentDistance / 1000 * 100) / 100;
+            // 更新进度文本
+            zh_distance_pan.children[5].children[4].text = `${distanceInKm}Km`;
+
+
+            // 根据 currentFrame 奇偶性设置旋转角度
+            if (currentFrame % 2 === 1) {
+                // 奇数：旋转角度 12
+                zh_distance_pan.children[5].children[3].rotation = 12;
+            } else {
+                // 偶数：旋转角度 -12
+                zh_distance_pan.children[5].children[3].rotation = -12;
+            }
+        }
+
 
 
 

@@ -155,6 +155,132 @@ function tosettable(json) {
                 break;
 
             // ---------------------- 所有颜色类型统一使用Layui选择器 ----------------------
+
+            // 背景颜色选择（选色时清空图片）
+
+
+// 背景颜色选择（选色时清空画布，填充纯色）
+// 背景颜色选择（选色时清空画布，填充纯色，对齐参考代码写法）
+case 'bg_color':
+    createLayuiColorPicker(inputDiv, item, function (color) {
+        // 1. 更新全局变量
+        new Function('value', 'window.' + item.url + ' = value;')(color);
+        const targetCanvas = appv_bg_pan?.children?.[0];
+        if (targetCanvas) {
+            // 参考高德代码：直接使用 Canvas 实例的 context 属性（无需 getContext）
+            const ctx = targetCanvas.context;
+            if (ctx) {
+                // 1. 清空画布残留内容
+                ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+                // 2. 填充纯色背景
+                ctx.fillStyle = color;
+                ctx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+                // 参考高德代码：调用 paint() 强制触发重绘（leaferjs 核心）
+                targetCanvas.paint();
+            }
+            targetCanvas.fill = color; // 保留fill属性，便于后续回显
+            delete appv_bg_pan.bgImageUrl; // 清空图片地址存储
+        }
+    });
+    break;
+
+// 背景图片选择（参考高德代码：context.drawImage + paint() 重绘）
+case 'bg_image':
+    // 创建图片预览容器
+    const imgContainer = document.createElement('div');
+    imgContainer.className = 'layui-row layui-col-space2 layui-margin-top';
+    // 关键调整：flex顶部对齐 + 自动换行（原有wrap保留，align-items改flex-start更整齐）
+    imgContainer.style.display = 'flex';
+    imgContainer.style.alignItems = 'flex-start'; // 改为顶部对齐，排版更整洁
+    imgContainer.style.flexWrap = 'wrap'; // 自动换行核心属性
+    imgContainer.style.gap = '8px'; // 增加图片间距，避免拥挤（替代layui-col-space2的间距）
+
+    // 定义备选背景图片（可随意增加，布局会自动适配）
+    const bgImages = [
+        { url: './bg/169.jpg', name: '16:9' },
+        { url: './bg/1692.jpg', name: '16:9' },
+        { url: './bg/1693.jpg', name: '16:9' },
+        { url: './bg/916.jpg', name: '9:16' },
+
+    ];
+
+    // 生成图片预览项（调整为60px宽高）
+    bgImages.forEach((imgItem, index) => {
+        const imgWrapper = document.createElement('div');
+        // 关键调整：栅格列从layui-col-xs6（占1/2）改为layui-col-xs2（占1/6），一行可排6个
+        // 若想一行排4个，可改为 layui-col-xs3；排3个改 layui-col-xs4，按需调整
+        imgWrapper.className = 'layui-col-xs2';
+        imgWrapper.style.cursor = 'pointer';
+        imgWrapper.style.textAlign = 'center';
+        imgWrapper.style.marginBottom = '8px'; // 增加底部间距，换行后更美观
+
+        // 预览图片（核心调整：宽高改为60px）
+        const previewImg = document.createElement('img');
+        previewImg.src = imgItem.url;
+        previewImg.alt = imgItem.name;
+        previewImg.style.width = '60px'; // 改为60px
+        previewImg.style.height = '60px'; // 改为60px
+        previewImg.style.objectFit = 'cover';
+        previewImg.style.border = '2px solid #e6e6e6';
+        previewImg.style.borderRadius = '4px';
+        previewImg.style.margin = '0 auto';
+
+        // 点击图片逻辑（完全不变）
+        previewImg.onclick = function () {
+            const targetCanvas = appv_bg_pan?.children?.[0];
+            if (!targetCanvas) return;
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = imgItem.url;
+
+            img.onload = function () {
+                const ctx = targetCanvas.context;
+                if (!ctx) return;
+
+                ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+                ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    targetCanvas.width,
+                    targetCanvas.height
+                );
+                targetCanvas.paint();
+
+                appv_bg_pan.bgImageUrl = imgItem.url;
+                new Function('value', 'window.' + item.url + ' = value;')(imgItem.url);
+
+                document.querySelectorAll('.bg-img-preview').forEach(img => {
+                    img.style.borderColor = '#e6e6e6';
+                });
+                this.style.borderColor = '#1890ff';
+                layer.msg(`Selected ${imgItem.name}`, { icon: 1, time: 1000 });
+            };
+
+            img.onerror = function () {
+                layer.msg(`Load ${imgItem.name} failed`, { icon: 2, time: 2000 });
+            };
+        };
+
+        // 图片名称文字（样式微调：字体更小一点，适配60px图片）
+        const imgText = document.createElement('div');
+        imgText.textContent = imgItem.name;
+        imgText.style.fontSize = '11px'; // 微调字体大小，更适配60px尺寸
+        imgText.style.marginTop = '4px';
+        imgText.style.color = '#666';
+        imgText.style.whiteSpace = 'nowrap'; // 文字不换行，保持整洁
+
+        previewImg.className = 'bg-img-preview';
+        imgWrapper.appendChild(previewImg);
+        imgWrapper.appendChild(imgText);
+        imgContainer.appendChild(imgWrapper);
+    });
+
+    // 挂载图片容器到输入面板
+    inputDiv.appendChild(imgContainer);
+    break;
+
             case 'color':
                 createLayuiColorPicker(inputDiv, item, function (color) {
                     new Function('value', 'window.' + item.url + ' = value;')(color);
@@ -648,6 +774,223 @@ function tosettable(json) {
                 // 将字体选择容器添加到输入区域
                 inputDiv.appendChild(fontContainer);
                 break;
+
+            case 'zh_p_color':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    // 执行原有逻辑：设置全局变量 + 进度条描边色
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    if (zh_distance_pan?.children?.[2]) {
+                        zh_distance_pan.children[2].stroke = color;
+                    }
+                    // 新增逻辑：遍历 children[3] 的所有子元素，设置 fill 为选中的 color
+                    // 多层容错校验，避免未定义报错
+                    if (zh_distance_pan?.children?.[3]?.children && Array.isArray(zh_distance_pan.children[3].children)) {
+                        zh_distance_pan.children[3].children.forEach(child => {
+                            // 仅当子元素存在 fill 属性时才赋值（避免覆盖非图形元素）
+                            if (child && typeof child.fill !== 'undefined') {
+                                child.fill = color;
+                            }
+                        });
+                    }
+                });
+                break;
+
+            case 'zh_t_color':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    // 执行原有逻辑：设置全局变量 + 进度条描边色
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    if (zh_distance_pan?.children?.[4]) {
+                        zh_distance_pan.children[4].children[0].fill = color;
+                    }
+                    // 新增逻辑：遍历 children[3] 的所有子元素，设置 fill 为选中的 color
+                    // 多层容错校验，避免未定义报错
+                    if (zh_distance_pan?.children?.[4]?.children && Array.isArray(zh_distance_pan.children[4].children)) {
+                        zh_distance_pan.children[4].children.forEach(child => {
+                            // 仅当子元素存在 fill 属性时才赋值（避免覆盖非图形元素）
+                            if (child && typeof child.fill !== 'undefined') {
+                                child.fill = color;
+                            }
+                        });
+                    }
+                });
+                break;
+
+            case 'zh_n_color':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    // 执行原有逻辑：设置全局变量 + 进度条描边色
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    if (zh_distance_pan?.children?.[5]) {
+                        zh_distance_pan.children[5].children[0].fill = color;
+                        zh_distance_pan.children[5].children[1].stroke = color;
+                        zh_distance_pan.children[5].children[2].fill = color;
+                    }
+
+                });
+                break;
+            case 'zh_tx_color':
+                createLayuiColorPicker(inputDiv, item, function (color) {
+                    // 执行原有逻辑：设置全局变量 + 进度条描边色
+                    new Function('value', 'window.' + item.url + ' = value;')(color);
+                    if (zh_distance_pan?.children?.[5]) {
+                        zh_distance_pan.children[5].children[4].fill = color;
+                        zh_distance_pan.children[5].children[5].fill = color;
+                    }
+
+                });
+                break;
+
+            case 'zh_icon_url':
+                // ========== 1. 基础容器布局（layui风格，适配图标排列） ==========
+                const iconContainer = document.createElement('div');
+                iconContainer.className = 'layui-row layui-col-space2 layui-margin-top';
+                iconContainer.style.display = 'flex';
+                iconContainer.style.alignItems = 'center';
+                iconContainer.style.flexWrap = 'wrap';
+
+                // ========== 2. 隐藏的文件选择框（保留本地选图逻辑） ==========
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*'; // 仅允许图片格式
+                fileInput.style.display = 'none';
+                fileInput.onchange = function (e) {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    // 读取本地图片为Base64（纯本地，不上传）
+                    const reader = new FileReader();
+                    reader.onload = function (readerEvent) {
+                        const base64Url = readerEvent.target.result;
+                        try {
+                            // 更新全局变量 + 替换图片URL（移除color相关赋值）
+                            new Function('value', 'window.' + item.url + ' = value;')(base64Url);
+                            if (zh_distance_pan?.children?.[5]?.children?.[3]) {
+                                zh_distance_pan.children[5].children[3].url = base64Url;
+                            }
+                            layer.msg('Local image replaced', { icon: 1, time: 1000 });
+                        } catch (err) {
+                            layer.msg('Image replacement failed: ' + err.message, { icon: 2, time: 2000 });
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                };
+                inputDiv.appendChild(fileInput);
+
+                // ========== 3. 60×60方块上传按钮（放在图标最前方） ==========
+                const uploadSquareBtn = document.createElement('div');
+                uploadSquareBtn.className = 'layui-col-xs3 layui-margin-1';
+                uploadSquareBtn.style.cursor = 'pointer';
+                uploadSquareBtn.style.textAlign = 'center';
+
+                // 60×60方块样式
+                const square = document.createElement('div');
+                square.style.width = '60px';
+                square.style.height = '60px';
+                square.style.backgroundColor = '#f5f5f5';
+                square.style.border = '2px dashed #d9d9d9';
+                square.style.borderRadius = '4px';
+                square.style.display = 'flex';
+                square.style.alignItems = 'center';
+                square.style.justifyContent = 'center';
+                square.style.margin = '0 auto';
+                // 悬浮效果
+                square.onmouseover = () => {
+                    square.style.backgroundColor = '#e8f4ff';
+                    square.style.borderColor = '#1890ff';
+                };
+                square.onmouseout = () => {
+                    square.style.backgroundColor = '#f5f5f5';
+                    square.style.borderColor = '#d9d9d9';
+                };
+                // 点击触发文件选择
+                square.onclick = () => fileInput.click();
+
+                // 方块内的提示文字（英文）
+                const uploadText = document.createElement('span');
+                uploadText.textContent = 'Upload';
+                uploadText.style.fontSize = '12px';
+                uploadText.style.color = '#666';
+                square.appendChild(uploadText);
+
+                // 按钮下方文字说明（英文）
+                const uploadDesc = document.createElement('div');
+                uploadDesc.textContent = 'Image';
+                uploadDesc.style.fontSize = '12px';
+                uploadDesc.style.marginTop = '4px';
+                uploadDesc.style.color = '#666';
+
+                uploadSquareBtn.appendChild(square);
+                uploadSquareBtn.appendChild(uploadDesc);
+                iconContainer.appendChild(uploadSquareBtn); // 放在图标列表最前
+
+                // ========== 4. 服务器备选图片（60×60预览 + 点击替换） ==========
+                const serverIcons = [
+                    { url: './icon/i1.jpg', name: 'Icon 1' },
+                    { url: './icon/i2.png', name: 'Icon 2' },
+                    { url: './icon/i3.png', name: 'Icon 3' },
+                    { url: './icon/i4.png', name: 'Icon 4' }
+                ];
+
+                // 生成备选图片预览项
+                serverIcons.forEach((icon, index) => {
+                    const iconItem = document.createElement('div');
+                    iconItem.className = 'layui-col-xs3 layui-margin-1';
+                    iconItem.style.cursor = 'pointer';
+                    iconItem.style.textAlign = 'center';
+
+                    // 图片元素（60×60固定尺寸）
+                    const iconImg = document.createElement('img');
+                    iconImg.src = icon.url;
+                    iconImg.alt = icon.name;
+                    iconImg.style.width = '60px';
+                    iconImg.style.height = '60px';
+                    iconImg.style.objectFit = 'cover';
+                    iconImg.style.border = '2px solid #e6e6e6';
+                    iconImg.style.borderRadius = '4px';
+                    // 点击图片替换URL
+                    iconImg.onclick = function () {
+                        try {
+                            // 更新全局变量（移除color相关赋值）
+                            new Function('value', 'window.' + item.url + ' = value;')(icon.url);
+                            // 替换目标节点URL
+                            if (zh_distance_pan?.children?.[5]?.children?.[3]) {
+                                zh_distance_pan.children[5].children[3].url = icon.url;
+                            }
+                            // 高亮选中的图片
+                            document.querySelectorAll('.icon-preview-img').forEach(img => {
+                                img.style.borderColor = '#e6e6e6';
+                            });
+                            this.style.borderColor = '#1890ff';
+                            layer.msg(`Selected ${icon.name}`, { icon: 1, time: 1000 });
+                        } catch (err) {
+                            layer.msg('Icon replacement failed: ' + err.message, { icon: 2, time: 2000 });
+                        }
+                    };
+                    iconImg.className = 'icon-preview-img';
+
+                    // 图片名称文字（英文）
+                    const iconText = document.createElement('div');
+                    iconText.textContent = icon.name;
+                    iconText.style.fontSize = '12px';
+                    iconText.style.marginTop = '4px';
+                    iconText.style.color = '#666';
+
+                    iconItem.appendChild(iconImg);
+                    iconItem.appendChild(iconText);
+                    iconContainer.appendChild(iconItem);
+                });
+
+                // ========== 5. 挂载元素到输入容器 ==========
+                // 标题（英文）
+                const previewTitle = document.createElement('div');
+                previewTitle.textContent = 'Select Icon (Click to Select/Upload):';
+                previewTitle.style.fontSize = '12px';
+                previewTitle.style.color = '#333';
+                previewTitle.style.marginBottom = '8px';
+                inputDiv.appendChild(previewTitle);
+
+                inputDiv.appendChild(iconContainer);
+                break;
+
         }
 
         div.appendChild(inputDiv);

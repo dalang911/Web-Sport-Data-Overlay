@@ -32,9 +32,16 @@ window.huitu = function () {
                         "id": "appv_bg_pan",
                         "set": [
                             { "name": `Canvas Settings`, "url": '', "value": "", "type": "title", "tools": false },
-                            { "name": `Canvas color`, "url": "appv_bg_pan.children[0].fill", "value": appv_bg_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Canvas color`, "url": "appv_bg_pan.children[0].fill", "value": appv_bg_pan.children[0].fill, "type": "bg_color", "tools": true },
                             {
-                                "name": `global FontFamily`,
+                                "name": `Background Image`,
+                                "url": "appv_bg_pan.bgImageUrl", // 自定义属性存储图片地址
+                                "value": appv_bg_pan.bgImageUrl || "",
+                                "type": "bg_image",
+                                "tools": true
+                            },
+                            {
+                                "name": `Global FontFamily`,
                                 "url": "",
                                 "value": globalFontFamily || 'caption', // 关联全局字体变量（默认caption）
                                 "type": "font_selector",
@@ -3660,7 +3667,158 @@ window.huitu = function () {
         },
     })
 
+    //zh距离进度条
+    zh_distance_pan = new Box({
+        id: 'zh_distance_pan',
+        x: appvWidth / 2 - 500,  // 保持居中定位
+        y: 20,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        resizeChildren: true,
+        children: [
+            {
+                tag: 'Polygon', //上背景
+                height: 30,
+                x: 0,
+                y: 0,
+                points: zh_ele_points,
+                curve: true,
+                fill:"#7ab6f2",
+            },
+            {
+                tag: 'Polygon', //下背景
+                height: 30,
+                x: 0,
+                y: 0,
+                points: zh_eled_points,
+                curve: true,
+                fill: "#FFFF00",
+            },
+            {
+                tag: 'Line', //进度条
+                y: 30,
+                width: 0,
+                strokeWidth: 5,
+                stroke: '#FFFFFF'
+            },
+            {
+                tag: 'Box',//点
+                y: 30,
+                lockRatio: true,
+                rotation: 0,//控制文字角度 (-10 至 10)
+                resizeChildren: true,
+                children: [
 
+                ]
+            },
+            {
+                tag: 'Box',//里程
+                y: 30,
+                lockRatio: true,
+                rotation: 0,//控制文字角度 (-10 至 10)
+                resizeChildren: true,
+                children: [
+
+                ]
+            },
+            {
+                tag: 'Box',//当前位置
+                y: 30,
+                lockRatio: true,
+                resizeChildren: true,
+                children: [
+                    {
+                        tag: 'Ellipse',
+                        width: 10,
+                        height: 10,
+                        x: 0,
+                        y: 0,
+                        around: 'center',
+                        fill: "#FF6347",
+                    },
+                    {
+                        tag: 'Line',
+                        y: 0,
+                        width: 50,
+                        rotation: -90,
+                        strokeWidth: 5,
+                        stroke: '#FF6347'
+                    },
+                    {
+                        tag: 'Ellipse',//头像背景
+                        width: 50,
+                        height: 50,
+                        x: 0,
+                        y: -50,
+                        around: 'center',
+                        fill: "#FF6347",
+                    },
+                    {
+                        tag: 'Image',//头像
+                        width: 40,
+                        height: 40,
+                        cornerRadius: 2000,
+                        x: 0,
+                        y: -50,
+                        rotation: 12,
+                        around: 'center',
+                        url: './icon/i1.jpg',
+                        draggable: true
+                    },
+                    {
+                        tag: 'Text',//行进距离
+                        text: '',
+                        resizeFontSize: true,
+                        x: -26,
+                        y: -68,
+                        fontSize: 14,
+                        fontWeight: 'black',
+                        fill: '#FFFFFF',
+                        textAlign: 'right',
+                        verticalAlign: 'top',
+                        //shadow: textshadow
+                    },
+                    {
+                        tag: 'Text',//累计用时
+                        text: '',
+                        resizeFontSize: true,
+                        x: -26,
+                        y: -52,
+                        fontSize: 14,
+                        fontWeight: 'black',
+                        fill: '#FFFFFF',
+                        textAlign: 'right',
+                        verticalAlign: 'top',
+                        //shadow: textshadow
+                    },
+                ]
+            },
+
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "zh_distance_pan",
+                        "set": [
+                            { "name": `distance`, "url": zh_distance_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Upper Bg Color`, "url": "zh_distance_pan.children[0].fill", "value": zh_distance_pan.children[0].fill, "type": "color", "tools": true },
+                            { "name": `Lower Bg Color`, "url": "zh_distance_pan.children[1].fill", "value": zh_distance_pan.children[1].fill, "type": "color", "tools": true },
+                            { "name": `Scale Color`, "url": "zh_distance_pan.children[2].stroke", "value": zh_distance_pan.children[2].stroke, "type": "zh_p_color", "tools": true },
+                            { "name": `Scale Text Color`, "url": "zh_distance_pan.children[4].children[0].fill", "value": zh_distance_pan.children[4].children[0].fill, "type": "zh_t_color", "tools": true },
+                            { "name": `Progress Color`, "url": "zh_distance_pan.children[5].children[0].fill", "value": zh_distance_pan.children[5].children[0].fill, "type": "zh_n_color", "tools": true },
+                            { "name": `Progress Text Color`, "url": "zh_distance_pan.children[5].children[4].fill", "value": zh_distance_pan.children[5].children[4].fill, "type": "zh_tx_color", "tools": true },
+                            { "name": `Icon`, "url": "zh_distance_pan.children[5].children[3].url", "value": zh_distance_pan.children[5].children[3].url, "type": "zh_icon_url", "tools": true },
+
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
 
     //默认画布容器
     frame = new Frame({
