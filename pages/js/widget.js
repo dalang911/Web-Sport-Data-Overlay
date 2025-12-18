@@ -3671,7 +3671,7 @@ window.huitu = function () {
     zh_distance_pan = new Box({
         id: 'zh_distance_pan',
         x: appvWidth / 2 - 500,  // 保持居中定位
-        y: 20,
+        y: 80,
         lockRatio: true,
         editable: true,
         hitBox: true,

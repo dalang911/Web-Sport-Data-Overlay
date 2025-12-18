@@ -2421,7 +2421,7 @@
 
             // ========== 第三步：原有逐点循环（仅保留非zh逻辑，无重复计算） ==========
             if (trkpt_data && trkpt_data.length > 0) {
-                const xScale = 800 / (trkpt_data.length - 1); // 预计算xScale，避免循环内重复算
+
                 const totalDistance = trkpt_data[trkpt_data.length - 1].distance || 0; // 预计算总距离
 
                 for (let i = 0; i < trkpt_data.length; i++) {
