@@ -747,7 +747,7 @@
         width: window.appvWidth,
         height: window.appvHeight,
         overflow: 'hide',
-        fill: '#0A9A3800' // 画布背景（黑幕）透明
+        fill: '#00000000' // 画布背景（黑幕）透明
     });
     window.appview.tree.add(window.frame);
 
@@ -796,7 +796,7 @@
         width: window.appvWidth,
         height: window.appvHeight,
         overflow: 'hide',
-        fill: '#0A9A3800'
+        fill: '#00000000'
     });
     window.memoryApp.tree.add(window.memoryFrame);
 
@@ -2194,37 +2194,72 @@
             //总长度
             max_distance_in_km = Math.round(trkpt_data[trkpt_data.length - 1].distance / 1000 * 100) / 100;
 
-            //计算坡度，坡度（正切值） = (高程差/水平距离)，slope*容器宽度为高度
+            // 计算坡度 + 累计爬升(Gain)/累计下降(Loss)
+            // 坡度（正切值） = (高程差/水平距离)，slope*容器宽度为高度
+            // Gain：从第一个点到当前点的累计爬升总高度（仅累加上升的高程差）
+            // Loss：从第一个点到当前点的累计下降总高度（仅累加下降的高程差，取绝对值）
             data.data.trkpt.forEach((point, index) => {
+                // ========== 原有坡度计算逻辑 ==========
                 if (index === 0 || index === data.data.trkpt.length - 1) {
                     point.slope = 0;
-                    return;
-                }
-
-                // 获取前一个点和后一个点
-                const prevPoint = data.data.trkpt[index - 1];
-                const nextPoint = data.data.trkpt[index + 1];
-
-                // 计算前后总距离差，（i-1 → i+1）
-                const totalDistance = nextPoint.distance - prevPoint.distance;
-
-                if (totalDistance === 0) {
-                    point.slope = 0;
-                    return;
-                }
-
-                // 计算前后总高程差
-                const totalAltitude = nextPoint.altitude - prevPoint.altitude;
-
-                // 当前点的坡度 = 总高程差 / 总距离差保留两位小数
-                let now_slope = Math.round((totalAltitude / totalDistance) * 100) / 100;
-                if (now_slope > 1) {
-                    point.slope = 1;
-                } else if (now_slope < -1) {
-                    point.slope = -1;
                 } else {
-                    point.slope = now_slope
+                    // 获取前一个点和后一个点
+                    const prevPoint = data.data.trkpt[index - 1];
+                    const nextPoint = data.data.trkpt[index + 1];
+
+                    // 计算前后总距离差，（i-1 → i+1）
+                    const totalDistance = nextPoint.distance - prevPoint.distance;
+
+                    if (totalDistance === 0) {
+                        point.slope = 0;
+                    } else {
+                        // 计算前后总高程差
+                        const totalAltitude = nextPoint.altitude - prevPoint.altitude;
+
+                        // 当前点的坡度 = 总高程差 / 总距离差保留两位小数
+                        let now_slope = Math.round((totalAltitude / totalDistance) * 100) / 100;
+                        // 坡度值限制在 [-1, 1] 范围内
+                        if (now_slope > 1) {
+                            point.slope = 1;
+                        } else if (now_slope < -1) {
+                            point.slope = -1;
+                        } else {
+                            point.slope = now_slope;
+                        }
+                    }
                 }
+
+                // ========== 新增：累计爬升(Gain)/累计下降(Loss)计算 ==========
+                // 初始化累计值（第一个点的累计爬升/下降都为0）
+                let cumulativeGain = 0;
+                let cumulativeLoss = 0;
+
+                // 从第二个点开始，逐个计算与前一个点的高程差
+                if (index > 0) {
+                    // 获取前一个点的高程和当前点的高程（增加空值判断，避免NaN）
+                    const prevAltitude = data.data.trkpt[index - 1].altitude ?? 0;
+                    const currentAltitude = point.altitude ?? 0;
+                    // 计算相邻两点的高程差
+                    const altitudeDiff = currentAltitude - prevAltitude;
+
+                    // 继承前一个点的累计值（核心：累计值是持续累加的）
+                    cumulativeGain = data.data.trkpt[index - 1].Gain ?? 0;
+                    cumulativeLoss = data.data.trkpt[index - 1].Loss ?? 0;
+
+                    // 高程差>0：爬升，累加到Gain
+                    if (altitudeDiff > 0) {
+                        cumulativeGain += altitudeDiff;
+                    }
+                    // 高程差<0：下降，取绝对值累加到Loss
+                    else if (altitudeDiff < 0) {
+                        cumulativeLoss += Math.abs(altitudeDiff);
+                    }
+                    // 高程差=0：无变化，累计值不变
+                }
+
+                // 给当前点赋值累计爬升和累计下降（保留两位小数，避免精度问题）
+                point.Gain = Math.round(cumulativeGain * 100) / 100;
+                point.Loss = Math.round(cumulativeLoss * 100) / 100;
             });
 
             //计算方位角
@@ -2374,8 +2409,8 @@
                 // 预计算zh所需的全局参数（仅算1次）
                 const totalDistance = trkpt_data[trkpt_data.length - 1].distance || 0;
                 const maxWidth = (totalDistance / 1000) * 30;
-                const eleFromMin = eleMin-5;
-                const eleFromMax = eleMax+5;
+                const eleFromMin = eleMin - 5;
+                const eleFromMax = eleMax + 5;
 
                 // 【修改1：定义底部预留像素，统一控制】
                 const bottomOffset = 10; // 底部预留10像素
@@ -2462,6 +2497,13 @@
                     o2o_ele_points.push(o2o_x, o2o_y);
                 }
             }
+
+            //插入爬升和下降
+
+
+
+
+
 
             huitu();//开始绘制
 
@@ -2799,8 +2841,8 @@
         rq.data.summary.total_time = sec; //训练时长
         rq.data.summary.total_timer_time = sec; //训练时长
         rq.data.motion.distance = parseFloat(gpx.tracks[0].distance.total.toFixed(2));//训练路程
-        rq.data.motion.total_ascent = gpx.tracks[0].elevation.pos;//总爬升
-        rq.data.motion.total_descent = gpx.tracks[0].elevation.neg;//总下降
+        rq.data.motion.total_ascent = parseFloat(gpx.tracks[0].elevation.pos).toFixed(2);//总爬升
+        rq.data.motion.total_descent = parseFloat(gpx.tracks[0].elevation.neg).toFixed(2);//总下降
         //计算每km用时
         // 假设rq对象已经定义好了，并且包含了所需的属性
         // 初始化变量
@@ -2948,8 +2990,8 @@
         rq.data.summary.total_time = sec; //训练时长
         rq.data.summary.total_timer_time = sec; //训练时长
         rq.data.motion.distance = parseFloat(tcx.tracks[0].distance.total.toFixed(2));//训练路程
-        rq.data.motion.total_ascent = tcx.tracks[0].elevation.pos;//总爬升
-        rq.data.motion.total_descent = tcx.tracks[0].elevation.neg;//总下降
+        rq.data.motion.total_ascent = parseFloat(tcx.tracks[0].elevation.pos).toFixed(2);//总爬升
+        rq.data.motion.total_descent = parseFloat(tcx.tracks[0].elevation.neg).toFixed(2);//总下降
         //计算每km用时
         // 假设rq对象已经定义好了，并且包含了所需的属性
         // 初始化变量

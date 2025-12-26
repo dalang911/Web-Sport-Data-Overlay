@@ -2329,6 +2329,89 @@ window.huitu = function () {
         },
     })
 
+    //爬升
+    text_gain_pan = new Box({
+        id: 'text_gain_pan',
+        x: appvWidth - 400,
+        y: appvHeight - 200,
+        width: 350,
+        height: 100,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                width: 350,
+                resizeFontSize: true,
+                fontSize: 52.5,
+                fontWeight: 'black',
+                text: `--`,
+                fill: '#FFFFFF',
+                textAlign: 'left',
+                verticalAlign: 'top',
+                shadow: textshadow
+            },
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "text_gain_pan",
+                        "set": [
+                            { "name": `Gain`, "url": text_gain_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "text_gain_pan.children[0].fill", "value": text_gain_pan.children[0].fill, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+    //下降
+    text_loss_pan = new Box({
+        id: 'text_loss_pan',
+        x: appvWidth - 400,
+        y: appvHeight - 150,
+        width: 350,
+        height: 100,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                width: 350,
+                resizeFontSize: true,
+                fontSize: 52.5,
+                fontWeight: 'black',
+                text: `--`,
+                fill: '#FFFFFF',
+                textAlign: 'left',
+                verticalAlign: 'top',
+                shadow: textshadow
+            },
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "text_loss_pan",
+                        "set": [
+                            { "name": `Loss`, "url": text_loss_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "text_loss_pan.children[0].fill", "value": text_loss_pan.children[0].fill, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
 
     //心率
     el_heart_pan = new Box({
@@ -3684,7 +3767,7 @@ window.huitu = function () {
                 y: 0,
                 points: zh_ele_points,
                 curve: true,
-                fill:"#7ab6f2",
+                fill: "#7ab6f2",
             },
             {
                 tag: 'Polygon', //下背景

@@ -165,7 +165,15 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             TO_gps_pan.children[0].text = `${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_lat)}\n${convertToDegreeMinuteSecond(trkpt_data[currentFrame].position_long)}`;
         }
 
+        //当前爬升
+        if (validElementIds.includes('text_gain_pan')) {
+            text_gain_pan.children[0].text = `Gain: ${parseInt(trkpt_data[currentFrame].Gain)} m`;;
+        }
 
+        //当前下降
+        if (validElementIds.includes('text_loss_pan')) {
+            text_loss_pan.children[0].text = `Loss: ${parseInt(trkpt_data[currentFrame].Loss)} m`;;
+        }
 
 
         //当前状态
