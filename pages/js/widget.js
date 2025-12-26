@@ -4,7 +4,7 @@ window.huitu = function () {
         x: 2,
         y: 2,
         blur: 0,
-        color: '#000000'
+        color: '#333333'
     }
     console.log('清空tree');
     //背景画布
@@ -21,7 +21,7 @@ window.huitu = function () {
                 tag: 'Canvas',
                 width: appvWidth,
                 height: appvHeight,
-                fill: '#0A9A38'
+                fill: '#000000'
             }
         ],
         event: {
