@@ -1103,8 +1103,8 @@
         window.VideoGenerator = class VideoGenerator {
             constructor(frameCanvas, options = {}, onStatus) {
                 this.config = {
-                    width: 1920,
-                    height: 1080,
+                    width: appvWidth,
+                    height: appvHeight,
                     codec: 'avc', // MP4默认H.264
                     bitrate: 8_000_000, // MP4默认8Mbps
                     quality: 1,
@@ -2106,10 +2106,14 @@
                                     canvElement.style.width = canvWidth + 'px';
                                     canvElement.style.height = canvHeight + 'px';
 
+                                    memoryFrame.width = appvWidth;//更新内存画幅
+                                    memoryFrame.height = appvHeight;//更新内存画幅
+
                                     appview.tree.clear();
                                     appview.width = 960;
                                     appview.height = 960;
                                     processJson(data); // 调用processJson函数并传入解析后的JSON数据
+
 
                                     //upFrame(parseInt(maxFrame * 0.7));//默认祯
 
@@ -2125,6 +2129,10 @@
                                     const canvElement = document.getElementById('canv');
                                     canvElement.style.width = canvWidth + 'px';
                                     canvElement.style.height = canvHeight + 'px';
+
+                                    memoryFrame.width = appvWidth;//更新内存画幅
+                                    memoryFrame.height = appvHeight;//更新内存画幅
+
                                     appview.tree.clear();
                                     appview.width = 960;
                                     appview.height = 960;
