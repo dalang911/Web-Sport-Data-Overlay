@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>华为运动数据转GPX</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .drop-area { border: 2px dashed #ccc; border-radius: 8px; padding: 3rem; text-align: center; margin: 2rem 0; cursor: pointer; }
+        .drop-area.active { border-color: #2196F3; background: #f0f7ff; }
+        #status { margin: 1rem 0; padding: 1rem; border-radius: 4px; display: none; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .error { background: #ffebee; color: #c62828; }
+        button { background: #2196F3; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        button:disabled { background: #90caf9; cursor: not-allowed; }
+        .feature-note { color: #666; margin: 1rem 0; padding: 1rem; background: #f5f5f5; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>华为运动数据转GPX工具</h1>
+    <p>支持拖入或选择华为运动健康导出的HiTrack文件，转换为GPX格式并下载</p>
+
+    <div class="feature-note">
+        ✨ 核心特性：<br>
+        - 完全保留原始数据记录，不补齐每秒数据<br>
+        - 新增速度数据解析（tp=rs类型），转换为km/h<br>
+        - 步频、心率、海拔、速度匹配到对应原始位置点<br>
+        - 严格遵循原始数据的时间间隔
+    </div>
+
+    <div class="drop-area" id="dropArea">
+        <p>📂 拖入文件到此处</p>
+        <p>或</p>
+        <label for="fileInput">
+            <button type="button">选择文件</button>
+            <input type="file" id="fileInput" style="display: none;">
+        </label>
+    </div>
+
+    <div id="status"></div>
+
+    <script>
+        // 全局变量存储解析后的数据
+        let trackData = {
+            points: [], // 存储所有原始轨迹点 { time, lat, lon, alt, hr, cadence, speed }
+            startTime: null,
+            endTime: null
+        };
+
+        // DOM元素
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const statusEl = document.getElementById('status');
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 拖放事件
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.classList.add('active');
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.classList.remove('active');
+            });
+
+            dropArea.addEventListener('drop', handleDrop, false);
+            fileInput.addEventListener('change', handleFileSelect, false);
+        }
+
+        // 处理文件拖放
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length) {
+                processFile(files[0]);
+            }
+        }
+
+        // 处理文件选择
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length) {
+                processFile(files[0]);
+            }
+        }
+
+        // 处理文件读取和解析
+        function processFile(file) {
+            showStatus(`正在解析文件: ${file.name}`, 'success');
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    parseHiTrackContent(content);
+                    generateGPX(file.name.replace(/\.[^/.]+$/, "") + '.gpx');
+                    showStatus(`转换成功！已生成保留原始数据的GPX文件（共${trackData.points.length}个原始位置点）`, 'success');
+                } catch (err) {
+                    showStatus(`转换失败: ${err.message}`, 'error');
+                    console.error('解析错误:', err);
+                }
+            };
+
+            reader.onerror = function() {
+                showStatus('文件读取失败，请重试', 'error');
+            };
+
+            reader.readAsText(file);
+        }
+
+        // 解析HiTrack文件内容（仅保留原始位置点+新增速度解析）
+        function parseHiTrackContent(content) {
+            // 重置数据
+            trackData = { points: [], startTime: null, endTime: null };
+
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            const tempData = {
+                locations: [], // 原始位置数据（仅保留实际存在的点）
+                heartRates: [], // 心率数据
+                altitudes: [], // 海拔数据
+                cadences: [], // 步频数据
+                speeds: [] // 速度数据（新增）
+            };
+
+            // 按行解析不同类型数据
+            lines.forEach(line => {
+                const parts = line.trim().split(';').filter(part => part);
+                const typePart = parts[0];
+                if (!typePart.startsWith('tp=')) return;
+
+                const type = typePart.split('=')[1];
+                const dataObj = {};
+
+                // 解析键值对
+                parts.forEach(part => {
+                    const [key, value] = part.split('=');
+                    if (key && value !== undefined) {
+                        dataObj[key] = value;
+                    }
+                });
+
+                // 处理不同类型数据
+                switch(type) {
+                    case 'lbs': // 位置数据（仅保留有效原始点）
+                        handleLocationData(dataObj, tempData.locations);
+                        break;
+                    case 'h-r': // 心率数据
+                        handleHeartRateData(dataObj, tempData.heartRates);
+                        break;
+                    case 'alti': // 海拔数据
+                        handleAltitudeData(dataObj, tempData.altitudes);
+                        break;
+                    case 's-r': // 步频数据
+                        handleCadenceData(dataObj, tempData.cadences);
+                        break;
+                    case 'rs': // 速度数据（新增）
+                        handleSpeedData(dataObj, tempData.speeds);
+                        break;
+                    default:
+                        // 忽略其他类型数据
+                        break;
+                }
+            });
+
+            // 合并所有数据（仅匹配原始位置点，不新增任何点）
+            mergeTrackData(tempData);
+        }
+
+        // 处理位置数据（仅保留有效原始点，不补齐）
+        function handleLocationData(dataObj, locations) {
+            // 跳过暂停标记点 (lat=90, lon=-80)
+            if (parseFloat(dataObj.lat) === 90 && parseFloat(dataObj.lon) === -80) {
+                return;
+            }
+
+            // 转换时间戳
+            const time = convertTimestamp(parseFloat(dataObj.t));
+            if (!time) return;
+
+            // 直接添加原始位置点，不做任何补齐
+            locations.push({
+                time: time,
+                lat: parseFloat(dataObj.lat),
+                lon: parseFloat(dataObj.lon),
+                alt: dataObj.alt ? parseFloat(dataObj.alt) : null
+            });
+        }
+
+        // 处理心率数据
+        function handleHeartRateData(dataObj, heartRates) {
+            const time = convertTimestamp(parseFloat(dataObj.k));
+            if (!time) return;
+
+            heartRates.push({
+                time: time,
+                hr: parseInt(dataObj.v, 10)
+            });
+        }
+
+        // 处理海拔数据
+        function handleAltitudeData(dataObj, altitudes) {
+            const time = convertTimestamp(parseFloat(dataObj.k));
+            if (!time) return;
+
+            altitudes.push({
+                time: time,
+                alt: parseFloat(dataObj.v)
+            });
+        }
+
+        // 处理步频数据
+        function handleCadenceData(dataObj, cadences) {
+            const time = convertTimestamp(parseFloat(dataObj.k));
+            if (!time) return;
+
+            const cadenceValue = parseInt(dataObj.v, 10);
+            // 过滤无效步频值（0通常表示暂停或骑行状态）
+            if (cadenceValue > 0) { // 仅保留有效步频值（>0）
+                cadences.push({
+                    time: time,
+                    cadence: cadenceValue
+                });
+            }
+        }
+
+        // 处理速度数据（新增）
+        function handleSpeedData(dataObj, speeds) {
+            // 解析相对时间（k：运动开始后的秒数）和速度值（v：分米/秒 dm/s）
+            const relativeTime = parseInt(dataObj.k, 10);
+            const speedDmPerSec = parseFloat(dataObj.v);
+
+            // 过滤无效速度值（负数或0表示静止/无效）
+            if (speedDmPerSec <= 0) return;
+
+            speeds.push({
+                relativeTime: relativeTime, // 相对运动开始时间的秒数
+                speedDmPerSec: speedDmPerSec // 原始单位：分米/秒
+            });
+        }
+
+        // 转换华为时间戳为ISO格式
+        function convertTimestamp(timestamp) {
+            try {
+                // 处理不同格式的时间戳（秒、毫秒、科学计数法）
+                if (timestamp > 1e12) {
+                    // 毫秒级时间戳
+                    timestamp = timestamp / 1000;
+                } else if (timestamp > 1e11) {
+                    // 13位毫秒级（如1762335282000）
+                    timestamp = timestamp / 1000;
+                } else if (timestamp < 604800) {
+                    // 相对时间（小于7天），暂不处理
+                    return null;
+                }
+
+                // 转换为ISO格式（UTC+0）
+                const date = new Date(timestamp * 1000);
+                if (isNaN(date.getTime())) return null;
+
+                // GPX要求的ISO格式：YYYY-MM-DDTHH:mm:ssZ
+                return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+            } catch (err) {
+                return null;
+            }
+        }
+
+        // 合并所有数据（仅匹配原始位置点，不新增任何点+速度匹配）
+        function mergeTrackData(tempData) {
+            // 对位置数据按时间排序（保持原始顺序）
+            const sortedLocations = tempData.locations.sort((a, b) => new Date(a.time) - new Date(b.time));
+            if (sortedLocations.length === 0) {
+                throw new Error('未找到有效位置数据');
+            }
+
+            // 排序辅助数据（心率、海拔、步频）
+            const sortedHR = tempData.heartRates.sort((a, b) => new Date(a.time) - new Date(b.time));
+            const sortedAlt = tempData.altitudes.sort((a, b) => new Date(a.time) - new Date(b.time));
+            const sortedCadence = tempData.cadences.sort((a, b) => new Date(a.time) - new Date(b.time));
+
+            // 处理速度数据：计算绝对时间（运动开始时间+相对时间）并排序（新增）
+            const activityStartTime = new Date(sortedLocations[0].time);
+            const sortedSpeeds = tempData.speeds
+                .map(speed => ({
+                    // 计算速度数据的绝对时间
+                    time: new Date(activityStartTime.getTime() + speed.relativeTime * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z'),
+                    // 转换为km/h：dm/s → m/s（÷10）→ km/h（×3.6）
+                    speedKmPerH: (speed.speedDmPerSec / 10) * 3.6
+                }))
+                .sort((a, b) => new Date(a.time) - new Date(b.time));
+
+            // 为每个原始位置点匹配最近的辅助数据（扩大匹配窗口到10秒）
+            sortedLocations.forEach(loc => {
+                const point = {
+                    time: loc.time,
+                    lat: loc.lat,
+                    lon: loc.lon,
+                    alt: loc.alt || findNearestData(loc.time, sortedAlt, 'alt', 10000), // 10秒匹配窗口
+                    hr: findNearestData(loc.time, sortedHR, 'hr', 10000),
+                    cadence: findNearestData(loc.time, sortedCadence, 'cadence', 10000),
+                    speed: findNearestData(loc.time, sortedSpeeds, 'speedKmPerH', 10000) // 新增速度匹配
+                };
+
+                trackData.points.push(point);
+            });
+
+            // 设置起止时间
+            trackData.startTime = trackData.points[0].time;
+            trackData.endTime = trackData.points[trackData.points.length - 1].time;
+        }
+
+        // 查找最近时间戳的数据（不生成新点，仅匹配）
+        function findNearestData(targetTime, dataArray, field, maxDiff = 5000) {
+            if (dataArray.length === 0) return null;
+
+            const targetDate = new Date(targetTime);
+            let nearestValue = null;
+            let minDiff = Infinity;
+
+            dataArray.forEach(item => {
+                const diff = Math.abs(new Date(item.time) - targetDate);
+                if (diff < minDiff && diff <= maxDiff) {
+                    minDiff = diff;
+                    nearestValue = item[field];
+                }
+            });
+
+            return nearestValue;
+        }
+
+        // 生成GPX文件（仅包含原始位置点+速度字段）
+        function generateGPX(filename) {
+            // GPX XML模板
+            const gpxTemplate = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="华为运动数据转GPX工具" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxdata="http://www.cluetrust.com/XML/GPXDATA/1/0">
+  <metadata>
+    <name>${filename}</name>
+    <time>${new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')}</time>
+    <desc>华为运动健康原始数据转换生成，共${trackData.points.length}个位置点</desc>
+    <author>
+      <name>华为运动数据转GPX工具</name>
+    </author>
+  </metadata>
+  <trk>
+    <name>华为运动轨迹</name>
+    <trkseg>
+      ${generateTrackPoints()}
+    </trkseg>
+  </trk>
+</gpx>`;
+
+            // 创建Blob并下载
+            const blob = new Blob([gpxTemplate], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }
+
+        // 生成轨迹点XML（移除RunCadence+新增速度字段）
+        function generateTrackPoints() {
+            return trackData.points.map(point => {
+                let xml = `<trkpt lat="${point.lat.toFixed(6)}" lon="${point.lon.toFixed(6)}">`;
+                xml += `<time>${point.time}</time>`;
+
+                // 添加海拔（原始数据或匹配到的数据）
+                if (point.alt !== null && !isNaN(point.alt)) {
+                    xml += `<ele>${point.alt.toFixed(1)}</ele>`;
+                }
+
+                // 添加扩展字段（心率+步频+速度，仅保留存在的数据）
+                let extensions = [];
+                if (point.hr !== null && point.hr > 0) {
+                    extensions.push(`<gpxtpx:hr>${point.hr}</gpxtpx:hr>`);
+                }
+                if (point.cadence !== null && point.cadence > 0) {
+                    // 仅保留通用步频字段，移除gpxtpx:RunCadence
+                    extensions.push(`<gpxdata:cadence>${point.cadence}</gpxdata:cadence>`);
+                }
+                if (point.speed !== null && point.speed > 0) {
+                    // 新增速度字段（单位：km/h）
+                    extensions.push(`<gpxdata:speed>${point.speed.toFixed(1)}</gpxdata:speed>`);
+                }
+
+                if (extensions.length > 0) {
+                    xml += `<extensions><gpxtpx:TrackPointExtension>${extensions.join('')}</gpxtpx:TrackPointExtension></extensions>`;
+                }
+
+                xml += `</trkpt>`;
+                return xml;
+            }).join('\n      ');
+        }
+
+        // 显示状态信息
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = type;
+            statusEl.style.display = 'block';
+
+            // 5秒后自动隐藏成功状态
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // 初始化
+        window.onload = initEventListeners;
+    </script>
+</body>
+</html>
