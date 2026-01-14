@@ -107,6 +107,13 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             text_nowtime_pan.children[0].text = secondsToHHMMSS(trkpt_data[currentFrame].sec);
         }
 
+        //当前倒计时
+        if (validElementIds.includes('text_countdown_pan')) {
+            //当前进行时间 var now_time_str = secondsToHHMMSS(trkpt_data[currentFrame].sec);
+            text_countdown_pan.children[0].text = secondsToHHMMSS(trkpt_data[maxFrame - 1].sec - trkpt_data[currentFrame].sec);
+
+        }
+
         //画地图轨迹
         if (validElementIds.includes('appv_map_pan') || validElementIds.includes('appv_map_a_pan')) {
             //画地图

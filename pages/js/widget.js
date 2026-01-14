@@ -1096,6 +1096,48 @@ window.huitu = function () {
         }
     })
 
+    //运动倒计时时间框
+    text_countdown_pan = new Box({
+        id: 'text_countdown_pan',
+        x: appvWidth - 400,
+        y: appvHeight - 400,
+        width: 350,
+        height: 100,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                width: 350,
+                resizeFontSize: true,
+                fontSize: 72,
+                fontWeight: 'black',
+                text: `--`,
+                fill: '#FFFFFF',
+                textAlign: 'left',
+                verticalAlign: 'top',
+                shadow: textshadow
+            },
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "text_countdown_pan",
+                        "set": [
+                            { "name": `Countdown`, "url": text_countdown_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "text_countdown_pan.children[0].fill", "value": text_countdown_pan.children[0].fill, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
     //地图
     appv_map_pan = new Box({
         id: 'appv_map_pan',

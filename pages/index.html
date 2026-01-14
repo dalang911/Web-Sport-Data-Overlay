@@ -432,6 +432,10 @@
                                 <div>Sport ET</div>
                             </div>
                             <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="text_countdown_pan"><img src="./images/m4.png"></div>
+                                <div>Countdown</div>
+                            </div>
+                            <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="el_weather_pan"><img src="./images/m6.png"></div>
                                 <div>Weather</div>
                             </div>
@@ -2245,7 +2249,12 @@
                     }
                 }
 
-                // ========== 新增：累计爬升(Gain)/累计下降(Loss)计算 ==========
+                // ========== 新增：累计爬升(Gain)/累计下降(Loss)计算 (已添加阈值过滤) ==========
+
+                // 定义一个最小高度变化阈值，单位：米
+                // 任何小于或等于此值的高度变化都将被忽略
+                const MIN_ALTITUDE_CHANGE = 0.15;
+
                 // 初始化累计值（第一个点的累计爬升/下降都为0）
                 let cumulativeGain = 0;
                 let cumulativeLoss = 0;
@@ -2258,22 +2267,25 @@
                     // 计算相邻两点的高程差
                     const altitudeDiff = currentAltitude - prevAltitude;
 
-                    // 继承前一个点的累计值（核心：累计值是持续累加的）
+                    // 继承前一个点的累计值
                     cumulativeGain = data.data.trkpt[index - 1].Gain ?? 0;
                     cumulativeLoss = data.data.trkpt[index - 1].Loss ?? 0;
 
-                    // 高程差>0：爬升，累加到Gain
-                    if (altitudeDiff > 0) {
+                    // --- 核心修改部分 ---
+                    // 只有当高程差的绝对值大于阈值时，才进行累加
+                    if (altitudeDiff > MIN_ALTITUDE_CHANGE) {
+                        // 爬升，且高度变化大于阈值
                         cumulativeGain += altitudeDiff;
-                    }
-                    // 高程差<0：下降，取绝对值累加到Loss
-                    else if (altitudeDiff < 0) {
+                    } else if (altitudeDiff < -MIN_ALTITUDE_CHANGE) {
+                        // 下降，且高度变化的绝对值大于阈值
                         cumulativeLoss += Math.abs(altitudeDiff);
                     }
-                    // 高程差=0：无变化，累计值不变
+                    // 如果 -MIN_ALTITUDE_CHANGE <= altitudeDiff <= MIN_ALTITUDE_CHANGE
+                    // 则认为是微小波动或噪音，不进行任何操作，累计值保持不变
+                    // ----------------------
                 }
 
-                // 给当前点赋值累计爬升和累计下降（保留两位小数，避免精度问题）
+                // 给当前点赋值累计爬升和累计下降（保留两位小数）
                 point.Gain = Math.round(cumulativeGain * 100) / 100;
                 point.Loss = Math.round(cumulativeLoss * 100) / 100;
             });
@@ -3174,13 +3186,18 @@
                 cadenceCorrected = cadenceCorrected * 2;
             }
             // 计算步幅
-            let stepLength = 0;
-            if (cadenceCorrected > 0) {
-                // 将步频从步/分钟转换为步/秒
-                //var cadencePerSecond = cadenceCorrected / 60 / 3;
-                // 步幅 = 速度（km每小时） / 步频（步/秒）
-                stepLength = (speed * 1000) / (cadenceCorrected * 60);
+            let stepLength = 0; // 初始化步幅变量
 
+            // 1. 优先检查并使用 currentPoint.step_length
+            // 检查它是否存在、不是null、不是NaN，并且是一个大于0的有效数值
+            if (currentPoint?.step_length != null && !isNaN(currentPoint.step_length) && currentPoint.step_length > 0) {
+                // 如果有效，直接使用该值，并从毫米(mm)转换为米(m)
+                stepLength = currentPoint.step_length / 1000;
+            }
+            // 2. 如果 step_length 无效，则回退到使用速度和步频进行计算
+            else if (cadenceCorrected > 0 && speed > 0) {
+                // 使用第一个代码块的简洁公式
+                stepLength = (speed * 1000) / (cadenceCorrected * 60);
             }
 
             // 上升和下降
