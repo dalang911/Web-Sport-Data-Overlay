@@ -167,3 +167,151 @@ function set_zh_distance_pan () {
         nodeContainertext.add(textNode);
     });
 }
+
+
+// ========== 核心封装函数：更新zs8距离进度条 ==========
+/**
+ * 封装函数：更新zs8_distance_pan进度条（标尺刻度+当前位置+里程文字）
+ * @returns {boolean} 更新成功返回true，失败返回false
+ */
+function updateZs8DistancePan() {
+    try {
+        // 全局变量容错
+        const trkpt_data = window.trkpt_data || [];
+        const json_data = window.json_data || {};
+        json_data.lap_standard = json_data.lap_standard || [];
+        const textshadow = window.textshadow || {};
+
+        // 1. 校验容器
+        if (!window.zs8_distance_pan) {
+            console.error('zs8_distance_pan 未初始化，无法更新');
+            return false;
+        }
+
+        // 2. 计算总距离（km）
+        const currentFrame = trkpt_data.length - 1;
+        const totalDistanceM = trkpt_data[currentFrame]?.distance || 0;
+        let targetDistanceKm = totalDistanceM / 1000;
+        targetDistanceKm = Math.max(3, Math.min(targetDistanceKm, 1000));
+
+        // 3. 【核心】预设目标段数（匹配你的要求：4.8→5段、8.7→5段、16.3→3段）
+        function getTargetSegmentCount(distance) {
+            if (distance >= 4 && distance < 9) return 5;    // 4.8/8.7km → 5段
+            if (distance >= 10 && distance < 20) return 3;  // 16.3km → 3段
+            if (distance >= 20 && distance < 50) return 4;  // 其他距离兜底
+            if (distance >= 50 && distance < 200) return 6;
+            return 8; // 200km以上
+        }
+        const targetSegCount = getTargetSegmentCount(targetDistanceKm);
+
+        // 4. 【核心】匹配1/5/10倍数步长，且保证总段数=目标段数
+        function getAdaptStep(distance, targetSeg) {
+            // 优先步长列表（1/5/10倍数，从大到小）
+            const preferredSteps = [10, 5, 1];
+            // 初始步长（目标段数对应的平均步长）
+            const avgStep = distance / targetSeg;
+
+            // 找最接近平均步长的优先步长
+            let bestStep = preferredSteps.reduce((prev, curr) => {
+                return Math.abs(curr - avgStep) < Math.abs(prev - avgStep) ? curr : prev;
+            }, preferredSteps[0]);
+
+            // 校准步长：保证总段数=目标段数（完整段+剩余段）
+            let fullCount = Math.floor(distance / bestStep);
+            let remain = distance - fullCount * bestStep;
+            let actualSegCount = fullCount + (remain > 0.001 ? 1 : 0);
+
+            // 若实际段数≠目标段数，微调步长（仍保证是1/5/10倍数）
+            if (actualSegCount > targetSegCount) {
+                // 段数偏多→增大步长（找下一个更大的1/5/10倍数）
+                const stepIndex = preferredSteps.indexOf(bestStep);
+                bestStep = stepIndex > 0 ? preferredSteps[stepIndex - 1] : bestStep * 2;
+            } else if (actualSegCount < targetSegCount) {
+                // 段数偏少→减小步长（找下一个更小的1/5/10倍数）
+                const stepIndex = preferredSteps.indexOf(bestStep);
+                bestStep = stepIndex < preferredSteps.length - 1 ? preferredSteps[stepIndex + 1] : bestStep / 2;
+            }
+
+            // 最终保证步长≥0.1（避免极小数）
+            return Math.max(0.1, bestStep);
+        }
+        const adaptStep = getAdaptStep(targetDistanceKm, targetSegCount);
+
+        // 5. 拆分：完整段 + 剩余段（总段数=目标段数）
+        let fullSegmentCount = 0;
+        let remainingLength = targetDistanceKm;
+        const segmentLengths = [];
+
+        // 先加完整段（最多目标段数-1段，留1段给剩余）
+        while (segmentLengths.length < targetSegCount - 1) {
+            if (remainingLength >= adaptStep) {
+                segmentLengths.push(adaptStep);
+                remainingLength -= adaptStep;
+                fullSegmentCount++;
+            } else {
+                break;
+            }
+        }
+        // 最后一段：剩余长度（保证总段数=目标段数）
+        if (segmentLengths.length < targetSegCount) {
+            segmentLengths.push(remainingLength);
+        }
+
+        // 6. 计算每段像素（总宽700px）
+        const totalPxWidth = 700;
+        const segmentPxWidths = segmentLengths.map(len => (len / targetDistanceKm) * totalPxWidth);
+
+        // 7. 计算刻度X坐标
+        let cumulativePx = 0;
+        const tickXPositions = [];
+        for (const pxWidth of segmentPxWidths) {
+            cumulativePx += pxWidth;
+            tickXPositions.push(Math.min(cumulativePx, totalPxWidth));
+        }
+
+        // 8. 重绘标尺
+        const rulerTicksContainer = zs8_distance_pan.children[3];
+        rulerTicksContainer.children = []; // 清空旧刻度
+
+        tickXPositions.forEach((x, index) => {
+            // 计算当前刻度的累计距离
+            const tickDistance = segmentLengths.slice(0, index + 1).reduce((sum, len) => sum + len, 0);
+            // 最后一段标红（剩余段）
+            const isLastSegment = index === segmentLengths.length - 1;
+
+            // 刻度线
+            rulerTicksContainer.add({
+                tag: 'Line',
+                x: x,
+                y: 0,
+                width: 6,
+                strokeWidth: 30,
+                stroke: isLastSegment ? '#FF0000' : '#FFFFFF'
+            });
+
+            // // 刻度文字
+            // rulerTicksContainer.add({
+            //     tag: 'Text',
+            //     x: x - 20,
+            //     y: 50,
+            //     text: tickDistance.toFixed(1) + 'km',
+            //     fill: '#FFFFFF',
+            //     fontSize: 12
+            // });
+        });
+
+        // 日志输出（验证分段是否符合要求）
+        console.log('zs8_distance_pan 更新成功：', {
+            目标距离: targetDistanceKm.toFixed(2) + 'km',
+            目标段数: targetSegCount,
+            实际段数: segmentLengths.length,
+            适配步长: adaptStep + 'km（1/5/10倍数）',
+            各段长度: segmentLengths.map(len => len.toFixed(2))
+        });
+
+        return true;
+    } catch (error) {
+        console.error('zs8_distance_pan 更新失败：', error);
+        return false;
+    }
+}
