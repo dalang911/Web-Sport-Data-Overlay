@@ -34,7 +34,7 @@
     <!-- 引入Mediabunny视频编码库 -->
     <!-- <script type="module" src="./js/mediabunny.js"></script>mediabunny.min.mjs -->
     <script type="module" src="./js/mediabunny.min.js"></script>
-    <link href="https://gstatic.qaq.qa/css2?family=Sofadi One&display=swap" rel="stylesheet">
+    <link href="https://gstatic.aby.pub/css2?family=Sofadi One&display=swap" rel="stylesheet">
 
     <style>
         html,
@@ -347,7 +347,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.64 .更新：背景图片预览，用于对比配色，不会被生成；新增一个带头像的主题；
+            Beta 0.65 .更新：垂直进度条；进度百分比；进度文字；
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -451,6 +451,18 @@
                             </div>
                             <div class="layui-col-sm12">
                                 <div class="layui-anim" lay-active="x_distance_pan"><img src="./images/l6.png"></div>
+                                <div>Distance</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="zs8_distance_pan"><img src="./images/l9.png"></div>
+                                <div>H Distance</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="zs8_distancetext_pan"><img src="./images/l10.png"></div>
+                                <div>Percent</div>
+                            </div>
+                            <div class="layui-col-sm12">
+                                <div class="layui-anim" lay-active="zs8_distancepercent_pan"><img src="./images/l11.png"></div>
                                 <div>Distance</div>
                             </div>
                             <div class="layui-col-sm12">
@@ -1834,6 +1846,16 @@
                 } else if (layActiveValue === 'zh_distance_pan') {
                     frame.add(window[layActiveValue]);
                     set_zh_distance_pan(); //加载小地图
+
+                    // 设置进度条值
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.value = parseInt(maxFrame * 0.7);
+
+                } else if (layActiveValue === 'zs8_distance_pan') {
+                    frame.add(window[layActiveValue]);
+                    updateZs8DistancePan();
+                    frame.add(zs8_distancetext_pan);
+                    frame.add(zs8_distancepercent_pan);
 
                     // 设置进度条值
                     const progressBar = document.getElementById('progressBar');

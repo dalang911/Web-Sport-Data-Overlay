@@ -304,6 +304,9 @@ case 'bg_image':
                     if (targetUrl === 'x_power_pan.children[1].fill') {
                         x_power_pan.children[2].fill = color;
                     }
+                    if (targetUrl === 'zs8_distance_pan.children[1].stroke') {
+                        zs8_distance_pan.children[5].children[0].fill= color;
+                    }
                 });
                 break;
 

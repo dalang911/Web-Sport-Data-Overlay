@@ -3945,6 +3945,219 @@ window.huitu = function () {
         },
     })
 
+    //zs8距离进度条
+    zs8_distance_pan = new Box({
+        id: 'zs8_distance_pan',
+        x: 30,  // 保持居中定位
+        y: appvHeight / 2 + 350,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        rotation: -90,
+        resizeChildren: true,
+        children: [
+            {
+                tag: 'Line', //底部背景条
+                y: 40,
+                width: 700,
+                strokeWidth: 8,
+                stroke: '#404e6d',
+                StrokeCap: 'round'
+            },
+            {
+                tag: 'Line', //实际进度条
+                y: 40,
+                width: 0,
+                strokeWidth: 8,
+                stroke: '#FFFFFF'
+            },
+            {
+                tag: 'Line', //段落进度条
+                y: 40,
+                width: 0,
+                strokeWidth: 8,
+                stroke: '#FF0000',
+                StrokeCap: 'round'
+            },
+            {
+                tag: 'Box',//标尺
+                y: 40,
+                lockRatio: true,
+                rotation: 0,//控制文字角度 (-10 至 10)
+                resizeChildren: true,
+                children: [
+
+                ]
+            },
+            {
+                tag: 'Box',//里程
+                lockRatio: true,
+                rotation: 0,//控制文字角度 (-10 至 10)
+                resizeChildren: true,
+                children: [
+                    {
+                        tag: 'Path', //段落进度条
+                        x: 730,
+                        y: 19,
+                        scale: 0.2,
+                        path: go_board_strokes,
+                        rotation: 90,
+                        flowAlign: 'bottom',
+                        fill: '#FFFFFF'
+                    },
+                    {
+                        tag: 'Path', //段落进度条
+                        x: 730,
+                        y: 19,
+                        scale: 0.2,
+                        path: go_board_black_cells,
+                        rotation: 90,
+                        flowAlign: 'bottom',
+                        fill: '#404e6d',
+
+                    },
+                ]
+            },
+            {
+                tag: 'Box',//当前位置
+                y: 40,
+                lockRatio: true,
+                resizeChildren: true,
+                children: [
+                    {
+                        tag: 'Polygon',
+                        width: 30,
+                        height: 30,
+                        x: 0,
+                        y: 0,
+                        sides: 6,
+                        cornerRadius: 3,
+                        around: 'center',
+                        fill: "#FFFFFF",
+                        rotation: 90
+                    },
+                    {
+                        tag: 'Polygon',
+                        width: 20,
+                        height: 20,
+                        x: 0,
+                        y: 0,
+                        sides: 6,
+                        cornerRadius: 3,
+                        around: 'center',
+                        fill: "#FF0000",
+                        rotation: 90
+                    },
+                ]
+            },
+
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "zs8_distance_pan",
+                        "set": [
+                            { "name": `H distance`, "url": zs8_distance_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Background Color`, "url": "zs8_distance_pan.children[0].stroke", "value": zs8_distance_pan.children[0].stroke, "type": "color", "tools": true },
+                            { "name": `Progress Color`, "url": "zs8_distance_pan.children[1].stroke", "value": zs8_distance_pan.children[1].stroke, "type": "color", "tools": true },
+                            { "name": `Paragraph Color`, "url": "zs8_distance_pan.children[2].stroke", "value": zs8_distance_pan.children[2].stroke, "type": "color", "tools": true },
+                            { "name": `Dot Color`, "url": "zs8_distance_pan.children[5].children[1].fill", "value": zs8_distance_pan.children[5].children[1].fill, "type": "color", "tools": true },
+
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+    //zs8行进文本
+    zs8_distancetext_pan = new Box({
+        id: 'zs8_distancetext_pan',
+        x: 30,  // 保持居中定位
+        y: appvHeight / 2 - 430,
+        width: 200,
+        height: 50,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                width: 200,
+                resizeFontSize: true,
+                fontSize: 30,
+                fontWeight: 'black',
+                text: `--`,
+                fill: '#FFFFFF',
+                textAlign: 'right',
+                verticalAlign: 'top',
+                shadow: textshadow
+            },
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "zs8_distancetext_pan",
+                        "set": [
+                            { "name": `Loss`, "url": zs8_distancetext_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "zs8_distancetext_pan.children[0].fill", "value": zs8_distancetext_pan.children[0].fill, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+    //zs8行进文本
+    zs8_distancepercent_pan = new Box({
+        id: 'zs8_distancepercent_pan',
+        x: 30,  // 保持居中定位
+        y: appvHeight / 2 - 390,
+        width: 200,
+        height: 50,
+        lockRatio: true,
+        editable: true,
+        hitBox: true,
+        resizeChildren: true,//子元素是否跟随 resize
+        children: [
+            {
+                tag: 'Text',
+                width: 200,
+                resizeFontSize: true,
+                fontSize: 30,
+                fontWeight: 'black',
+                text: `--`,
+                fill: '#FFFFFF',
+                textAlign: 'right',
+                verticalAlign: 'top',
+                shadow: textshadow
+            },
+        ],
+        event: {
+            [PointerEvent.DOWN]: [
+                function () {
+                    var json =
+                    {
+                        "id": "zs8_distancepercent_pan",
+                        "set": [
+                            { "name": `Loss`, "url": zs8_distancepercent_pan.children[0].id, "value": "", "type": "title", "tools": false },
+                            { "name": `Text color`, "url": "zs8_distancepercent_pan.children[0].fill", "value": zs8_distancepercent_pan.children[0].fill, "type": "color", "tools": true },
+                        ]
+                    }
+                    tosettable(json);
+                }
+            ],
+        },
+    })
+
+
     //默认画布容器
     frame = new Frame({
         width: appvWidth,

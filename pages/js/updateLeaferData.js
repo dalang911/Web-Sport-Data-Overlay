@@ -15,7 +15,7 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
 
         //长度条
 
-        if (validElementIds.includes('appv_distance_pan') || validElementIds.includes('l_distance_pan') || validElementIds.includes('lite_distance_pan')) {
+        if (validElementIds.includes('appv_distance_pan') || validElementIds.includes('l_distance_pan') || validElementIds.includes('lite_distance_pan') || validElementIds.includes('zs8_distancetext_pan') || validElementIds.includes('zs8_distancepercent_pan')) {
 
             //开始填充
             // 获取trkpt_data数组中最后一个元素的distance属性值，除以1000后进行四舍五入保留两位小数
@@ -39,6 +39,20 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * lite_distance_pan.children[0].width;//计算实时长度
             lite_distance_pan.children[1].width = jdtcd;
             lite_distance_pan.children[2].text = distance_in_km + `/` + max_distance_in_km;//行进长度
+
+            //距离条
+            zs8_distancetext_pan.children[0].text = distance_in_km + `/` + max_distance_in_km + `Km`;//行进长度
+
+            // 1. 计算百分比（处理max_distance_in_km为0的情况，避免除以0报错）
+            let percentValue = 0;
+            if (max_distance_in_km !== 0 && !isNaN(max_distance_in_km)) {
+                // 核心公式：(行进长度 / 最大长度) * 100
+                percentValue = (distance_in_km / max_distance_in_km) * 100;
+            }
+            // 2. 格式化百分比（可选：保留1位小数，更友好；也可改为0位小数用.toFixed(0)）
+            const percentText = percentValue.toFixed(2) + '%';
+            // 3. 赋值到文本元素（替换原有拼接逻辑）
+            zs8_distancepercent_pan.children[0].text = percentText; // 显示如"50.0%"
 
 
         }
@@ -87,6 +101,31 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
                 x_distance_pan.children[4].fill = x_distance_pan.children[6].stroke;
             }
 
+        }
+
+        //zs8_distance_pan,自动分段长度条
+        if (validElementIds.includes('zs8_distance_pan')) {
+            // 1. 计算实时长度（jdtcd）
+            const jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * zs8_distance_pan.children[0].width;
+
+            // 2. 实际进度条
+            zs8_distance_pan.children[1].width = jdtcd;
+            zs8_distance_pan.children[5].x = jdtcd;
+
+            // 3. 段落进度条
+            // 步骤1：获取刻度步长X值（可选链+默认值，防止属性不存在）
+            const tickStepX = zs8_distance_pan?.children[3]?.children[0]?.x || 0;
+            const now_t = tickStepX !== 0 ? Math.trunc(jdtcd / tickStepX) * tickStepX : 0;
+            zs8_distance_pan.children[2].width = now_t;
+
+            //设置奇偶图标变化
+            if (currentFrame % 2 === 0) {
+                // 偶数帧：强制恢复原始色（兜底，确保逻辑绝对可逆）
+                zs8_distance_pan.children[5].children[1].opacity = 0.7;
+            } else {
+                // 奇数帧：切换为提亮色（基于缓存的原始色计算）
+                zs8_distance_pan.children[5].children[1].opacity = 1;
+            }
         }
 
         //高程
@@ -682,7 +721,7 @@ window.updateLeaferData = function (currentFrame, updateMemory = true) {
             el_slope_pan.children[0].points = newSlopePoints;
         }
 
-        //当前日期
+        //Avatar
         if (validElementIds.includes('zh_distance_pan')) {
             var jdtcd = (trkpt_data[currentFrame].distance / trkpt_data[maxFrame - 1].distance) * zh_distance_pan.children[2].width;//计算实时长度
             zh_distance_pan.children[5].x = jdtcd;
