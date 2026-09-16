@@ -347,7 +347,7 @@
             Xscreen Sports Data Overlay
         </li>
         <li class="layui-nav-item" style="margin-right: 30px;font-size: 12px;">
-            Beta 0.65 .更新：垂直进度条；进度百分比；进度文字；
+            Beta 0.66 .修复原始异常数值；增加删除模板功能；
         </li>
         <li class="layui-nav-item">No client, user-friendly, fast, and aesthetic</li>
         <div class="ws-header-menu">
@@ -1929,11 +1929,15 @@
 
             allConfigs.forEach(config => {
                 tableHtml += `
-                    <tr>
-                        <td>${config.title}</td>
-                        <td>${config.isCustomTitle ? '自定义' : config.title}</td>
-                        <td><button class="layui-btn layui-btn-sm loadConfig" data-config='${JSON.stringify(config.config)}'>载入</button></td>
-                    </tr>`;
+                <tr>
+                    <td>${config.title}</td>
+                    <td>${config.isCustomTitle ? '自定义' : '系统自动'}</td>
+                    <td>
+                        <button class="layui-btn layui-btn-sm loadConfig" data-config='${JSON.stringify(config.config).replace(/'/g, "&#39;")}'>载入</button>
+                        <!-- 【修改点 1】添加删除按钮，传递 title -->
+                        <button class="layui-btn layui-btn-sm layui-btn-danger deleteConfig" data-title="${config.title}">删除</button>
+                    </td>
+                </tr>`;
             });
 
             tableHtml += `</tbody></table>`;
@@ -1948,6 +1952,35 @@
                 yes: function (index) {
                     layui.layer.close(index); // 关闭弹层
                 }
+            });
+
+
+            // 【修改点 2】添加删除按钮的事件监听（使用事件委托）
+            $(document).on('click', '.deleteConfig', function () {
+                const title = $(this).data('title'); // 获取要删除的配置标题
+
+                // 弹出确认框
+                layer.confirm(`确定要删除配置 "${title}" 吗？`, { icon: 3, title: '提示' }, function (index) {
+                    const storageKey = `frameConfig_${title}`;
+
+                    // 从 localStorage 移除
+                    localStorage.removeItem(storageKey);
+
+                    // 提示成功
+                    layer.msg('删除成功', { icon: 1 });
+                    layer.close(index);
+
+                    // 界面交互：找到当前行并淡出移除，或者直接关闭弹窗让用户重开
+                    // 这里选择移除当前行，体验更好
+                    const row = $('button[data-title="' + title + '"]').closest('tr');
+                    row.fadeOut(300, function () {
+                        $(this).remove();
+                        // 如果表格空了，可以关闭弹窗（可选）
+                        if ($('.layui-table tbody tr').length === 0) {
+                            layer.closeAll('page');
+                        }
+                    });
+                });
             });
 
             // 绑定载入按钮点击事件（使用事件委托）
@@ -1973,7 +2006,6 @@
         });
 
     });
-
 
     // 辅助函数：显示错误信息
     function showError(message) {
@@ -2054,7 +2086,7 @@
                     //return;
 
                     if (data && data['status'] === 0) {
-                        //对trkpt进行插值
+                        //对trkpt进行插值，并修复不合规数值
                         interpolationPoints(data);
 
                         //更新地图数据
@@ -2585,11 +2617,23 @@
         return value;
     };
 
+
+    //插值到1秒，修复不合规数值
     //插值到1秒
     function interpolationPoints(data) {
         if (!data?.data?.trkpt || data.data.trkpt.length < 2) return;
 
         let trkpt = [...data.data.trkpt]; // 使用副本避免修改原始数据
+
+        // ===== 新增：在插值前先清洗一遍原始数据 =====
+        // 这一步可以消除原始数据中的长尾浮点数，确保参与计算的数据是干净的
+        trkpt.forEach(point => {
+            Object.keys(point).forEach(key => {
+                point[key] = formatValue(key, point[key]);
+            });
+        });
+        // ============================================
+
         let i = 0;
 
         while (i < trkpt.length - 1) {
@@ -2617,8 +2661,9 @@
                 const interpolatedPoint = { sec: current.sec + j };
                 Object.keys(current).forEach(key => {
                     if (current.hasOwnProperty(key) && nextPoint.hasOwnProperty(key)) {
-                        // 根据属性类型格式化值
+                        // 计算插值 (此时 current 和 nextPoint 的值已经是清洗过的)
                         const value = current[key] + (nextPoint[key] - current[key]) * (j / (steps + 1));
+                        // 格式化/清洗插值结果
                         interpolatedPoint[key] = formatValue(key, value);
                     }
                 });
@@ -2632,7 +2677,7 @@
         data.data.trkpt = trkpt;
     }
 
-    // 格式化辅助函数
+    // 格式化辅助函数 (保持不变)
     function formatValue(key, value) {
         if (typeof value !== 'number') return value;
 
@@ -2652,7 +2697,6 @@
                 return value;
         }
     }
-
 
 
     // 轨迹图数组
